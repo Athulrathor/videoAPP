@@ -1,10 +1,13 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const VideoCard = (props) => {
-  const { title, views, createdAt, thumbnail, videoFile } = props.video;
+  const {title, views, createdAt, thumbnail, videoFile } = props.video;
 
   const { user } = useSelector((state) => state.user); 
+
+  const Navigate = useNavigate();
 
     function timeAgo(createdAt) {
       const now = new Date();
@@ -50,7 +53,7 @@ const VideoCard = (props) => {
             <video
               src={videoFile}
               poster={thumbnail}
-              controls
+              onClick={() => Navigate(`/video/${props.video._id}`)}
               className='w-fit bg-black aspect-video rounded-2xl'
             ></video>
 

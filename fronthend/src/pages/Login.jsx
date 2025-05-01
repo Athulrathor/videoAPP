@@ -24,12 +24,15 @@ const Login = () => {
     await axiosInstance
       .post("/users/login", { email, password })
       .then((response) => {
-        sessionStorage.setItem("accessToken", response.data.data.accessToken);
+        sessionStorage.setItem("accessToken", response?.data?.data?.accessToken);
 
-        console.log(response.data);
+        console.log(response.data.message);
         dispatch(setLoading(false));
         dispatch(setError(false));
         dispatch(login(response.data));
+
+        setEmail("");
+        setPassword("");
         navigate("/");
       })
       .catch((error) => {
@@ -97,7 +100,7 @@ const Login = () => {
 
                 <button
                   type="submit"
-                  className="w-2xs outline-2 mt-6 py-2 text-2xl font-bold rounded-xs outline-[#e62d27] hover:bg-[#e62d27] hover:text-white active:outline-black black:active:outline-white  active:bg-[#e62d27] active:text-white transition duration-200 ease-in-out"
+                  className={`w-2xs outline-2 disabled:opacity-80 disabled:grayscale-25 mt-6 py-2 text-2xl font-bold rounded-xs outline-[#e62d27] hover:bg-[#e62d27] hover:text-white active:outline-black black:active:outline-white  active:bg-[#e62d27] active:text-white transition duration-200 ease-in-out`}
                   disabled={loggedIn}
                 >
                   {loggedIn ? <h2>Loading</h2> :"Login"}

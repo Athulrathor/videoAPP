@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaHistory } from "react-icons/fa";
 import { PiQueueBold } from "react-icons/pi";
 import { GoVideo } from "react-icons/go";
@@ -31,7 +31,7 @@ import achivefill from "../assets/achivefill.png";
 
 function SideMenu(props) {
   const currentYear = new Date().getFullYear();
-  const [active, setActive] = useState("home");
+  
   const { user, loggedIn } = useSelector((state) => state.user);
 
   const Navigate = useNavigate();
@@ -45,13 +45,13 @@ function SideMenu(props) {
       <div className="border-b border-gray-300 pb-5 gap-1">
         <div
           className={`hover:bg-gray-100 font-semibold rounded-lg px-3 py-2 flex items-center gap-4 ${
-            active === "home" ? "bg-gray-200" : ""
+            props.sideActive.active === "home" ? "bg-gray-200" : ""
           }`}
           onClick={() => {
-            setActive("home");
+            props.sideActive.setActive("home");
           }}
         >
-          {active === "home" ? (
+          {props.sideActive.active === "home" ? (
             <GoHomeFill className="w-5 h-5" />
           ) : (
             <GrHomeRounded className="w-5 h-5" />
@@ -60,11 +60,11 @@ function SideMenu(props) {
         </div>
         <div
           className={`hover:bg-gray-100 font-normal rounded-lg px-3 py-2 gap-4 flex items-center ${
-            active === "shorts" ? "bg-gray-200" : ""
+            props.sideActive.active === "shorts" ? "bg-gray-200" : ""
           }`}
-          onClick={() => setActive("shorts")}
+          onClick={() => props.sideActive.setActive("shorts")}
         >
-          {active === "shorts" ? (
+          {props.sideActive.active === "shorts" ? (
             <img
               src={shortsfill}
               alt="#"
@@ -82,11 +82,11 @@ function SideMenu(props) {
         </div>
         <div
           className={`hover:bg-gray-100 font-normal rounded-lg px-3 py-2 gap-4 flex items-center ${
-            active === "subscription" ? "bg-gray-200" : ""
+            props.sideActive.active === "subscription" ? "bg-gray-200" : ""
           }`}
-          onClick={() => setActive("subscription")}
+          onClick={() => props.sideActive.setActive("subscription")}
         >
-          {active === "subscription" ? (
+          {props.sideActive.activee === "subscription" ? (
             <BsCollectionPlayFill className=" w-5 h-5" />
           ) : (
             <BsCollectionPlay className=" w-5 h-5" />
@@ -107,11 +107,11 @@ function SideMenu(props) {
           <div>
             <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                active === "history" ? "bg-gray-200" : ""
+                props.sideActive.active === "history" ? "bg-gray-200" : ""
               }`}
-              onClick={() => setActive("history")}
+              onClick={() => props.sideActive.setActive("history")}
             >
-              {active === "history" ? (
+              {props.sideActive.active === "history" ? (
                 <FaHistory className="text-xl fill-black stroke-3" />
               ) : (
                 <LuHistory className="text-xl" />
@@ -120,11 +120,11 @@ function SideMenu(props) {
             </h1>
             <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                active === "playlists" ? "bg-gray-200" : ""
+                props.sideActive.active === "playlists" ? "bg-gray-200" : ""
               }`}
-              onClick={() => setActive("playlists")}
+              onClick={() => props.sideActive.setActive("playlists")}
             >
-              {active === "playlists" ? (
+              {props.sideActive.active === "playlists" ? (
                 <PiQueueBold className="text-xl stroke-1" />
               ) : (
                 <PiQueueBold className="text-xl" />
@@ -133,11 +133,11 @@ function SideMenu(props) {
             </h1>
             <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                active === "your videos" ? "bg-gray-200" : ""
+                props.sideActive.active === "your videos" ? "bg-gray-200" : ""
               }`}
-              onClick={() => setActive("your videos")}
+              onClick={() => props.sideActive.setActive("your videos")}
             >
-              {active === "your videos" ? (
+              {props.sideActive.active === "your videos" ? (
                 <BsPlayBtnFill className="text-xl" />
               ) : (
                 <GoVideo className="text-xl" />
@@ -146,11 +146,11 @@ function SideMenu(props) {
             </h1>
             <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                active === "watch later" ? "bg-gray-200" : ""
+                props.sideActive.active === "watch later" ? "bg-gray-200" : ""
               }`}
-              onClick={() => setActive("watch later")}
+              onClick={() => props.sideActive.setActive("watch later")}
             >
-              {active === "watch later" ? (
+              {props.sideActive.active === "watch later" ? (
                 <MdWatchLater className="text-2xl" />
               ) : (
                 <MdOutlineWatchLater className="text-2xl" />
@@ -159,11 +159,11 @@ function SideMenu(props) {
             </h1>
             <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                active === "likedVideos" ? "bg-gray-200" : ""
+                props.sideActive.active === "likedVideos" ? "bg-gray-200" : ""
               }`}
-              onClick={() => setActive("likedVideos")}
+              onClick={() => props.sideActive.setActive("likedVideos")}
             >
-              {active === "likedVideos" ? (
+              {props.sideActive.active === "likedVideos" ? (
                 <BiSolidLike className="text-xl" />
               ) : (
                 <BiLike className="text-xl" />
@@ -191,9 +191,9 @@ function SideMenu(props) {
           <div>
             <div
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                active === "Channle_01" ? "bg-gray-200" : ""
+                props.sideActive.active === "Channle_01" ? "bg-gray-200" : ""
               }`}
-              onClick={() => setActive("Channle_01")}
+              onClick={() => props.sideActive.setActive("Channle_01")}
             >
               <div className="border-2 rounded-full p-0.5 border-black">
                 <GrChannel className="" />
@@ -224,20 +224,20 @@ function SideMenu(props) {
         <div>
           <h1
             className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              active === "trending" ? "bg-gray-200" : ""
+              props.sideActive.active === "trending" ? "bg-gray-200" : ""
             }`}
-            onClick={() => setActive("trending")}
+            onClick={() => props.sideActive.setActive("trending")}
           >
             <IoMdTrendingUp className="text-xl" />
             {props.menuToggle.showMenu === true ? "" : "Trending"}
           </h1>
           <h1
             className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              active === "music" ? "bg-gray-200" : ""
+              props.sideActive.active === "music" ? "bg-gray-200" : ""
             }`}
-            onClick={() => setActive("music")}
+            onClick={() => props.sideActive.setActive("music")}
           >
-            {active === "music" ? (
+            {props.sideActive.active === "music" ? (
               <HiMusicalNote className="text-xl" />
             ) : (
               <HiOutlineMusicalNote className="text-xl" />
@@ -246,11 +246,11 @@ function SideMenu(props) {
           </h1>
           <h1
             className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              active === "gaming" ? "bg-gray-200" : ""
+              props.sideActive.active === "gaming" ? "bg-gray-200" : ""
             }`}
-            onClick={() => setActive("gaming")}
+            onClick={() => props.sideActive.setActive("gaming")}
           >
-            {active === "gaming" ? (
+            {props.sideActive.active === "gaming" ? (
               <IoGameController className="text-xl" />
             ) : (
               <IoGameControllerOutline className="text-xl" />
@@ -259,12 +259,12 @@ function SideMenu(props) {
           </h1>
           <h1
             className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              active === "sports" ? "bg-gray-200" : ""
+              props.sideActive.active === "sports" ? "bg-gray-200" : ""
             }`}
-            onClick={() => setActive("sports")}
+            onClick={() => props.sideActive.setActive("sports")}
           >
             {/* <GrAchievement className="text-xl" /> */}
-            {active === "sports" ? (
+            {props.sideActive.active === "sports" ? (
               <img
                 src={achivefill}
                 className="w-5 h-5"
@@ -307,36 +307,36 @@ function SideMenu(props) {
       <div className="border-b border-gray-300 py-5">
         <h1
           className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-            active === "settings" ? "bg-gray-200" : ""
+            props.sideActive.active === "settings" ? "bg-gray-200" : ""
           }`}
-          onClick={() => setActive("settings")}
+          onClick={() => props.sideActive.setActive("settings")}
         >
           <IoSettingsOutline className="text-2xl" />
           {props.menuToggle.showMenu === true ? "" : "Settings"}
         </h1>
         <h1
           className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-            active === "report history" ? "bg-gray-200" : ""
+            props.sideActive.active === "report history" ? "bg-gray-200" : ""
           }`}
-          onClick={() => setActive("report history")}
+          onClick={() => props.sideActive.setActive("report history")}
         >
           <MdOutlinedFlag className="text-2xl" />
           {props.menuToggle.showMenu === true ? "" : "Report history"}
         </h1>
         <h1
           className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-            active === "help" ? "bg-gray-200" : ""
+            props.sideActive.active === "help" ? "bg-gray-200" : ""
           }`}
-          onClick={() => setActive("help")}
+          onClick={() => props.sideActive.setActive("help")}
         >
           <MdHelpOutline className="text-2xl" />
           {props.menuToggle.showMenu === true ? "" : "Help"}
         </h1>
         <h1
           className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-            active === "feedback" ? "bg-gray-200" : ""
+            props.sideActive.active === "feedback" ? "bg-gray-200" : ""
           }`}
-          onClick={() => setActive("feedback")}
+          onClick={() => props.sideActive.setActive("feedback")}
         >
           <MdOutlineFeedback className="text-2xl" />
           {props.menuToggle.showMenu === true ? "" : "Send feedback"}

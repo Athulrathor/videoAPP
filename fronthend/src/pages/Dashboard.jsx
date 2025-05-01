@@ -9,9 +9,7 @@ import Main from "../components/Main";
 const Dashboard = () => {
   return (
     <>
-      <Header />
-      {/* <Main /> */}
-      <SideMenu/>
+      <div>for dashboard creating pages!!!!!</div>
     </>
   );
 };

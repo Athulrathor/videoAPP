@@ -27,14 +27,14 @@ const getAllShorts = asyncHandler(async (req, res) => {
     const startingIndex = (pages - 1) * limits;
 
     const getAllShortFile = await Short.aggregate([
-       {
-         $match: {
-           $or: [
-             { title: { $regex: query, $options: "i" } },
-             { description: { $regex: query, $options: "i" } },
-           ],
-         },
-       },
+      {
+        $match: {
+          $or: [
+            { title: { $regex: query, $options: "i" } },
+            { description: { $regex: query, $options: "i" } },
+          ],
+        },
+      },
       {
         $skip: (pages - 1) * limits,
       },
@@ -43,7 +43,7 @@ const getAllShorts = asyncHandler(async (req, res) => {
       },
       {
         $sort: {
-          [sortType]: sortBy,
+          sortBy: sortType === "ascending" ? 1 : -1,
         },
       },
     ]);

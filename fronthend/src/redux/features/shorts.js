@@ -3,19 +3,19 @@ import { createSlice } from "@reduxjs/toolkit";
 export const shortSlice = createSlice({
   name: "short",
   initialState: {
-    shorts: [],
+    short: [],
     shortLoading: false,
     shortError: false,
     isShort: false,
   },
   reducers: {
     shorts: (state, action) => {
-      state.shorts = action.payload;
+      state.short = action.payload;
       state.shortLoading = false;
       state.isShort = true;
     },
     noshort: (state) => {
-      state.shorts = [];
+      state.short = [];
       state.shortLoading = false;
       state.shortError = true;
       state.isShort = false;
@@ -29,5 +29,5 @@ export const shortSlice = createSlice({
   },
 });
 
-export const { short, noshort, shortLoading, shortError } = shortSlice.actions;
+export const { shorts, noshort, shortLoading, shortError } = shortSlice.actions;
 export default shortSlice.reducer;

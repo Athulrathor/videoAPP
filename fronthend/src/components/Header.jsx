@@ -15,17 +15,15 @@ import { setLoading, setError, logout } from "../redux/features/user.js";
 import { axiosInstance } from "../libs/axios.js";
 import Login from "../pages/Login.jsx";
 import Select from "react-select";
+import { noVideo } from "../redux/features/videos.js";
 
 const Header = (props) => {
-  const { user } = useSelector((state) => state.user);
-  const { loggedIn } = useSelector((state) => state.user);
+  const { user, loggedIn } = useSelector((state) => state.user);
 
   const [showDropdown, setShowDropdown] = useState(false);
 
   const Navigate = useNavigate();
   const dispatch = useDispatch();
-
-  console.log(loggedIn);
 
   if (user == undefined) {
     return null;
@@ -41,10 +39,10 @@ const Header = (props) => {
         console.log(response.data.message);
 
         sessionStorage.removeItem("accessToken");
-        sessionStorage.removeItem("persist:root");
 
         dispatch(setLoading(false));
         dispatch(setError(false));
+        dispatch(noVideo([]));
         dispatch(logout());
       })
       .catch((error) => {
@@ -172,22 +170,15 @@ const Header = (props) => {
                   className="absolute right-[-45px] mt-2 w-32 bg-white border border-gray-300 rounded-md shadow-lg"
                   onMouseLeave={() => setShowDropdown(!showDropdown)}
                 >
-                    <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      Video
-                    </li>
-                    <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      Short
-                    </li>
-                    <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      Live
-                    </li>
-
+                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    Video
+                  </li>
+                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    Short
+                  </li>
+                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    Live
+                  </li>
                 </ul>
               )}
             </div>

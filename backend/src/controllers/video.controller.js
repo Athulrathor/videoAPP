@@ -147,7 +147,41 @@ const getVideoById = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Video id is missing!");
     }
 
-    const videoFile = await Video.findById(videoId);
+    // const videoFile = await Video.findById(videoId);
+
+    const videoFile = await Video.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(videoId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+        },
+      },
+      {
+        $unwind: "$owner",
+      },
+      {
+        $project: {
+          title: 1,
+          description: 1,
+          videoFile: 1,
+          thumbnail: 1,
+          isPublished: 1,
+          owner: {
+            _id: "$owner._id",
+            username: "$owner.username",
+            avatar: "$owner.avatar",
+          },
+        },
+      },
+
+    ])
 
     if (!videoFile) {
       throw new ApiError(400, "Video is missing!");
