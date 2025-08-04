@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaHistory } from "react-icons/fa";
 import { PiQueueBold } from "react-icons/pi";
 import { GoVideo } from "react-icons/go";
@@ -15,8 +15,8 @@ import { GrHomeRounded } from "react-icons/gr";
 import { BsCollectionPlay } from "react-icons/bs";
 import shorts from "../assets/shorts.svg";
 import shortsfill from "../assets/shortsfill.svg";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 import { GoHomeFill } from "react-icons/go";
 import { BsCollectionPlayFill } from "react-icons/bs";
 import { BsPlayBtnFill } from "react-icons/bs";
@@ -26,45 +26,95 @@ import { MdWatchLater } from "react-icons/md";
 import { HiOutlineMusicalNote } from "react-icons/hi2";
 import { HiMusicalNote } from "react-icons/hi2";
 import { BiLike } from "react-icons/bi";
-import achiveout from "../assets/achiveout.png"
-import achivefill from "../assets/achivefill.png";
+import { setSideActive } from "../redux/features/user";
+import { axiosInstance } from "../libs/axios";
 
 function SideMenu(props) {
   const currentYear = new Date().getFullYear();
-  
-  const { user, loggedIn } = useSelector((state) => state.user);
+
+  const dispatch = useDispatch();
+  const getLocation = useLocation();
+
+  const { user, loggedIn, sideActive } = useSelector((state) => state.user);
 
   const Navigate = useNavigate();
 
+  const [subcribers, setSubcribers] = useState({
+    loading: true,
+    error: "",
+    data: null,
+  });
+
+  const [hideName, setHideName] = useState(false);
+
+  const fetchUserSubcribers = async () => {
+    setSubcribers((prev) => ({
+      ...prev,
+      loading: true,
+    }));
+
+    try {
+      const subcriber = await axiosInstance.get(`subcriber/get-subcriber`);
+      setSubcribers((prev) => ({
+        ...prev,
+        loading: false,
+        data: subcriber?.data?.data,
+      }));
+    } catch (error) {
+      setSubcribers((prev) => ({
+        ...prev,
+        loading: false,
+        error: error.message,
+      }));
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserSubcribers();
+  }, []);
+
+  useEffect(() => {
+    if (window.innerWidth > 768) {
+      setHideName(true)
+    } else {
+      setHideName(false)
+    }
+  }, [setHideName, props.menuToggle?.showMenu]);
+
   return (
     <div
-      className={`scroll mr-2 h-[calc(100vh-56px)] max-sm:hidden ${
-        props.menuToggle.showMenu === true ? "w-fit" : "w-[188px]"
-      } lg:block bg-white shadow-lg p-2.5 overflow-y-scroll scroll-smooth`}
+      className={`scroll h-[calc(100vh-65px)]  ${
+        props.menuToggle?.showMenu ? hideName ? "w-fit" : "hidden" : "w-[200px] z-14"
+      } max-md:absolute bg-white shadow-lg p-2.5 overflow-y-scroll transition-transform duration-1000 ease-in-out scroll-smooth`}
     >
       <div className="border-b border-gray-300 pb-5 gap-1">
         <div
           className={`hover:bg-gray-100 font-semibold rounded-lg px-3 py-2 flex items-center gap-4 ${
-            props.sideActive.active === "home" ? "bg-gray-200" : ""
+            sideActive === "home" ? "bg-gray-200" : ""
           }`}
           onClick={() => {
-            props.sideActive.setActive("home");
+            dispatch(setSideActive("home"));
+            if (getLocation !== "/") return Navigate("/");
           }}
         >
-          {props.sideActive.active === "home" ? (
+          {sideActive === "home" ? (
             <GoHomeFill className="w-5 h-5" />
           ) : (
             <GrHomeRounded className="w-5 h-5" />
           )}
-          {props.menuToggle.showMenu === true ? "" : <h1>Home</h1>}
+          {props.menuToggle?.showMenu === true ? "" : <h1>Home</h1>}
         </div>
         <div
           className={`hover:bg-gray-100 font-normal rounded-lg px-3 py-2 gap-4 flex items-center ${
-            props.sideActive.active === "shorts" ? "bg-gray-200" : ""
+            sideActive === "shorts" ? "bg-gray-200" : ""
           }`}
-          onClick={() => props.sideActive.setActive("shorts")}
+          onClick={() => {
+            dispatch(setSideActive("shorts"));
+            if (getLocation !== "/") return Navigate("/");
+          }}
         >
-          {props.sideActive.active === "shorts" ? (
+          {sideActive === "shorts" ? (
             <img
               src={shortsfill}
               alt="#"
@@ -78,97 +128,113 @@ function SideMenu(props) {
             />
           )}
           {/* <SiYoutubeshorts className="w-5 h-5" /> */}
-          {props.menuToggle.showMenu === true ? "" : <h1>Shorts</h1>}
+          {props.menuToggle?.showMenu === true ? "" : <h1>Shorts</h1>}
         </div>
         <div
           className={`hover:bg-gray-100 font-normal rounded-lg px-3 py-2 gap-4 flex items-center ${
-            props.sideActive.active === "subscription" ? "bg-gray-200" : ""
+            sideActive === "subscription" ? "bg-gray-200" : ""
           }`}
-          onClick={() => props.sideActive.setActive("subscription")}
+          onClick={() => {
+            dispatch(setSideActive("subscription"));
+            if (getLocation !== "/") return Navigate("/");
+          }}
         >
-          {props.sideActive.activee === "subscription" ? (
+          {sideActive === "subscription" ? (
             <BsCollectionPlayFill className=" w-5 h-5" />
           ) : (
             <BsCollectionPlay className=" w-5 h-5" />
           )}
-          {props.menuToggle.showMenu === true ? "" : <h1>Subcription</h1>}
+          {props.menuToggle?.showMenu === true ? "" : <h1>Subcription</h1>}
         </div>
       </div>
 
       {loggedIn ? (
         <div className="border-b border-gray-300 py-5">
-          {props.menuToggle.showMenu === true ? (
+          {props.menuToggle?.showMenu === true ? (
             ""
           ) : (
-            <h1 className="flex items-center gap-4 font-semibold rounded-lg px-3">
-              {loggedIn ? user.data.user.username : "You"} <IoIosArrowForward />
+            <h1
+              onClick={() => Navigate(`/channel/${user?.data?.user?.username}`)}
+              className="flex items-center gap-4 font-semibold rounded-lg px-3"
+            >
+              {loggedIn ? user?.data?.user?.username : "You"}{" "}
+              <IoIosArrowForward />
             </h1>
           )}
           <div>
-            <h1
+            {/* <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                props.sideActive.active === "history" ? "bg-gray-200" : ""
+                sideActive === "history" ? "bg-gray-200" : ""
               }`}
-              onClick={() => props.sideActive.setActive("history")}
+              onClick={() => dispatch(setSideActive("history"))}
             >
-              {props.sideActive.active === "history" ? (
+              {sideActive === "history" ? (
                 <FaHistory className="text-xl fill-black stroke-3" />
               ) : (
                 <LuHistory className="text-xl" />
               )}
-              {props.menuToggle.showMenu === true ? "" : "History"}
-            </h1>
+              {props.menuToggle?.showMenu === true ? "" : "History"}
+            </h1> */}
             <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                props.sideActive.active === "playlists" ? "bg-gray-200" : ""
+                sideActive === "playlists" ? "bg-gray-200" : ""
               }`}
-              onClick={() => props.sideActive.setActive("playlists")}
+              onClick={() => {
+                dispatch(setSideActive("playlists"));
+                if (getLocation !== "/") return Navigate("/");
+              }}
             >
-              {props.sideActive.active === "playlists" ? (
+              {sideActive === "playlists" ? (
                 <PiQueueBold className="text-xl stroke-1" />
               ) : (
                 <PiQueueBold className="text-xl" />
               )}
-              {props.menuToggle.showMenu === true ? "" : "Playlists"}
+              {props.menuToggle?.showMenu === true ? "" : "Playlists"}
             </h1>
             <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                props.sideActive.active === "your videos" ? "bg-gray-200" : ""
+                sideActive === "your videos" ? "bg-gray-200" : ""
               }`}
-              onClick={() => props.sideActive.setActive("your videos")}
+              onClick={() => {
+                dispatch(setSideActive("your videos"));
+                if (getLocation !== "/") return Navigate("/");
+              }}
             >
-              {props.sideActive.active === "your videos" ? (
+              {sideActive === "your videos" ? (
                 <BsPlayBtnFill className="text-xl" />
               ) : (
                 <GoVideo className="text-xl" />
               )}
-              {props.menuToggle.showMenu === true ? "" : "Your Videos"}
+              {props.menuToggle?.showMenu === true ? "" : "Your Videos"}
             </h1>
-            <h1
+            {/* <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                props.sideActive.active === "watch later" ? "bg-gray-200" : ""
+                sideActive === "watch later" ? "bg-gray-200" : ""
               }`}
-              onClick={() => props.sideActive.setActive("watch later")}
+              onClick={() => dispatch(setSideActive("watch later"))}
             >
-              {props.sideActive.active === "watch later" ? (
+              {sideActive === "watch later" ? (
                 <MdWatchLater className="text-2xl" />
               ) : (
                 <MdOutlineWatchLater className="text-2xl" />
               )}
-              {props.menuToggle.showMenu === true ? "" : "Watch later"}
-            </h1>
+              {props.menuToggle?.showMenu === true ? "" : "Watch later"}
+            </h1> */}
             <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                props.sideActive.active === "likedVideos" ? "bg-gray-200" : ""
+                sideActive === "likedVideos" ? "bg-gray-200" : ""
               }`}
-              onClick={() => props.sideActive.setActive("likedVideos")}
+              onClick={() => {
+                dispatch(setSideActive("likedVideos"));
+                if (getLocation !== "/") return Navigate("/");
+              }}
             >
-              {props.sideActive.active === "likedVideos" ? (
+              {sideActive === "likedVideos" ? (
                 <BiSolidLike className="text-xl" />
               ) : (
                 <BiLike className="text-xl" />
               )}
-              {props.menuToggle.showMenu === true ? "" : "Liked videos"}
+              {props.menuToggle?.showMenu === true ? "" : "Liked videos"}
             </h1>
           </div>
         </div>
@@ -178,93 +244,106 @@ function SideMenu(props) {
 
       {loggedIn ? (
         <div className="border-b border-gray-300 py-5">
-          {props.menuToggle.showMenu === true ? (
+          {props.menuToggle?.showMenu === true ? (
             ""
           ) : (
             <h1
-              className={`flex items-center gap-4 font-semibold rounded-lg px-3`}
+              className={`flex items-center gap-4 font-semibold rounded-lg px-3 mb-2`}
             >
-              <GrChannel className="text-xl" />
-              Subcriptions
+              {/* <GrChannel className="text-xl" /> */}
+              Subcribers
             </h1>
           )}
           <div>
-            <div
-              className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                props.sideActive.active === "Channle_01" ? "bg-gray-200" : ""
-              }`}
-              onClick={() => props.sideActive.setActive("Channle_01")}
-            >
-              <div className="border-2 rounded-full p-0.5 border-black">
-                <GrChannel className="" />
-              </div>
-              {props.menuToggle.showMenu === true ? "" : <h1>Channle_01</h1>}
-            </div>
+            {subcribers.data !== null &&
+              subcribers.data.map((subcriber) => (
+                <div
+                  key={subcriber?._id}
+                  className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2`}
+                  onClick={() =>
+                    Navigate(`/channel/${subcriber?.subcribers?.username}`)
+                  }
+                >
+                  <div className=" border-black">
+                    {/* <GrChannel className="" /> */}
+                    <img
+                      src={subcriber?.subcribers?.avatar}
+                      className="rounded-full w-6 aspect-square drop-shadow-xs"
+                      alt=""
+                    />
+                  </div>
+                  {props.menuToggle?.showMenu === true ? (
+                    ""
+                  ) : (
+                    <h1>{subcriber?.subcribers?.username}</h1>
+                  )}
+                </div>
+              ))}
 
-            <div className="flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2">
+            {/* <div className="flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2">
               <div className="border-2 rounded-full p-0.5 border-black">
                 <GrChannel className="" />
               </div>
-              {props.menuToggle.showMenu === true ? "" : <h1>Channle_02</h1>}
-            </div>
+              {props.menuToggle?.showMenu === true ? "" : <h1>Channle_02</h1>}
+            </div> */}
           </div>
         </div>
       ) : (
         ""
       )}
 
-      <div className="border-b border-gray-300 py-5">
-        {props.menuToggle.showMenu === true ? (
+      {/* <div className="border-b border-gray-300 py-5"> */}
+      {/* {props.menuToggle?.showMenu === true ? (
           ""
         ) : (
           <h1 className="items-center gap-4 font-semibold rounded-lg px-3">
-            Exlore
+            Explore
           </h1>
-        )}
-        <div>
-          <h1
+        )} */}
+      <div>
+        {/* <h1
             className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              props.sideActive.active === "trending" ? "bg-gray-200" : ""
+              sideActive === "trending" ? "bg-gray-200" : ""
             }`}
-            onClick={() => props.sideActive.setActive("trending")}
+            onClick={() => dispatch(setSideActive("trending"))}
           >
             <IoMdTrendingUp className="text-xl" />
-            {props.menuToggle.showMenu === true ? "" : "Trending"}
-          </h1>
-          <h1
+            {props.menuToggle?.showMenu === true ? "" : "Trending"}
+          </h1> */}
+        {/* <h1
             className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              props.sideActive.active === "music" ? "bg-gray-200" : ""
+              sideActive === "music" ? "bg-gray-200" : ""
             }`}
-            onClick={() => props.sideActive.setActive("music")}
+            onClick={() => dispatch(setSideActive("music"))}
           >
-            {props.sideActive.active === "music" ? (
+            {sideActive === "music" ? (
               <HiMusicalNote className="text-xl" />
             ) : (
               <HiOutlineMusicalNote className="text-xl" />
             )}
-            {props.menuToggle.showMenu === true ? "" : "Music"}
-          </h1>
-          <h1
+            {props.menuToggle?.showMenu === true ? "" : "Music"}
+          </h1> */}
+        {/* <h1
             className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              props.sideActive.active === "gaming" ? "bg-gray-200" : ""
+              sideActive === "gaming" ? "bg-gray-200" : ""
             }`}
-            onClick={() => props.sideActive.setActive("gaming")}
+            onClick={() => dispatch(setSideActive("gaming"))}
           >
-            {props.sideActive.active === "gaming" ? (
+            {sideActive === "gaming" ? (
               <IoGameController className="text-xl" />
             ) : (
               <IoGameControllerOutline className="text-xl" />
             )}
-            {props.menuToggle.showMenu === true ? "" : "Gaming"}
-          </h1>
-          <h1
+            {props.menuToggle?.showMenu === true ? "" : "Gaming"}
+          </h1> */}
+        {/* <h1
             className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              props.sideActive.active === "sports" ? "bg-gray-200" : ""
+              sideActive === "sports" ? "bg-gray-200" : ""
             }`}
-            onClick={() => props.sideActive.setActive("sports")}
+            onClick={() => dispatch(setSideActive("sports"))}
           >
-            {/* <GrAchievement className="text-xl" /> */}
-            {props.sideActive.active === "sports" ? (
+
+            {sideActive === "sports" ? (
               <img
                 src={achivefill}
                 className="w-5 h-5"
@@ -275,10 +354,10 @@ function SideMenu(props) {
                 className="w-5 h-5"
               />
             )}
-            {props.menuToggle.showMenu === true ? "" : "Sports"}
-          </h1>
-        </div>
+            {props.menuToggle?.showMenu === true ? "" : "Sports"}
+          </h1> */}
       </div>
+      {/* </div> */}
       {/* 
       <div className="border-b border-gray-300 py-5">
         <h1 className="items-center gap-4 font-semibold rounded-lg px-3 py-2">
@@ -307,43 +386,44 @@ function SideMenu(props) {
       <div className="border-b border-gray-300 py-5">
         <h1
           className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-            props.sideActive.active === "settings" ? "bg-gray-200" : ""
+            sideActive === "settings" ? "bg-gray-200" : ""
           }`}
-          onClick={() => props.sideActive.setActive("settings")}
+          // onClick={() => dispatch(setSideActive("settings"))}
+          onClick={() => Navigate(`/settings`)}
         >
           <IoSettingsOutline className="text-2xl" />
-          {props.menuToggle.showMenu === true ? "" : "Settings"}
+          {props.menuToggle?.showMenu === true ? "" : "Settings"}
         </h1>
         <h1
           className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-            props.sideActive.active === "report history" ? "bg-gray-200" : ""
+            sideActive === "report history" ? "bg-gray-200" : ""
           }`}
-          onClick={() => props.sideActive.setActive("report history")}
+          onClick={() => dispatch(setSideActive("report history"))}
         >
           <MdOutlinedFlag className="text-2xl" />
-          {props.menuToggle.showMenu === true ? "" : "Report history"}
+          {props.menuToggle?.showMenu === true ? "" : "Report history"}
         </h1>
         <h1
           className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-            props.sideActive.active === "help" ? "bg-gray-200" : ""
+            sideActive === "help" ? "bg-gray-200" : ""
           }`}
-          onClick={() => props.sideActive.setActive("help")}
+          onClick={() => dispatch(setSideActive("help"))}
         >
           <MdHelpOutline className="text-2xl" />
-          {props.menuToggle.showMenu === true ? "" : "Help"}
+          {props.menuToggle?.showMenu === true ? "" : "Help"}
         </h1>
         <h1
           className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-            props.sideActive.active === "feedback" ? "bg-gray-200" : ""
+            sideActive === "feedback" ? "bg-gray-200" : ""
           }`}
-          onClick={() => props.sideActive.setActive("feedback")}
+          onClick={() => dispatch(setSideActive("feedback"))}
         >
           <MdOutlineFeedback className="text-2xl" />
-          {props.menuToggle.showMenu === true ? "" : "Send feedback"}
+          {props.menuToggle?.showMenu === true ? "" : "Send feedback"}
         </h1>
       </div>
 
-      {props.menuToggle.showMenu === true ? (
+      {props.menuToggle?.showMenu === true ? (
         ""
       ) : (
         <div className="py-5 ">
@@ -354,7 +434,7 @@ function SideMenu(props) {
             Terms Privacy Policy & Safety How YouTube works Test new features
           </p>
           <div className="text-gray-400 pt-2">
-            <h1>@ {currentYear} Google LLC</h1>
+            <h1>@ {currentYear} VidTube CC</h1>
           </div>
         </div>
       )}

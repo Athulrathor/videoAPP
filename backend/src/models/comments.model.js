@@ -15,6 +15,14 @@ const commentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    short: {
+      type: Schema.Types.ObjectId,
+      ref:"short",
+    },
+    comment: {
+      type: mongoose.Types.ObjectId,
+      ref: "Comment",
+    },
   },
   { timestamp: true }
 );

@@ -1,24 +1,37 @@
-import React, { useState, useEffect, useCallback } from "react";
-import VideoCard from "../components/VideoCard";
+import React,{ useState, useEffect, lazy } from "react";
 import Header from "../components/Header";
 import SideMenu from "../components/SideMenu";
-// import TagSection from "../components/tagSection";
 import Main from "../components/Main";
 import { useDispatch, useSelector } from "react-redux";
-import { noVideo, videoError, videoLoading, videos } from "../redux/features/videos";
+import { fetchVideos, videoLoading } from "../redux/features/videos";
+import { fetchshort, shortLoading } from "../redux/features/shorts";
 import { axiosInstance } from "../libs/axios";
-import { noshort, shortError, shortLoading, shorts } from "../redux/features/shorts";
 
-// import { getvideos } from "../feature/getAllVideo.js";
+const UploadVideo = lazy(() => import('../components/UploadVideo'));
+const UploadShort = lazy(() => import("../components/UploadShort"));
+const UploadLive = lazy(() => import('../components/UploadLive'));
 
 function Home() {
   const [showMenu, setShowMenu] = useState(false);
-  const [active, setActive] = useState("home");
-  const { user, loggedIn } = useSelector((state) => state.user);
+  const { user, loggedIn, sideActive } = useSelector((state) => state.user);
+  // const {short} = useSelector((state) => state.short);
+
+  const [toggleVideoUploading, setToggleVideoUploading] = useState(true);
+  const [toggleShortUploading, setToggleShortUploading] = useState(true);
+  const [toggleLiveUploading, setToggleLiveUploading] = useState(true);
 
   const dispatch = useDispatch();
 
   const [videoParams, setVideoParams] = useState({
+    page: 1,
+    limit: 20,
+    query: "",
+    sortBy: 1,
+    sortType: "createdAt",
+    userId: user?.data?.user?._id,
+  });
+
+  const [shortParams, setShortParams] = useState({
     page: 1,
     limit: 10,
     query: "",
@@ -27,95 +40,122 @@ function Home() {
     userId: user?.data?.user?._id,
   });
 
-  const getAllVideo = useCallback(async () => {
-    dispatch(videoLoading(true));
+  useEffect(() => {
+    if (window.innerWidth <= 768) setShowMenu(true);
+   },[]);
 
-         try {
-           const response = await axiosInstance.get("/videos/get-all-videos", {
-             params: videoParams,
-           });
-           dispatch(videos(response.data.data.data));
-           dispatch(videoLoading(false));
-           sessionStorage.setItem(
-             "videos",
-             JSON.stringify(response.data.data.data)
-           );
-           console.log(response.data.message);
-         } catch (error) {
-           dispatch(noVideo());
-           dispatch(videoError(true));
-           dispatch(videoLoading(false));
-           console.log("Error :", error.message);
-         } finally {
-           dispatch(videoLoading(false));
-         }
-       
-}, [loggedIn, active, videoParams, dispatch]);
+  function timeAgo(createdAt) {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const difference = Math.floor((now - created) / 1000);
 
-const getAllShorts = useCallback(async () => {
-  dispatch(shortLoading(true));
-
-  try {
-    const response = await axiosInstance.get("/short/get-all-short", {
-      params: videoParams,
-    });
-    dispatch(shorts(response.data.data.data));
-    console.log(response.data.message);
-    dispatch(shortLoading(false));
-    //  sessionStorage.setItem(
-    //    "shorts",
-    //    JSON.stringify(response.data.data.data)
-    //  );
-    // console.log("shorts fetched successfully");
-  } catch (error) {
-    dispatch(noshort());
-    dispatch(shortError(true));
-    dispatch(shortLoading(false));
-    console.log("Error :", error.message);
-  } finally {
-    dispatch(shortLoading(false));
+    if (difference < 60) {
+      return `${difference} seconds ago`;
+    } else if (difference < 3600) {
+      const minutes = Math.floor(difference / 60);
+      return `${minutes} minutes ago`;
+    } else if (difference < 86400) {
+      const hours = Math.floor(difference / 3600);
+      return `${hours} hours ago`;
+    } else if (difference < 2419200) {
+      const days = Math.floor(difference / 86400);
+      return `${days} days ago`;
+    } else if (difference / 31536000) {
+      const month = Math.floor(difference / 2419200);
+      return `${month} month ago`;
+    } else {
+      const year = Math.floor(difference / 31536000);
+      return `${year} year ago`;
+    }
   }
-}, [loggedIn, active, videoParams, dispatch]);
 
-   useEffect(() => {
-     if (loggedIn === true && active === "home") {
-         getAllVideo()
+
+
+    const fetchViewCounter = async (getShortId) => {
+      if (!getShortId) return "id not found";
+      try {
+        await axiosInstance.get(`short/view-counter/${getShortId}`);
+        fetchshort(dispatch, shortParams);
+      } catch (error) {
+        console.error(error);
       }
-   },[getAllVideo]);
-  
-     useEffect(() => {
-       if (loggedIn === true && active === "shorts") {
-         getAllShorts();
-       }
-       
-     },[getAllShorts]);
-  
+    };
+
+  useEffect(() => {
+
+      // const time = setInterval(() => {
+        if (loggedIn === true && sideActive === "home") {
+          fetchVideos(dispatch, videoParams);
+        }
+      // }, 350);
+      
+
+      // return () => clearInterval(time);
+  }, [dispatch,videoParams,loggedIn,sideActive]);
+
+  useEffect(() => {
+    if (loggedIn === true && sideActive === "shorts") {
+      fetchshort(dispatch,shortParams);
+    }
+  }, [dispatch, shortParams, loggedIn, sideActive]);
+
+        const fetchLikeToggle = async (getShortId) => {
+          try {
+            const likes = await axiosInstance.get(
+              `like/toggle-like-to-short/${getShortId}`
+            );
+            console.log("cliked",likes)
+
+            fetchshort(dispatch, shortParams);
+          } catch (error) {
+            console.error(error);
+          }
+  };
+
   return (
-    <>
-      <Header menuToggle={{ showMenu, setShowMenu }} />
+    <div className="relative">
+      <UploadVideo
+        setToggleVideoUploading={setToggleVideoUploading}
+        toggleVideoUploading={toggleVideoUploading}
+      />
+      <UploadShort
+        setToggleShortUploading={setToggleShortUploading}
+        toggleShortUploading={toggleShortUploading}
+      />
+      <UploadLive
+        setToggleLiveUploading={setToggleLiveUploading}
+        toggleLiveUploading={toggleLiveUploading}
+      />
+      <Header
+        menuToggle={{ showMenu, setShowMenu }}
+        setToggleVideoUploading={setToggleVideoUploading}
+        setToggleShortUploading={setToggleShortUploading}
+        setToggleLiveUploading={setToggleLiveUploading}
+        videoQueries={{ videoParams, setVideoParams }}
+        shortQueries={{shortParams,setShortParams}}
+      />
       <div className={`w-fit flex justify-end`}>
         <div className="w-fit">
           <SideMenu
-            menuToggle={{ showMenu }}
+            menuToggle={{ showMenu, setShowMenu }}
             videoParam={{ setVideoParams, videoParams }}
-            sideActive={{ active, setActive }}
           />
         </div>
 
         <div className="">
           {/* <TagSection /> */}
 
-          {videoLoading === true ? (
-            <div>loading</div>
-          ) : (
-              <Main
-                videoParam={{ setVideoParams, videoParams }}
-                sideActive={{ active, setActive }}
-              />
-          )}
+          <Main
+            showMenu={showMenu}
+            timeAgo={timeAgo}
+            shortLoading={shortLoading}
+            videoLoading={videoLoading}
+            fetchLikeToggle={fetchLikeToggle}
+            fetchViewCounter={fetchViewCounter}
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

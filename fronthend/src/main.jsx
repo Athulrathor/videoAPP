@@ -1,4 +1,4 @@
-import React, { StrictMode } from "react";
+import React, { lazy, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
@@ -7,7 +7,7 @@ import store from "./redux/store.js";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor } from "./redux/store.js";
 
-// persistor.purge();
+const VidTubeLoading = lazy(() => import('./components/LoadingScreen/VidTubeLoading.jsx'))
 
 const root = createRoot(document.getElementById("root"));
 root.render(
@@ -15,11 +15,12 @@ root.render(
     <StrictMode>
       <Provider store={store}>
         <PersistGate
-          loading={<h1>Loading...</h1>}
+          loading={
+            <div>
+              <VidTubeLoading />
+            </div>
+          }
           persistor={persistor}
-          onBeforeLift={() => {
-            console.log("Rehydration complete!");
-          }}
         >
           <App />
         </PersistGate>

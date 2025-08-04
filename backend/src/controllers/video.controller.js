@@ -13,10 +13,10 @@ const getAllVideos = asyncHandler(async (req, res) => {
   try {
     const {
       page = 1,
-      limit = 10,
+      limit = 20,
       query = `/^video/`,
       sortBy = 1,
-      sortType = "ascending",
+      sortType = "",
       userId = req.user._id,
     } = req.query;
 
@@ -27,14 +27,39 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const totalPage = Math.ceil(totalVideo / limits);
     const startingIndex = (pages - 1) * limits;
 
+    if (query.trim() === "" && totalVideo.length === 0) return;
+
 
     const getAllVideoFile = await Video.aggregate([
       {
         $match: {
           $or: [
             { title: { $regex: query, $options: "i" } },
-            { description: { $regex: query, $options: "i" } },
           ],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "userInfo",
+        },
+      },
+      {
+        $unwind: "$userInfo",
+      },
+      {
+        $project: {
+          "userInfo.password": 0,
+          "userInfo.coverImage": 0,
+          "userInfo.refreshToken": 0,
+          "userInfo.acessToken": 0,
+          // "userInfo.createdAt": 0,
+          "userInfo.updatedAt": 0,
+          "userInfo.fullname": 0,
+          // "userInfo.username": 0,
+          "userInfo.email": 0,
         },
       },
       {
@@ -73,17 +98,156 @@ const getAllVideos = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllSuggestion = asyncHandler(async (req, res) => {
+  //TODO: get all videos based on query, sort, pagination
+  //videofile thumnail title description duration  view ispublished owner = videoschema
+
+  try {
+    const { query = `/^video/`} = req.query;
+
+    if (query.trim() === "") return;
+
+    const getSuggestion = await Video.aggregate([
+      {
+        $match: {
+          $or: [
+            { title: { $regex: query, $options: "i" } },
+          ],
+        },
+      },
+      {
+        $project: {
+          title:1
+        },
+      },
+    ]);
+
+    if (!getSuggestion) {
+      throw new ApiError(400, "Error in getting all suggetion!");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          getSuggestion,
+          "suggation fetched file fetched successfully!"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(500, error.message, "Error in getting all suggestion!");
+  }
+});
+
+const getVideoByOwner = asyncHandler(async (req, res) => {
+  //TODO: get all videos based on query, sort, pagination
+  //videofile thumnail title description duration  view ispublished owner = videoschema
+
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      query = `/^video/`,
+      sortBy = 1,
+      sortType = "ascending",
+    } = req.query;
+
+    const { userId } = req.params;
+    
+    if (!userId || !isValidObjectId(userId))
+      throw new ApiError(400, "User id is missing!");
+
+    const pages = parseInt(page);
+    const limits = parseInt(limit);
+
+    const totalVideo = await Video.countDocuments({ owner: userId });
+    const totalPage = Math.ceil(totalVideo / limits);
+    const startingIndex = (pages - 1) * limits;
+
+    const getAllVideoFile = await Video.aggregate([
+      {
+        $match: {
+          owner: new mongoose.Types.ObjectId(userId),
+        },
+      },
+      // {
+      //   $match: {
+      //     $or: [
+      //       { title: { $regex: query, $options: "i" } },
+      //       { description: { $regex: query, $options: "i" } },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "userInfo",
+        },
+      },
+      {
+        $unwind: "$userInfo",
+      },
+      {
+        $project: {
+          "userInfo.password": 0,
+          // "userInfo.coverImage": 0,
+          "userInfo.refreshToken": 0,
+          "userInfo.acessToken": 0,
+          // "userInfo.createdAt": 0,
+          "userInfo.updatedAt": 0,
+          // "userInfo.fullname": 0,
+          // "userInfo.username": 0,
+          "userInfo.email": 0,
+        },
+      },
+      // {
+      //   $skip: (pages - 1) * limits,
+      // },
+      // {
+      //   $limit: limits,
+      // },
+      // {
+      //   $sort: {
+      //     sortBy: sortType === "ascending" ? 1 : -1,
+      //   },
+      // },
+    ]);
+
+    if (!getAllVideoFile) {
+      throw new ApiError(400, "Error in getting video file!");
+    }
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          totalPage: totalPage,
+          totalVideo: totalVideo,
+          startingIndex: startingIndex,
+          data: getAllVideoFile,
+        },
+        "Video file fetched successfully!"
+      )
+    );
+  } catch (error) {
+    throw new ApiError(500, error.message, "Error in getting all video!");
+  }
+})
+
 const publishAVideo = asyncHandler(async (req, res) => {
   // TODO: get video, upload to cloudinary, create video
 
   try {
     const { title, description, isPublished = true } = req.body;
 
-    if (!title || title?.trim() === 0) {
+    if (!title || title?.trim() === "") {
       throw new ApiError(401, "Oops title is missing!");
     }
 
-    if (description?.trim() === 0) {
+    if (description?.trim() === "") {
       throw new ApiError(400, "Oops description is missing!");
     }
 
@@ -167,12 +331,29 @@ const getVideoById = asyncHandler(async (req, res) => {
         $unwind: "$owner",
       },
       {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "video",
+          as: "likesInfo",
+        },
+      },
+      {
+        $set: {
+          likeCount: { $size: "$likesInfo" },
+        },
+      },
+      {
         $project: {
           title: 1,
           description: 1,
+          duration: 1,
           videoFile: 1,
           thumbnail: 1,
           isPublished: 1,
+          likeCount: 1,
+          views:1,
+          createdAt:1,
           owner: {
             _id: "$owner._id",
             username: "$owner.username",
@@ -180,8 +361,7 @@ const getVideoById = asyncHandler(async (req, res) => {
           },
         },
       },
-
-    ])
+    ]);
 
     if (!videoFile) {
       throw new ApiError(400, "Video is missing!");
@@ -327,11 +507,43 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   }
 });
 
+const videoViewCounter = asyncHandler(async (req, res) => {
+  try {
+    const { videoId } = req.params;
+
+    if (!videoId) {
+      throw new ApiError(401, "Video id is missing!");
+    }
+
+    const updatedVideo = await Video.findByIdAndUpdate(
+      videoId,
+      { $inc: { views: 1 } }, // Increments by 1 on each call
+      { new: true }
+    );
+
+    if (!updatedVideo) {
+      throw new ApiError(400, "error counting views!");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, updatedVideo, "views is fetched successfully!")
+      );
+  } catch (error) {
+    throw new ApiError(500, error.message, "Error in view counter!");
+  }
+});
+
+
 export {
   getAllVideos,
+  getVideoByOwner,
   publishAVideo,
   getVideoById,
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  videoViewCounter,
+  getAllSuggestion
 };

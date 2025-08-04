@@ -1,8 +1,14 @@
 
+
 body{
   overflow: hidden;
 }
 
 .scroll{
+  scrollbar-width: none;
+}
+
+
+.scrollBar::-webkit-scrollbar{
   scrollbar-width: none;
 }

@@ -1,4 +1,5 @@
 
+import { isValidObjectId } from "mongoose";
 import { Short } from "../models/short.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -11,12 +12,11 @@ const getAllShorts = asyncHandler(async (req, res) => {
 
   try {
     const {
-      page = 1,
-      limit = 10,
+      page=1,
+      limit=2,
       query = `/^short/`,
       sortBy = 1,
       sortType = "ascending",
-      userId = req.user._id,
     } = req.query;
 
     const pages = parseInt(page);
@@ -31,19 +31,160 @@ const getAllShorts = asyncHandler(async (req, res) => {
         $match: {
           $or: [
             { title: { $regex: query, $options: "i" } },
-            { description: { $regex: query, $options: "i" } },
+          ],
+        },
+      },
+   {
+     $lookup: {
+       from: "likes",
+       localField: "_id",
+       foreignField: "short",
+       as: "likesInfo",
+     },
+   },
+   {
+     $set: {
+       likeCount: { $size: "$likesInfo" },
+     },
+   },
+   {
+     $lookup: {
+       from: "comments",
+       localField: "_id",
+       foreignField: "short",
+       as: "commentInfo",
+     },
+   },
+   {
+     $set: {
+       commentCount: { $size: "$commentInfo" },
+     },
+   },
+   {
+     $lookup: {
+       from: "users",
+       localField: "owner",
+       foreignField: "_id",
+       as: "userInfo",
+       pipeline: [
+         {
+           $project: {
+             _id: 1,
+             username: 1,
+             avatar: 1,
+             createdAt: 1,
+           },
+         },
+       ],
+     },
+   },
+   {
+     $project: {
+       likesInfo: 0,
+       commentInfo:0,
+     },
+   },
+ ]);
+
+    if (!getAllShortFile) {
+      throw new ApiError(400, "Error in getting short file!");
+    }
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          totalPage: totalPage,
+          startingIndex: startingIndex,
+          totalShort:totalShort,
+          data: getAllShortFile,
+        },
+        "short file fetched successfully!"
+      )
+    );
+  } catch (error) {
+    throw new ApiError(500, error.message, "Error in getting all short!");
+  }
+});
+
+const getShortByOwner = asyncHandler(async (req, res) => {
+  //TODO: get all shorts based on query, sort, pagination
+  //shortfile thumnail title description duration  view ispublished owner = shortschema
+
+  try {
+    const {
+      page = 1,
+      limit = 2,
+      query = `/^short/`,
+      sortBy = 1,
+      sortType = "ascending",
+    } = req.query;
+
+    const { userId } = req.params;
+
+    if (!userId || !isValidObjectId(userId)) throw new ApiError(400, "User id is missing!");
+
+    const pages = parseInt(page);
+    const limits = parseInt(limit);
+
+    const totalShort = await Short.countDocuments({});
+    const totalPage = Math.ceil(totalShort / limits);
+    const startingIndex = (pages - 1) * limits;
+
+    const getAllShortFile = await Short.aggregate([
+      {
+        $match: {
+          owner: userId,
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "short",
+          as: "likesInfo",
+        },
+      },
+      {
+        $set: {
+          likeCount: { $size: "$likesInfo" },
+        },
+      },
+      {
+        $lookup: {
+          from: "comments",
+          localField: "_id",
+          foreignField: "short",
+          as: "commentInfo",
+        },
+      },
+      {
+        $set: {
+          commentCount: { $size: "$commentInfo" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "userInfo",
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                username: 1,
+                avatar: 1,
+                createdAt: 1,
+              },
+            },
           ],
         },
       },
       {
-        $skip: (pages - 1) * limits,
-      },
-      {
-        $limit: limits,
-      },
-      {
-        $sort: {
-          sortBy: sortType === "ascending" ? 1 : -1,
+        $project: {
+          likesInfo: 0,
+          commentInfo: 0,
         },
       },
     ]);
@@ -57,8 +198,8 @@ const getAllShorts = asyncHandler(async (req, res) => {
         200,
         {
           totalPage: totalPage,
-          totalshort: totalShort,
           startingIndex: startingIndex,
+          totalShort: totalShort,
           data: getAllShortFile,
         },
         "short file fetched successfully!"
@@ -75,15 +216,17 @@ const publishAShort = asyncHandler(async (req, res) => {
   try {
     const { title, description, isPublished = true } = req.body;
 
-    if (!title || title?.trim() === 0) {
+    if (!title || title?.trim() === "") {
       throw new ApiError(401, "Oops title is missing!");
     }
 
-    if (description?.trim() === 0) {
+    if (description?.trim() === "") {
       throw new ApiError(400, "Oops description is missing!");
     }
 
     const shortFileLocalPath = req.file?.path;
+
+    console.log(shortFileLocalPath)
 
     if (!shortFileLocalPath) {
       throw new ApiError(401, "Short file is missing!");
@@ -96,12 +239,14 @@ const publishAShort = asyncHandler(async (req, res) => {
     // const thumbnailUploadedToCloudinary = await uploadOnCloudinary(
     //   thumbnailFileLocalPath
     // );
+    
+    console.log("shortfile : ", shortUploadedToCloudinary);
 
     if (!shortUploadedToCloudinary.url) {
       throw new ApiError(404, "Short url is missing!");
     }
 
-    if (!shortUploadedToCloudinary.duration > 60 * 3) {
+    if (shortUploadedToCloudinary.duration > 60 * 3) {
       throw new ApiError(404, "Short is larger than 3 min!");
     }
 
@@ -115,7 +260,7 @@ const publishAShort = asyncHandler(async (req, res) => {
     //   },
 
     const short = await Short.create({
-      shortFile: shortUploadedToCloudinary.url,
+      shortFile: shortUploadedToCloudinary?.url,
       title: title,
       description: description,
       isPublished: isPublished,
@@ -293,11 +438,41 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   }
 });
 
+const shortViewCounter = asyncHandler(async (req, res) => {
+  try {
+    const { shortId } = req.params;
+
+    if (!shortId) {
+      throw new ApiError(401, "Short id is missing!");
+    }
+
+    const updatedShort = await Short.findByIdAndUpdate(
+      shortId,
+      { $inc: { views: 1 } }, // Increments by 1 on each call
+      { new: true }
+    );
+
+    if (!updatedShort) {
+      throw new ApiError(400, "error counting views!");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, updatedShort, "views is fetched successfully!")
+      );
+  } catch (error) {
+    throw new ApiError(500, error.message, "Error in view counter!");
+  }
+});
+
 export {
   getAllShorts,
+  getShortByOwner,
   publishAShort,
   getShortById,
   updateShort,
   deleteShort,
   togglePublishStatus,
+  shortViewCounter,
 };

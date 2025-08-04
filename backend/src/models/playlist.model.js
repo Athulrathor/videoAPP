@@ -10,7 +10,7 @@ const playlistSchema = new Schema(
       type: String,
       required: true,
     },
-    video:{
+    video: {
       type: Schema.Types.ObjectId,
       ref: "Video",
     },
@@ -19,7 +19,7 @@ const playlistSchema = new Schema(
       ref: "User",
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 export const Playlist = mongoose.model("Playlist", playlistSchema);

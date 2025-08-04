@@ -1,120 +1,120 @@
 import React, { useEffect, useRef, useState } from 'react'
-
 import { axiosInstance } from '../libs/axios';
 import { useNavigate } from 'react-router-dom';
 import { Volume2, VolumeX } from 'lucide-react';
+import { useSelector } from "react-redux";
 
-const Subscription = (props) => {
+const UserVideos = (props) => {
 
-  const { timeAgo,formatTime} = props;
-
-  // const { loggedIn } = useSelector((state) => state.user);
+  const { timeAgo, formatTime } = props;
+  
+  const { user } = useSelector((state) => state.user);
 
   const Navigate = useNavigate();
 
-      const [videoStatus, setVideoStatus] = useState({
-        isPlaying: false,
-        isMuted: false,
-        showControl: false,
-        duration: 0,
-      });
-    
-    const videoRef = useRef({});
+  const [yourVideo, setYourVideo] = useState({
+    loading: true,
+    error: "",
+    data: null,
+  });
 
-  const [subcribersData, setSubcribersData] = useState({
-        loading: true,
-        error: "",
-        data: null,
-      })
+    const [videoStatus, setVideoStatus] = useState({
+      isPlaying: false,
+      isMuted: false,
+      showControl: false,
+      duration: 0,
+    });
+  
+  const videoRef = useRef({});
 
-  const fetchSubcriberVideosAndShort = async () => {
-    setSubcribersData((prev) => ({
-      ...prev, loading: true
-    }));
-
-    try {
-      const subcriberVideosAndShort = await axiosInstance.get(
-        `subcriber/get-subcribers-videos-and-short`
-      );
-      setSubcribersData((prev) => ({
-        ...prev,
-        loading: false,
-        data:subcriberVideosAndShort?.data?.data
-      }));
-    } catch (error) {
-      setSubcribersData((prev) => ({
-        ...prev,
-        loading: false,
-        error:error.message
-      }));
-
-      console.error(error);
-    }
-  }
-
-  useEffect(() => {
-    fetchSubcriberVideosAndShort();
-  }, []);
-
-      const togglePlay = (videoId2) => {
-        const video = videoRef.current[videoId2];
-        if (video) {
-          setVideoStatus((prev) => ({
+    useEffect(() => {
+      const fetchVideoByOwner = async () => {
+        setYourVideo((prev) => ({
+          ...prev,
+          loading: true,
+        }));
+        try {
+          const videos = await axiosInstance.get(
+            `videos/get-all-videos-of-owner/${user?.data?.user?._id}`
+          );
+          console.log(videos);
+          setYourVideo((prev) => ({
             ...prev,
-            [videoId2]: { ...prev[videoId2], isPlaying: true },
+            loading: false,
+            data: videos?.data?.data?.data,
           }));
-          video.play();
+        } catch (error) {
+          setYourVideo((prev) => ({
+            ...prev,
+            loading: false,
+            error: error.message,
+          }));
+          console.error(error);
         }
       };
 
-      const togglePause = (videoId2) => {
-        const video = videoRef.current[videoId2];
-        if (video) {
-          setVideoStatus((prev) => ({
-            ...prev,
-            [videoId2]: { ...prev[videoId2], isPlaying: false },
-          }));
-          video.pause();
-        }
-      };
+      fetchVideoByOwner();
+    }, [user?.data?.user?._id]);
+  
+    const togglePlay = (videoId2) => {
+      const video = videoRef.current[videoId2];
+      if (video) {
+        setVideoStatus((prev) => ({
+          ...prev,
+          [videoId2]: { ...prev[videoId2], isPlaying: true },
+        }));
+        video.play();
+      }
+    };
 
-      const toggleMute = (e, videoId2) => {
-        e.stopPropagation();
+    const togglePause = (videoId2) => {
+      const video = videoRef.current[videoId2];
+      if (video) {
+        setVideoStatus((prev) => ({
+          ...prev,
+          [videoId2]: { ...prev[videoId2], isPlaying: false },
+        }));
+        video.pause();
+      }
+    };
 
-        const video = videoRef.current[videoId2];
-        if (video) {
-          const currentMuteState = videoStatus[videoId2]?.isMuted;
-          const newMuteState = !currentMuteState;
+    const toggleMute = (e, videoId2) => {
+      e.stopPropagation();
 
-          setVideoStatus((prev) => ({
-            ...prev,
-            [videoId2]: { ...prev[videoId2], isMuted: newMuteState },
-          }));
+      const video = videoRef.current[videoId2];
+      if (video) {
+        const currentMuteState = videoStatus[videoId2]?.isMuted;
+        const newMuteState = !currentMuteState;
 
-          video.muted = newMuteState;
-        }
-      };
+        setVideoStatus((prev) => ({
+          ...prev,
+          [videoId2]: { ...prev[videoId2], isMuted: newMuteState },
+        }));
 
-      const handleOnTimeUpdate = (videoId2) => {
-        const video = videoRef.current[videoId2];
-        if (video) {
-          setVideoStatus((prev) => ({
-            ...prev,
-            [videoId2]: { ...prev[videoId2], duration: video.currentTime },
-          }));
-        }
-  };
+        video.muted = newMuteState;
+      }
+    };
+
+    const handleOnTimeUpdate = (videoId2) => {
+      const video = videoRef.current[videoId2];
+      if (video) {
+        setVideoStatus((prev) => ({
+          ...prev,
+          [videoId2]: { ...prev[videoId2], duration: video.currentTime },
+        }));
+      }
+    };
 
   return (
-    <div className="h-[90vh] scroll-smooth overflow-y-scroll">
-      {/* {loggedIn ? "" : */}
+    <div className="h-[90vh] overflow-y-scroll ">
+      {/* title */}
       <div className="w-full flex items-center font-bold text-2xl max-md:text-lg max-sm:text-sm p-2">
-        <h1>User Subcriber Videos</h1>
+        <h1>User Videos</h1>
       </div>
       {/* videoList */}
       <div className="w-[calc(190px - 100%)] px-2 space-y-3 h-[calc(113px - 100vh)]">
-        {subcribersData.loading === false &&
-          subcribersData?.data?.videos.map((video) => (
+        {yourVideo?.loading === false &&
+          yourVideo?.data.map((video) => (
             <div
               key={video._id}
               className="flex h-fit"
@@ -202,7 +202,7 @@ const Subscription = (props) => {
                 <div className="flex">
                   <div className="flex items-baseline ">
                     <img
-                      src={video?.owner?.avatar}
+                      src={video?.userInfo?.avatar}
                       alt=""
                       className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
                     />
@@ -210,7 +210,7 @@ const Subscription = (props) => {
                   <div className="flex flex-col leading-tight">
                     {/* user name */}
                     <div className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
-                      <h3>{video?.owner?.username}</h3>
+                      <h3>{video?.userInfo?.username}</h3>
                     </div>
                     {/* view and month ago */}
                     <div className="text-[11px] font-normal  text-gray-500 max-md:text-[11px] space-x-1.5">
@@ -229,4 +229,4 @@ const Subscription = (props) => {
   );
 }
 
-export default Subscription;
+export default UserVideos

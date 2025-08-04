@@ -10,11 +10,14 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import VideoPages from "./pages/VideoPages";
+import Channel from "./pages/Channel";
+import Settings from "./pages/Settings";
+import { useSelector } from "react-redux";
 // import { useSelector } from "react-redux";
 
 function App() {
 
-  // const { loggedIn } = useSelector((state) => state.user);
+  const { loggedIn } = useSelector((state) => state.user);
 
   return (
     <>
@@ -38,17 +41,17 @@ function App() {
 
           <Route
             path="/video/:VideoId"
-            element={<VideoPages />}
-          />
-          {/* <Route
-            path="/videos"
-            element={<Videos />}
+            element={loggedIn ? <VideoPages /> : <Login />}
           />
           <Route
-            path="/short"
-            element={<Short />}
+            path="/channel/:username"
+            element={loggedIn ? <Channel /> : <Login />}
           />
           <Route
+            path="/settings"
+            element={loggedIn ? <Settings /> : <Login />}
+          />
+          {/*<Route
             path="/playlist"
             element={<Playlist />}
           />

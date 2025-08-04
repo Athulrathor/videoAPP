@@ -8,8 +8,16 @@ export const userSlice = createSlice({
     error: false,
     token: null,
     loggedIn: false,
+    sideActive: "home",
+    settingsActive:"Accounts",
   },
   reducers: {
+    setSideActive: (state, action) => {
+      state.sideActive = action.payload;
+    },
+    setSettingsActive:(state, action) => {
+      state.settingsActive = action.payload;
+    },
     login: (state, action) => {
       state.user = { ...state.user, ...action.payload };
       state.loggedIn = true;
@@ -31,5 +39,6 @@ export const userSlice = createSlice({
 
 
 
-export const { login, logout, setLoading, setError } = userSlice.actions;
+export const { login, logout, setLoading, setError, setSideActive,setSettingsActive } =
+  userSlice.actions;
 export default userSlice.reducer;

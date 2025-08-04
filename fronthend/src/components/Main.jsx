@@ -1,29 +1,90 @@
-import React from "react";
-import Videos from "../pages/Videos";
-import Short from "../pages/Short";
-import Playlist from "../pages/Playlist"
-import Subscription from "../pages/Subscription";
+import React,{ lazy } from "react";
+import { useSelector } from "react-redux";
+import { shortLoading } from "../redux/features/shorts";
+import Channel from "../pages/Channel";
+
+const Videos = lazy(() => import('../pages/Videos'))
+const Short = lazy(() => import("../pages/Short"));
+const Playlist = lazy(() => import("../pages/Playlist"));
+const Subscription = lazy(() => import("../pages/Subscription"));
+const UserVideos = lazy(() => import("../pages/UserVideos"));
+const LikedVideos = lazy(() => import("../pages/LikedVideos"));
+const Settings = lazy(() => import("../pages/Settings"));
 
 const Main = (props) => {
 
+  const { sideActive } = useSelector(state => state.user);
+
+  const mainWidth = props.showMenu;
+
+    const formatTime = (time) => {
+      const minutes = Math.floor(time / 60);
+      const seconds = Math.floor(time % 60);
+      return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    };
+  
   return (
-    <main className="lex flex-col w-[calc(100vw-188px)] h-[calc(100vh - 65px)] overflow-y-scroll bg-[#f9f9f9] scrollbar-hide">
-      {(props.sideActive.active === "home" ? <Videos /> : "") ||
-        (props.sideActive.active === "shorts" ? <Short /> : "") ||
-        (props.sideActive.active === "subscription" ? <Subscription /> : "") ||
-        (props.sideActive.active === "history" ? <History /> : "") ||
-        (props.sideActive.active === "playlists" ? <Playlist /> : "") ||
-        (props.sideActive.active === "your videos" ? <UserVideos /> : "") ||
-        (props.sideActive.active === "watch later" ? <WatchLater /> : "") ||
-        (props.sideActive.active === "likedVideos" ? <LikedVideos /> : "") ||
-        (props.sideActive.active === "trending" ? <Trending /> : "") ||
-        (props.sideActive.active === "music" ? <Music /> : "") ||
-        (props.sideActive.active === "gaming" ? <Gaming /> : "") ||
-        (props.sideActive.active === "sports" ? <Sports /> : "") ||
-        (props.sideActive.active === "setting" ? <Setting /> : "") ||
-        (props.sideActive.active === "report history" ? <ReportHistory /> : "") ||
-        (props.sideActive.active === "help" ? <Help /> : "") ||
-        (props.sideActive.active === "feedback" ? <Feedback /> : "")}
+    <main
+      className={`flex flex-col max-md:w-full ${
+        mainWidth ? "w-[calc(100vw-66px)]" : "w-[calc(100vw-200px)]"
+      } h-[calc(100vh - 65px)] bg-[#f9f9f9]`}
+    >
+      {(sideActive === "home" ? (
+        <Videos
+          timeAgo={props.timeAgo}
+          videoLoading={props.videoLoading}
+          formatTime={formatTime}
+        />
+      ) : (
+        ""
+      )) ||
+        (sideActive === "shorts" ? (
+          <Short
+            width={props.showMenu}
+            timeAgo={props.timeAgo}
+            formatTime={formatTime}
+            shortLoading={shortLoading}
+            fetchLikeToggle={props.fetchLikeToggle}
+            fetchViewCounter={props.fetchViewCounter}
+          />
+        ) : (
+          ""
+        )) ||
+        (sideActive === "subscription" ? (
+          <Subscription
+            timeAgo={props.timeAgo}
+            formatTime={formatTime}
+          />
+        ) : (
+          ""
+        )) ||
+        (sideActive === "history" ? <History /> : "") ||
+        (sideActive === "playlists" ? <Playlist /> : "") ||
+        (sideActive === "your videos" ? (
+          <UserVideos
+            timeAgo={props.timeAgo}
+            formatTime={formatTime}
+          />
+        ) : (
+          ""
+        )) ||
+        (sideActive === "watch later" ? <WatchLater /> : "") ||
+        (sideActive === "likedVideos" ? (
+          <LikedVideos
+            timeAgo={props.timeAgo}
+            formatTime={formatTime}
+          />
+        ) : (
+          ""
+        )) ||
+        (sideActive === "trending" ? <Trending /> : "") ||
+        (sideActive === "music" ? <Music /> : "") ||
+        (sideActive === "gaming" ? <Gaming /> : "") ||
+        (sideActive === "sports" ? <Sports /> : "") ||
+        (sideActive === "setting" ? <Settings /> : "") ||
+        (sideActive === "report history" ? <ReportHistory /> : "") ||
+        (sideActive === "help" ? <Help /> : "") ||
+        (sideActive === "feedback" ? <Feedback /> : "")}
     </main>
   );
 };

@@ -1,22 +1,37 @@
-import mongoose, { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId, Schema } from "mongoose";
 import { Subcriptions } from "../models/subcriptions.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { axiosInstance } from "../../../fronthend/src/libs/axios.js";
+import { Video } from "../models/video.model.js";
+import { Short } from "../models/short.model.js";
 
 const toggleSubscription = asyncHandler(async (req, res) => {
   // TODO: toggle subscription
 
   try {
-    const userId = req?.user._id;
 
-    const isSubcribed = await Subcriptions.findOne({ channel: userId });
+    const userId = req.params.userId;
+
+    const currentUserId = req?.user._id;
+
+    if (!userId) {
+      throw new ApiError("Id not found ")
+    }
+
+    if (userId === currentUserId) return;
+
+    let isSubcribed = await Subcriptions.findOne({
+      subcriber: userId,
+      subcribed:currentUserId,
+    });
 
     let subcribed;
     let unSubcribed;
 
     if (isSubcribed) {
-      unSubcribed = await Subcriptions.deleteOne({ channel: userId });
+      unSubcribed = await Subcriptions.deleteOne({ subcriber: userId,subcribed:currentUserId });
 
       if (!unSubcribed) {
         throw new ApiError(
@@ -25,9 +40,11 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         );
       }
     } else {
+
       subcribed = await Subcriptions.create({
-        channel: userId,
-      });
+        subcriber: userId,
+        subcribed: currentUserId,
+      }); 
 
       if (!subcribed) {
         throw new ApiError(
@@ -37,34 +54,12 @@ const toggleSubscription = asyncHandler(async (req, res) => {
       }
     }
 
-    // const channelCount = await Subcriptions.aggregate([
-    //   {
-    //     $match: {
-    //       channel: userId,
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "null",
-    //       channelCount: {
-    //         $sum: 1,
-    //       },
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       _id: 0,
-    //       channelCount: 1,
-    //     },
-    //   },
-    // ]);
-
     return res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          { subcribed,unSubcribed },
+          { subcribed: subcribed, unSubcribed: unSubcribed },
           "Getting subcription count!"
         )
       );
@@ -77,33 +72,47 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   try {
-    const { channelId } = req.params;
+    // const { userId } = req.params;
 
-    if (!channelId) {
-      throw new ApiError(403, "Channel id is not found!");
+    const currentUserId = req.user._id;
+
+    // if (!userId) {
+    //   throw new ApiError(403, "User id is not found!");
+    // }
+
+    if (!currentUserId) {
+      throw new ApiError(403, "Current user id is not found!");
     }
 
     const UserChannelSubscribers = await Subcriptions.aggregate([
       {
         $match: {
-          channel: new mongoose.Types.ObjectId(channelId),
+          subcribed: new mongoose.Types.ObjectId(currentUserId),
         },
       },
       {
         $lookup: {
           from: "users",
-          localField: "channel",
+          localField: "subcriber",
           foreignField: "_id",
-          as: "channel",
-          pipeline: [
-            {
-              $addFields: {
-                channelCount: {
-                  $sum: 1,
-                },
-              },
-            },
-          ],
+          as: "subcribers",
+        },
+      },
+      {
+        $unwind:"$subcribers"
+      },
+      {
+        $project: {
+          // _id: 1,
+          // subcriber: 1,
+          // subcribed: 1,
+          // createdAt: 1,
+          // updatedAt: 1,
+          "subcribers._id":1,
+          "subcribers.avatar": 1,
+          "subcribers.username": 1,
+          "subcribers.createdAt": 1,
+          // "subcribers.subcriberCount":1
         },
       },
     ]);
@@ -120,36 +129,100 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   }
 });
 
+const getUserChannelSubscribersVideosAndShort = asyncHandler(async (req, res) => {
+  try {
+
+    const currentUserId = req.user._id;
+
+    if (!currentUserId) {
+      throw new ApiError(403, "Current user id is not found!");
+    }
+
+    const UserChannelSubscribers = await Subcriptions.aggregate([
+      {
+        $match: {
+          subcribed: new mongoose.Types.ObjectId(currentUserId),
+        },
+      },
+      {
+        $project: {
+          subcriber: 1,
+        },
+      },
+    ]);
+      
+    if (!UserChannelSubscribers) {
+      throw new ApiError(404, "User channel subcriber not found!");
+    }
+
+    const videosIds = UserChannelSubscribers.map((video) => { return video.subcriber })
+    
+    const shortsIds = UserChannelSubscribers.map((short) => {
+      return short.subcriber;
+    });
+
+    const videos = await Video.find({
+      owner: { $in: videosIds },
+    }).populate({
+      path: "owner", select: "avatar username _id"
+    });
+    
+    const shorts = await Short.find({
+      owner: { $in: shortsIds },
+    }).populate({
+      path: "owner",
+      select: "avatar username _id",
+    });
+
+    return res.status(200).json(new ApiResponse(200, {videos:videos,shorts:shorts}, "User videos and short are fetched successfully!"));
+
+  } catch (error) {
+    console.log(error.message);
+    throw new ApiError(500, "Error in get user subcriber videos and shorts!");
+  }
+});
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   try {
-      const { subscriberId } = req.params;
+      const { userId } = req.params;
       
-    if (!subscriberId) {
+    if (!userId) {
       throw new ApiError(403, "Subcriber id is not found!");
     }
 
     const UserChannelSubscribed = await Subcriptions.aggregate([
       {
         $match: {
-          subcriber: new mongoose.Types.ObjectId(subscriberId),
+          subcriber: new mongoose.Types.ObjectId(userId),
         },
       },
       {
         $lookup: {
           from: "users",
-          localField: "subcriber",
+          localField: "subcribed",
           foreignField: "_id",
-          as: "subcriber",
+          as: "subcribeds",
           pipeline: [
             {
               $addFields: {
-                subcriberCount: {
+                subcribedCount: {
                   $sum: 1,
                 },
               },
             },
           ],
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          subcriber: 1,
+          subcribed: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          "subcribeds._id": 1,
+          "subcribeds.avatar": 1,
+          "subcribeds.username": 1,
         },
       },
     ]);
@@ -174,4 +247,48 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
   }
 });
 
-export { toggleSubscription, getUserChannelSubscribers, getSubscribedChannels };
+const isSubcribed = asyncHandler(async (req, res) => {
+
+  const { userId } = req.params;
+
+  const currentUserId = req.user._id;
+
+  if (!userId || !isValidObjectId(userId)) {
+    throw new ApiError(403, "Subcriber id is not found!");
+  }
+
+  try {
+    
+    const isChecking = await Subcriptions.findOne({ subcriber: userId, subcribed: currentUserId });
+
+    let status = null;
+
+    if (isChecking === null) {
+      status = false;
+    } else {
+      status = true;
+    }
+
+          return res
+            .status(200)
+            .json(
+              new ApiResponse(
+                200,
+                status,
+                "User channel fetched successfully!"
+              )
+            );
+
+
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+export {
+  toggleSubscription,
+  getUserChannelSubscribers,
+  getSubscribedChannels,
+  isSubcribed,
+  getUserChannelSubscribersVideosAndShort,
+};

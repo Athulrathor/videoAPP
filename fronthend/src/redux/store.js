@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './features/user.js';
 import videoReducer from "./features/videos.js";
 import shortReducer from "./features/shorts.js";
-import subscriberReducer from "./features/subcriptionStore.js";
+import subscriberReducer from "./features/subcribers.js";
 import { combineReducers } from '@reduxjs/toolkit';
 import sessionStorage from "redux-persist/lib/storage/session";
 import {
@@ -29,7 +29,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   user: userReducer,
   videos: videoReducer,
-  short: shortReducer,
+  shorts: shortReducer,
   subscriber: subscriberReducer,
 });
 

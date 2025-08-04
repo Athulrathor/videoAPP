@@ -23,7 +23,7 @@ const likeSchema = new Schema(
       ref: "Short",
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 export const Like = mongoose.model("Like", likeSchema);

@@ -12,7 +12,7 @@ const tweetSchema = new Schema(
       ref: "User",
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 tweetSchema.plugin(mongooseAggregatePaginate);
