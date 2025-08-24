@@ -1,0 +1,836 @@
+import React, { useEffect, useState } from 'react';
+import { ThumbsUp, ThumbsDown, MoreVertical, Heart, X } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAddCommentReplies, fetchAddShortComment, fetchAddVideoComment, fetchCommentReplies, fetchVideoComment } from '../redux/features/comment';
+import { fetchLikeToggleComment } from '../redux/features/likes';
+import { isCommentLiked } from '../redux/features/likes';
+
+const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment, toggle={shortComments:true,setShowComment:null} }) => {
+    const dispatch = useDispatch();
+
+    const { videosComments, repliesOnComment,shortComments } = useSelector(state => state.comments);
+    const { commentLiked } = useSelector(state => state.likes)
+    
+    // Local state to track UI updates
+    const [localCommentData, setLocalCommentData] = useState({});
+
+    const [newComment, setNewComment] = useState('');
+    const [showCommentActions, setShowCommentActions] = useState(false);
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [showRepliesFor, setShowRepliesFor] = useState(null); // Track which comment's replies are shown
+
+    // Fixed: Initialize commentStatus as an empty object instead of with nested properties
+    const [commentStatus, setCommentStatus] = useState({});
+
+    // Initialize local comment data when comments load
+    useEffect(() => {
+        if (videosComments && videosComments?.length > 0) {
+            const initialData = {};
+            videosComments.forEach(comment => {
+                dispatch(isCommentLiked(comment._id));
+                initialData[comment._id] = {
+                    totalLikes: comment.totalLikes || 0,
+                    totalReplies: comment.totalReplies || comment.totalComment,
+                    isLiked: commentLiked
+                };
+            });
+            setLocalCommentData(initialData);
+        }
+        if (shortComments && shortComments?.length > 0) {
+            const initialData = {};
+            shortComments.forEach(comment => {
+                dispatch(isCommentLiked(comment._id));
+                initialData[comment._id] = {
+                    totalLikes: comment.totalLikes || 0,
+                    totalReplies: comment.totalReplies || comment.totalComment,
+                    isLiked: commentLiked
+                };
+            });
+            setLocalCommentData(initialData);
+        }
+            
+    }, [videosComments,shortComments]);
+
+    useEffect(() => {
+        if (contentId && whichContent === "videos") {
+            dispatch(fetchVideoComment(contentId));
+        }
+    }, [contentId, dispatch, whichContent]);
+
+    // Handle functions
+    const handleLikeToggleComment = (id) => {
+        const currentLiked = localCommentData[id]?.isLiked || commentStatus[id]?.like || false;
+        const currentLikes = localCommentData[id]?.totalLikes || 0;
+        
+        // Optimistic UI update
+        setLocalCommentData(prev => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                isLiked: !currentLiked,
+                totalLikes: currentLiked ? currentLikes - 1 : currentLikes + 1
+            }
+        }));
+
+        setCommentStatus((prev) => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                like: !currentLiked
+            }
+        }));
+
+        // API call
+        dispatch(fetchLikeToggleComment(id))
+            .unwrap()
+            .then((response) => {
+                // Update with actual server response if available
+                if (response?.totalLikes !== undefined) {
+                    setLocalCommentData(prev => ({
+                        ...prev,
+                        [id]: {
+                            ...prev[id],
+                            totalLikes: response.totalLikes,
+                            isLiked: response.isLiked
+                        }
+                    }));
+                }
+            })
+            .catch((error) => {
+                // Revert optimistic update on error
+                setLocalCommentData(prev => ({
+                    ...prev,
+                    [id]: {
+                        ...prev[id],
+                        isLiked: currentLiked,
+                        totalLikes: currentLikes
+                    }
+                }));
+                setCommentStatus((prev) => ({
+                    ...prev,
+                    [id]: {
+                        ...prev[id],
+                        like: currentLiked
+                    }
+                }));
+                console.error('Failed to toggle like:', error);
+            });
+    };
+
+    const handleDisLike = (id) => {
+        // Fixed: Similar structure for dislike
+        setCommentStatus((prev) => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                dislike: !prev[id]?.dislike
+            }
+        }));
+    };
+
+    const handleAddComment = () => {
+        if (whichContent === "videos") {
+            if (newComment.trim()) {
+                dispatch(fetchAddVideoComment({ id: contentId, newComment: newComment.trim() }))
+                    .unwrap()
+                    .then(() => {
+                        setNewComment('');
+                        setShowCommentActions(false);
+                        // Refresh comments to get updated list
+                        dispatch(fetchVideoComment(contentId));
+                    })
+                    .catch((error) => {
+                        console.error('Failed to add comment:', error);
+                    });
+            }
+        } else {
+            if (newComment.trim()) {
+                dispatch(fetchAddShortComment({ id: contentId, newComment: newComment.trim() }))
+                    .unwrap()
+                    .then(() => {
+                        setNewComment('');
+                        setShowCommentActions(false);
+                        // Refresh comments to get updated list
+                        dispatch(fetchVideoComment(contentId));
+                    })
+                    .catch((error) => {
+                        console.error('Failed to add comment:', error);
+                    });
+            }
+        }
+    };
+
+    const handleAddCommentReplies = (commentId, replied) => {
+        if (replied?.trim()) {
+            // Optimistically update reply count
+            setLocalCommentData(prev => ({
+                ...prev,
+                [commentId]: {
+                    ...prev[commentId],
+                    totalReplies: (prev[commentId]?.totalReplies || 0) + 1
+                }
+            }));
+
+            dispatch(fetchAddCommentReplies({ id: commentId, newComment: replied.trim() }))
+                .unwrap()
+                .then(() => {
+                    // Refresh replies for the specific comment
+                    dispatch(fetchCommentReplies(commentId));
+                    // Clear reply input and close reply form
+                    setCommentStatus((prev) => ({
+                        ...prev,
+                        [commentId]: {
+                            ...prev[commentId],
+                            repliesInput: ""
+                        }
+                    }));
+                    setReplyingTo(null);
+                    // Keep replies visible after adding a new one
+                    setShowRepliesFor(commentId);
+                    
+                    // Also refresh main comments to get updated reply counts
+                    dispatch(fetchVideoComment(contentId));
+                })
+                .catch((error) => {
+                    // Revert optimistic update on error
+                    setLocalCommentData(prev => ({
+                        ...prev,
+                        [commentId]: {
+                            ...prev[commentId],
+                            totalReplies: Math.max((prev[commentId]?.totalReplies || 1) - 1, 0)
+                        }
+                    }));
+                    console.error('Failed to add reply:', error);
+                });
+        }
+    };
+
+    const handleCommentReplies = (commentId) => {
+        // Toggle replies visibility and fetch if not already loaded
+        if (showRepliesFor === commentId) {
+            setShowRepliesFor(null); // Hide replies if already showing
+        } else {
+            setShowRepliesFor(commentId); // Show replies for this comment
+            dispatch(fetchCommentReplies(commentId)); // Fetch replies from API
+        }
+    };
+
+    const handleReplyToggle = (commentId) => {
+        setReplyingTo(replyingTo === commentId ? null : commentId);
+    };
+
+    // Fixed: Handle replies input change properly
+    const handleRepliesInputChange = (commentId, value) => {
+        setCommentStatus((prev) => ({
+            ...prev,
+            [commentId]: {
+                ...prev[commentId],
+                repliesInput: value
+            }
+        }));
+    };
+
+    const Comment = ({ comment, isReply = false }) => {
+        // Get current like status and counts from local state or fallback to comment data
+        const currentLikes = localCommentData[comment._id]?.totalLikes ?? comment.totalLikes ?? 0;
+        // const currentReplies = localCommentData[comment._id]?.totalReplies ?? comment.totalReplies ?? comment.repliesCount ?? 0;
+        const isLiked = localCommentData[comment._id]?.isLiked ?? commentStatus[comment._id]?.like ?? comment.isLiked ?? false;
+
+        return (
+            <div className={`flex gap-3 ${isReply ? 'ml-6 mt-3' : 'mb-4'}`}>
+                <div className={`${isReply ? 'w-6 h-6' : 'w-10 h-10'} rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs`}>
+                    {comment?.user_info?.avatar}
+                </div>
+
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium">
+                            @{comment?.user_info?.username}
+                        </span>
+                        <span className="text-gray-400 text-xs">{comment?.createdAt}</span>
+                    </div>
+
+                    <div className="text-sm leading-relaxed mb-2">
+                        {comment?.content}
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => handleLikeToggleComment(comment._id)}
+                                className={`p-2 flex items-center rounded-full hover:bg-gray-800 transition-colors ${isLiked ? 'text-blue-500' : 'text-gray-400'}`}
+                            >
+                                <ThumbsUp className="w-4 h-4" />
+                                <span className='ml-1 text-black'>{currentLikes}</span>
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => handleDisLike(comment._id)}
+                            className={`p-2 rounded-full hover:bg-gray-800 transition-colors ${commentStatus[comment?._id]?.dislike ? 'text-red-500' : 'text-gray-400'}`}
+                        >
+                            <ThumbsDown className="w-4 h-4" />
+                        </button>
+
+                        {!isReply && (
+                            <button
+                                onClick={() => handleReplyToggle(comment._id)}
+                                className="text-xs font-medium text-gray-400 hover:text-white px-3 py-1 rounded-full hover:bg-gray-800 transition-colors"
+                            >
+                                Reply
+                            </button>
+                        )}
+
+                        <button className="p-2 rounded-full hover:bg-gray-800 transition-colors text-gray-400">
+                            <MoreVertical className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {replyingTo === comment?._id && (
+                        <div className="mt-3 flex gap-2">
+                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs">
+                                y
+                            </div>
+                            <div className="flex-1">
+                                <textarea
+                                    value={commentStatus[comment._id]?.repliesInput || ''}
+                                    onChange={(e) => handleRepliesInputChange(comment._id, e.target.value)}
+                                    placeholder={`Reply to @${comment?.user_info?.username}...`}
+                                    className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none resize-none text-sm p-2"
+                                    rows="2"
+                                />
+                                <div className="flex gap-2 mt-2">
+                                    <button
+                                        onClick={() => handleAddCommentReplies(comment._id, commentStatus[comment._id]?.repliesInput)}
+                                        className="px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-full hover:bg-blue-700 transition-colors"
+                                        disabled={!commentStatus[comment._id]?.repliesInput?.trim()}
+                                    >
+                                        Reply
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setReplyingTo(null);
+                                            setCommentStatus((prev) => ({
+                                                ...prev,
+                                                [comment._id]: {
+                                                    ...prev[comment._id],
+                                                    repliesInput: ""
+                                                }
+                                            }));
+                                        }}
+                                        className="px-4 py-2 text-gray-400 text-xs font-medium rounded-full hover:bg-gray-800 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Updated: Show replies button for comments */}
+                    {!isReply && (
+                        <button 
+                            onClick={() => handleCommentReplies(comment._id)} 
+                            className={`border-1 my-1 px-4 py-1 rounded-2xl border-gray-300 ${
+                                showRepliesFor === comment._id 
+                                    ? 'bg-blue-100 text-blue-600 border-blue-300' 
+                                    : 'bg-gray-100 hover:bg-gray-200'
+                            } active:bg-gray-200 transition-colors`}
+                        >
+                            {showRepliesFor === comment._id ? 'Hide Replies' : 'Show Replies'} 
+                            <span className='ml-1'>{comment?.totalReplies}</span>
+                        </button>
+                    )}
+
+                    {/* Updated: Show replies only for the specific comment that's expanded */}
+                    {!isReply && showRepliesFor === comment._id && repliesOnComment?.data && (
+                        <div className="mt-3">
+                            {repliesOnComment.data.map(reply => (
+                                <Comment key={reply?._id || reply?.id} comment={reply} isReply={true} />
+                            ))}
+                            {repliesOnComment.data.length === 0 && (
+                                <div className="ml-6 text-gray-500 text-sm">No replies yet.</div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div>
+            <div className={`${toggle.showComment ? "" : ""} z-21 border-2 border-gray-200 ${!minimiseComment ? "h-fit" : "min-h-screen"} p-4`}>
+                <div className="max-w-4xl mx-auto">
+                    {/* Comments Header */}
+                    <div>
+                        <div className="flex items-center gap-8 mb-6">
+                            <h3 className="text-xl font-medium">Comments</h3>
+                            <button className="flex items-center gap-2 text-sm font-medium text-gray-300">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z" />
+                                </svg>
+                                Sort by
+                            </button>
+                        </div>
+                        <div className={`${whichContent === "videos" ? "hidden" : ""}`}>
+                              {/* close button */}
+                              <button
+                        onClick={() => toggle.setShowComment(true)}
+                                className="p-3 rounded-full hover:bg-gray-100 active:bg-gray-200"
+                               >
+                                 <X />
+                               </button>
+                             </div>
+                    </div>
+
+                    {/* Add Comment */}
+                    <div className="flex gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
+                            y
+                        </div>
+                        <div className="flex-1">
+                            <textarea
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                onFocus={() => setShowCommentActions(true)}
+                                placeholder="Add a comment..."
+                                className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none resize-none text-sm p-2"
+                                rows="2"
+                            />
+                            {showCommentActions && (
+                                <div className="flex gap-2 mt-3">
+                                    <button
+                                        onClick={handleAddComment}
+                                        className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-full hover:bg-blue-600 transition-colors"
+                                        disabled={!newComment.trim()}
+                                    >
+                                        Comment
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowCommentActions(false);
+                                            setNewComment('');
+                                        }}
+                                        className="px-4 py-2 bg-gray-200 text-sm font-medium rounded-full hover:bg-gray-300 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Comments List */}
+                    <div className={`${minimiseComment ? "" : "h-16 overflow-hidden"}`}>
+                        {(whichContent === "videos" ? videosComments : shortComments )?.map(comment => (
+                            <Comment key={comment?._id} comment={comment} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+            
+            <div className={`${!minimiseComment ? "hidden" : ""} cursor-pointer ${whichContent === "shorts" ? "hidden" : ""}`}  onClick={() => setMinimiseComment(!minimiseComment)}>
+                see Less
+            </div>
+        </div>
+    );
+};
+
+export default Comments;
+
+// <div
+//     onClick={() => { handleVideoComment(); setMinimiseComment(true) }}
+//     className={`w-full p-2 h-auto max-lg:flex-shrink-0 max-lg:p-1 max-lg:my-2 border-2 bg-gray-200 border-gray-300 max-md:rounded-none rounded-2xl mb-2 ${minimiseComment
+//             ? "max-lg:h-fit"
+//             : "max-lg:h-32 max-lg:overflow-hidden"
+//         }  `}
+// >
+//     <div className="font-semibold max-lg:lg text-2xl mb-1 flex items-center">
+//         {/* comments title  */}
+//         <div className="space-x-1 text-md max-sm:text-[16px] flex">
+//             <h1>Comments</h1>
+//             <span className="opacity-40">{videoCommentCount}</span>
+//         </div>
+//         {/* comments filter box */}
+//     </div>
+//     <div className="w-full  flex items-center h-fit">
+//         {/* input field */}
+//         <div className="flex w-full">
+//             {/* image of user */}
+//             <div className="aspect-square">
+//                 <img
+//                     src={user?.avatar}
+//                     className="w-14 max-md:p-1 max-md:w-12 rounded-full aspect-square p-2"
+//                 />
+//             </div>
+//             {/* comment input box */}
+//             <div className="w-full  h-12 max-md:h-8 flex items-center justify-center">
+//                 <input
+//                     type="text"
+//                     placeholder="Add a comment..."
+//                     value={videoCommentInput}
+//                     onChange={(e) => setVideoCommentInput(e.target.value)}
+//                     className="border-b pl-3 max-md:text-md max-md:pl-1 text-lg w-full border-gray-300 focus:outline-none focus:ring-0"
+//                 />
+//             </div>
+//             {/* comment send button */}
+//             <div className="aspect-square flex items-center justify-center w-14 max-md:w-8">
+//                 <button
+//                     onClick={() => {
+//                         handleAddVideoComment(videoCommentInput);
+//                         setVideoCommentInput("");
+//                     }}
+//                     className="w-14 max-md:w-8 max-md:p-0 p-2 hover:bg-gray-100 active:bg-gray-200  aspect-square flex justify-center items-center"
+//                 >
+//                     <SendHorizonal className="max-md:size-4" />
+//                 </button>
+//             </div>
+//         </div>
+//     </div>
+//     {/* comment content section */}
+//     <div className="w-full p-3 max-md:p-0">
+//         {videosComments?.map((comment) => (
+//             <div key={comment?._id}>
+//                 {/* username, time ago and image */}
+//                 <div>
+//                     <div className="flex items-center ">
+//                         <div className="aspect-square max-md:p-1 p-2">
+//                             <img
+//                                 src={comment?.user_info?.avatar}
+//                                 className="max-md:p-1 rounded-full w-8 aspect-square"
+//                             />
+//                         </div>
+
+//                         <div className="space-x-3 max-md:space-x-1.5">
+//                             <span className="text-lg max-md:text-sm font-medium">
+//                                 {comment?.user_info?.username}
+//                             </span>
+//                             <span className="text-gray-500 text-md max-md:text-sm">
+//                                 {formatTimeAgo(comment?.createdAt)}
+//                             </span>
+//                         </div>
+//                     </div>
+//                     {/* content */}
+//                     <div className="scrollBar ml-12 max-md:ml-10 max-md:text-[15px] text-md overflow-y-auto">
+//                         {comment?.content}
+//                     </div>
+//                     <div className="ml-10  flex items-center p-1">
+//                         {/* liked button */}
+//                         <div className="flex items-center mr-2">
+//                             <button
+//                                 onClick={() => handlelikeComment(comment?._id)}
+//                                 className="mr-1"
+//                             >
+//                                 {commentStatus[comment?._id]?.like ? (
+//                                     <ThumbsUp
+//                                         fill="black"
+//                                         size={20}
+//                                         className="max-md:size-4"
+//                                     />
+//                                 ) : (
+//                                     <ThumbsUp
+//                                         size={20}
+//                                         className="max-md:size-4"
+//                                     />
+//                                 )}
+//                             </button>
+//                             <span>{comment?.totalLikes}</span>
+//                         </div>
+//                         {/* disliked button */}
+//                         <div className="flex items-center  mr-2">
+//                             <button
+//                                 onClick={() => handleDislikeComment(comment?._id)}
+//                                 className="mr-1"
+//                             >
+//                                 {commentStatus[comment?._id]?.disLike ? (
+//                                     <ThumbsDown
+//                                         fill="black"
+//                                         size={20}
+//                                         className="max-md:size-4"
+//                                     />
+//                                 ) : (
+//                                     <ThumbsDown
+//                                         size={20}
+//                                         className="max-md:size-4"
+//                                     />
+//                                 )}
+//                             </button>
+//                             <span></span>
+//                         </div>
+//                         {/* reply button */}
+//                         <div className="flex items-center">
+//                             <button
+//                                 onClick={() =>
+//                                     setRepliesCommentInput((prev) => ({
+//                                         ...prev,
+//                                         [comment?._id]: {
+//                                             ...prev[comment?._id],
+//                                             inputStatus:
+//                                                 !repliesCommentInput[comment?._id]
+//                                                     ?.inputStatus,
+//                                         },
+//                                     }))
+//                                 }
+//                                 className="py-1 px-3 rounded-[11px]  hover:bg-gray-100 active:bg-gray-200"
+//                             >
+//                                 Reply
+//                             </button>
+//                         </div>
+//                     </div>
+//                     {/* input for taking replies */}
+//                     <div
+//                         className={`${!repliesCommentInput[comment?._id]?.inputStatus
+//                                 ? "hidden"
+//                                 : ""
+//                             } w-full flex items-center`}
+//                     >
+//                         {/* input field */}
+//                         <div className="flex w-full ml-8">
+//                             {/* image of user */}
+//                             <div className="aspect-square">
+//                                 <img
+//                                     src={user?.data?.user?.avatar}
+//                                     className="w-14 max-md:p-1 max-md:w-12 rounded-full max-w-8 aspect-square p-2"
+//                                 />
+//                             </div>
+//                             {/* comment input box */}
+//                             <div className="w-full h-14 max-md:h-8  flex items-center justify-center">
+//                                 <input
+//                                     type="text"
+//                                     placeholder="Add a comment..."
+//                                     value={
+//                                         repliesCommentInput[comment?._id]?.inputValue
+//                                     }
+//                                     onChange={(e) =>
+//                                         setRepliesCommentInput((prev) => ({
+//                                             ...prev,
+//                                             [comment?._id]: {
+//                                                 ...prev[comment?._id],
+//                                                 inputValue: e.target.value,
+//                                             },
+//                                         }))
+//                                     }
+//                                     className="border-b pl-3 max-md:[15px] text-lg w-full border-gray-300 focus:outline-none focus:ring-0"
+//                                 />
+//                             </div>
+//                             {/* comment send button */}
+//                             <div className="aspect-square flex items-center justify-center w-14 max-w-8">
+//                                 <button
+//                                     onClick={() => {
+//                                         handleAddCommentReplies(
+//                                             comment?._id,
+//                                             repliesCommentInput[comment?._id]?.inputValue
+//                                         );
+//                                     }}
+//                                     className="w-14 max-md:w-8 px-2 hover:bg-gray-100 active:bg-gray-200 aspect-square flex justify-center items-center"
+//                                 >
+//                                     <SendHorizonal />
+//                                 </button>
+//                             </div>
+//                         </div>
+//                     </div>
+
+//                     {/* replied list */}
+//                     <div className="ml-12 mt-2 flex items-center">
+//                         <button
+//                             onClick={() => {
+//                                 setCommentStatus((prev) => ({
+//                                     ...prev,
+//                                     [comment?._id]: {
+//                                         ...prev[comment?._id],
+//                                         repliesToggle:
+//                                             !commentStatus[comment?._id]?.repliesToggle,
+//                                     },
+//                                 }));
+//                                 setGetCommentRepliesId(comment?._id);
+//                                 handleCommentReplies(comment?._id);
+//                             }}
+//                             className="space-y-2 pt-1 pb-1 pl-3 pr-3 rounded-[11px] bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-500 flex justify-center items-center"
+//                         >
+//                             Replies{" "}
+//                             <span>
+//                                 <ChevronDown size={20} />
+//                             </span>
+//                         </button>
+//                     </div>
+
+//                     <div></div>
+//                     {/* sub comment means replies */}
+//                     <div
+//                         className={`${commentStatus[comment?._id]?.repliesToggle
+//                                 ? ""
+//                                 : "hidden"
+//                             }  overfolw-y-scroll scroll-smooth scrollBar `}
+//                     >
+//                         {repliesOnComment.map((replies) => (
+//                             <div
+//                                 key={replies._id}
+//                                 // id={replies._id || "userid"}
+//                                 className="ml-12"
+//                             >
+//                                 {/* image,username and time ago */}
+//                                 <div className="flex items-center ">
+//                                     <div className="aspect-square p-2">
+//                                         <img
+//                                             src={replies?.user_info?.avatar}
+//                                             className="min-w-6 bg-blue-300 rounded-full w-8 aspect-square"
+//                                         />
+//                                     </div>
+//                                     <div className="-space-x-3">
+//                                         <span className="text-lg max-md:text-[15px] font-medium">
+//                                             {replies?.user_info?.username}
+//                                         </span>
+//                                         <span className="text-gray-500 max-md:text-sm text-md">
+//                                             {replies?.createdAt}
+//                                         </span>
+//                                     </div>
+//                                 </div>
+//                                 {/* sub content */}
+//                                 <div className="scrollBar ml-12 max-md:ml-12 max-md:text-sm text-md overflow-y-auto">
+//                                     {replies?.content}
+//                                 </div>
+//                                 <div className="ml-12  flex items-center p-1">
+//                                     {/* liked button sub comment */}
+//                                     <div className="flex items-center mr-2">
+//                                         <button
+//                                             onClick={() => handlelikeReplies(replies._id)}
+//                                             className="mr-1"
+//                                         >
+//                                             {commentStatus[replies._id]?.repliesLike ? (
+//                                                 <ThumbsUp
+//                                                     fill={"black"}
+//                                                     size={20}
+//                                                     className="max-md:size-4"
+//                                                 />
+//                                             ) : (
+//                                                 <ThumbsUp
+//                                                     size={20}
+//                                                     className="max-md:size-4"
+//                                                 />
+//                                             )}
+//                                         </button>
+//                                         <span>{replies?.totalLikes}</span>
+//                                     </div>
+//                                     {/* disliked button sub comment */}
+//                                     <div className="flex items-center  mr-2">
+//                                         <button
+//                                             onClick={() =>
+//                                                 handleDislikeReplies(replies._id)
+//                                             }
+//                                             className="mr-1"
+//                                         >
+//                                             {commentStatus[replies._id]
+//                                                 ?.repliesDisLike ? (
+//                                                 <ThumbsDown
+//                                                     fill={"black"}
+//                                                     size={20}
+//                                                     className="max-md:size-4"
+//                                                 />
+//                                             ) : (
+//                                                 <ThumbsDown
+//                                                     size={20}
+//                                                     className="max-md:size-4"
+//                                                 />
+//                                             )}
+//                                         </button>
+//                                         <span></span>
+//                                     </div>
+//                                     {/* reply button sub comment */}
+//                                     <div className="flex items-center">
+//                                         <button
+//                                             onClick={() =>
+//                                                 setCommentStatus((prev) => ({
+//                                                     ...prev,
+//                                                     [replies._id]: {
+//                                                         ...prev[replies._id],
+//                                                         replyToggle:
+//                                                             !commentStatus[replies._id]
+//                                                                 ?.replyToggle,
+//                                                     },
+//                                                 }))
+//                                             }
+//                                             className="py-1 px-3 rounded-[11px]  hover:bg-gray-100 active:bg-gray-200"
+//                                         >
+//                                             Reply
+//                                         </button>
+//                                     </div>
+//                                 </div>
+//                                 {/* replies input set */}
+//                                 <div
+//                                     className={`${commentStatus[replies._id]?.replyToggle
+//                                             ? ""
+//                                             : "hidden"
+//                                         } w-full flex items-center`}
+//                                 >
+//                                     {/* input field */}
+//                                     <div className="flex w-full">
+//                                         {/* image of user */}
+//                                         <div className="aspect-square flex justify-center items-center mr-2">
+//                                             <img
+//                                                 src={user?.userInfo?.avatar}
+//                                                 className="w-14 rounded-full max-md:p-0 max-md:w-8 aspect-square p-2"
+//                                             />
+//                                         </div>
+//                                         {/* comment input box */}
+//                                         <div className="w-full max-md:text-sm h-14 max-md:h-12 flex items-center justify-center">
+//                                             <span className="text-sm max-md:text-[12px] font-stretch-extra-condensed ">{`@${replies?.user_info?.username}`}</span>
+
+//                                             <input
+//                                                 type="text"
+//                                                 placeholder="Add a comment..."
+//                                                 value={
+//                                                     commentStatus[replies._id]?.replyInput
+//                                                 }
+//                                                 onChange={(e) => {
+//                                                     setCommentStatus((prev) => ({
+//                                                         ...prev,
+//                                                         [replies._id]: {
+//                                                             ...prev[replies._id],
+//                                                             replyInput: e.target.value,
+//                                                         },
+//                                                     }));
+//                                                 }}
+//                                                 className="border-b pl-3 max-md:pl-1.5 max-md:text-sm text-lg w-full border-gray-300 focus:outline-none focus:ring-0"
+//                                             />
+//                                         </div>
+//                                         {/* comment send button */}
+//                                         <div className="aspect-square flex items-center justify-center w-14 max-md:w-8">
+//                                             <button
+//                                                 onClick={() => {
+//                                                     handleAddCommentReplies(
+//                                                         replies._id,
+//                                                         commentStatus[replies._id]?.replyInput
+//                                                     );
+//                                                     setCommentStatus((prev) => ({
+//                                                         ...prev,
+//                                                         [replies._id]: {
+//                                                             ...prev[replies._id],
+//                                                             replyInput: "",
+//                                                         },
+//                                                     }));
+//                                                 }}
+//                                                 className="w-14 max-md:w-8 max-md:p-0 p-2.5 hover:bg-gray-100 active:bg-gray-200 aspect-square flex justify-center items-center"
+//                                             >
+//                                                 <SendHorizonal />
+//                                             </button>
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         ))}
+//                     </div>
+//                 </div>
+//             </div>
+//         ))}
+//     </div>
+//     <button
+//         className={`${!minimiseComment ? "hidden" : "max-lg:text-xs"}`}
+//         onClick={(e) => {
+//             e.stopPropagation();
+//             setMinimiseComment(false);
+//         }}
+//     >
+//         show less
+//     </button>
+// </div>

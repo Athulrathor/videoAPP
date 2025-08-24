@@ -1,0 +1,24 @@
+
+
+body{
+  overflow: hidden;
+}
+
+.scroll{
+  scrollbar-width: none;
+}
+
+
+.scrollBar::-webkit-scrollbar{
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none !important;
+  }
+}
+
+.skeleton-surface {
+  background-color: rgb(249 250 251);
+}
