@@ -4,14 +4,13 @@ import { Link, Navigate } from "react-router-dom";
 import VideoCard from "../components/VideoCard";
 import VideoPages from "./VideoPages";
 import VideoSkeletonLoading from "../components/LoadingScreen/VideoSkeletonLoading"
-import { videoError } from "../redux/features/videos";
 import { RefreshCw, WifiOff } from "lucide-react";
 
 const Videos = (props) => {
 
   const { timeAgo, formatTime } = props;
 
-  const { videos, videoLoading } = useSelector((state) => state.videos);
+  const { videos, videoLoading,videoError } = useSelector((state) => state.videos);
 
   const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [isRetrying, setIsRetrying] = useState(false);

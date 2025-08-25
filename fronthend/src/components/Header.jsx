@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { HiMenu } from "react-icons/hi";
 import { IoIosSearch } from "react-icons/io";
 import { MdMic } from "react-icons/md";
@@ -13,22 +13,20 @@ import { useDispatch } from "react-redux";
 import Login from "../pages/Login.jsx";
 import { X } from "lucide-react";
 import MicSpeechToText from "./TextToSpeach.jsx";
-import { fetchLogoutUser,logOut } from "../redux/features/user.js";
-import { googleLogout } from "@react-oauth/google";
+import { fetchLogoutUser,logOut } from "../redux/features/user.js";;
 import { toast } from "react-toastify";
 import { fetchVideosSuggestion } from "../redux/features/videos.js";
 
 const Header = (props) => {
+  const { setToggleVideoUploading, setToggleShortUploading, setToggleLiveUploading, videoQueries } = props;
+  
   const { user, loggedIn } = useSelector((state) => state.user);
   const { getsuggestion } = useSelector(state => state.videos);
-
-  const { setToggleVideoUploading,setToggleShortUploading,setToggleLiveUploading,videoQueries } = props;
 
   const [showDropdown, setShowDropdown] = useState(false);
   const searchBtn = useRef(null);
   const mobileInputRef = useRef();
 
-  // const [suggestion, setSuggestion] = useState([]);
   const [suggestionBar, setSuggestionBar] = useState(false);
   const [inputBar, setInputBar] = useState({ query: "" })
   const [counter, setCounter] = useState(0)
@@ -40,69 +38,52 @@ const Header = (props) => {
   const Navigate = useNavigate();
   const dispatch = useDispatch();
 
-  console.log(user.avatar)
+  // const hasQuery = useMemo(() => inputBar.query.trim() !== "", [inputBar.query]);
+  // const hasSuggestions = useMemo(() => getsuggestion?.length > 0, [getsuggestion?.length]);
 
-  const handleKeyDown = (e) => {
-
+  const handleKeyDown = useCallback((e) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-
       if (!suggestionBar) return;
-
       setCounter(prev => prev < getsuggestion.length - 1 ? prev + 1 : 0)
-
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-
       if (!suggestionBar) return;
-
       setCounter(prev => prev > 0 ? prev - 1 : getsuggestion.length - 1)
     } else if (e.key === "Enter") {
-
       if (suggestionBar && counter >= 0 && getsuggestion[counter]) {
         e.preventDefault();
-
         setInputBar(prev => ({ ...prev, query: getsuggestion[counter].title }));
         searchBtn.current.click();
         setSuggestionBar(false);
         setCounter(-1);
       }
     } 
-  }
+  }, [suggestionBar, counter, getsuggestion])
 
   useEffect(() => {
     setCounter(-1);
   }, [getsuggestion])
 
-  const logoutUser = async (e) => {
-    e.preventDefault();
-
+  const logoutUser = () => {
     try {
-      const logout = await dispatch(fetchLogoutUser());
-      googleLogout
-      console.log(logout?.data.message);
-      console.warn(logout?.data.message);
-
-      googleLogout();
-
+      dispatch(fetchLogoutUser());
       dispatch(logOut());
 
       localStorage.removeItem('accessToken');
       sessionStorage.removeItem('accessToken');
-
-      toast.success('Logged out successfully');
-
       Navigate('/login', { replace: true });
+      toast.success('Logged out successfully');
+      setOpenDropMenu(false)
+      
     } catch (error) {
       console.error("Error:", error.message);
       alert("Logout failed. Please try again.");
+      setOpenDropMenu(false)
     }
   };
 
   useEffect(() => {
-
-    
-
     const timer = setTimeout(async () => {
       dispatch(fetchVideosSuggestion({ query: inputBar.query }));
     }, 300);
@@ -429,7 +410,7 @@ const Header = (props) => {
               <li onClick={() => {  setOpenDropMenu(false) }} className="px-1 active:bg-gray-300 hover:bg-gray-200 ">Profile</li>
               <li onClick={() => { Navigate(`/channel/${user?.username.replace(' ','')}`); setOpenDropMenu(false)}} className="px-1  active:bg-gray-300 hover:bg-gray-200">View channel</li>
               <li onClick={() => { Navigate("/settings"); setOpenDropMenu(false) }} className="px-1  active:bg-gray-300 hover:bg-gray-200">Settings</li>
-              <li onClick={() => { logoutUser(); setOpenDropMenu(false) }} className="px-1  active:bg-gray-300 hover:bg-gray-200">Logout</li>
+              <li onClick={logoutUser} className="px-1  active:bg-gray-300 hover:bg-gray-200">Logout</li>
             </ul>
           </div>
         </div>

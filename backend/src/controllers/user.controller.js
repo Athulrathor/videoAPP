@@ -8,7 +8,6 @@ import { Subcriptions } from "../models/subcriptions.model.js";
 import mongoose, { isValidObjectId } from "mongoose";
 import { Like } from "../models/like.model.js";
 import axios from "axios";
-import { log } from "console";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -73,6 +72,7 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImage: coverImageUploadedToCloudinary.url,
     email,
     password,
+    through:false,
   });
 
   const createdUser = await User.findById(newUser._id).select(
@@ -94,8 +94,6 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const { email, username, password } = req.body;
 
-    console.log("this is email :  ",email," ","this is Pass :  ",password)
-
       if (!username && !email) {
         throw new ApiError(400, "Username or email is required!");
       }
@@ -103,20 +101,17 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({
     $or: [{ email }, { username }],
   });
-    
-    console.log("Available user :  ",user)
 
   if (!user) {
     throw new ApiError(400, "User is not found!");
   }
 
-    const isPasswordValid = await user.isPasswordCorrect(password);
-    
-    console.log("passwordHashed :  ", isPasswordValid);
-
-  if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid user credentials!");
-  }
+    if (!user.through) {
+      const isPasswordValid = await user.isPasswordCorrect(password);
+      if (!isPasswordValid) {
+        throw new ApiError(401, "Invalid user credentials!");
+      }
+    }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
     user._id
@@ -174,6 +169,7 @@ const googleLogin = asyncHandler(async (req, res) => {
         fullname: data.name || 'Google User',
         email: data.email,
         avatar: data.picture || '',
+        through:true
       });
     }
 

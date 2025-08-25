@@ -10,9 +10,12 @@ export const fetchAddCommentReplies = createAsyncThunk('add/commentReplies', asy
     try {
         const commentAdded = await axiosInstance.post(`comment/add-comment-to-comment/${id}`, { comment: newComment, });
         console.log(commentAdded.data.data)
-        return commentAdded?.data?.data?.data;
+        return {
+            parentId: id,
+            comment: commentAdded?.data?.data?.data
+        };
     } catch (error) {
-        return rejectWithValue(error.message);
+        return rejectWithValue(error?.response?.data?.message || error.message);
     }
 });
 
@@ -25,9 +28,13 @@ export const fetchAddVideoComment = createAsyncThunk('add/VideoComment', async (
     try {
         const videoCommentAdded = await axiosInstance.post(`comment/add-comment-to-video/${id}`, { comment: newComment });
 
-        return videoCommentAdded.data.message;
+        return {
+            videoId: id,
+            newComment: videoCommentAdded?.data?.data,
+            message: videoCommentAdded?.data?.message
+        };
     } catch (error) {
-        return rejectWithValue(error.message);
+        return rejectWithValue(error?.response?.data?.message || error.message);
     }
 });
 
@@ -37,10 +44,15 @@ export const fetchAddShortComment = createAsyncThunk('addComment/ShortComment', 
     if (!newComment) return rejectWithValue("New comment not found!");
 
     try {
-        await axiosInstance.post(`comment/add-comment-to-short/${id}`,{comment: newComment});
+        const shortComment = await axiosInstance.post(`comment/add-comment-to-short/${id}`, { comment: newComment });
+        
+        return {
+            shortId: id,
+            newComment: shortComment?.data?.data,
+            message: shortComment?.data?.message
+        };
     } catch (error) {
-        console.error(error)
-        return rejectWithValue(error.message);
+        return rejectWithValue(error?.response?.data?.message || error.message);
     }
 })
 
@@ -51,9 +63,12 @@ export const fetchCommentReplies = createAsyncThunk('getComment/commentReplies',
         
         const commentReplies = await axiosInstance.get(`comment//get-comment-to-comment/${id}`);
         console.log(commentReplies)
-        return commentReplies?.data?.data;
+        return {
+            commentId: id,
+            replies: commentReplies?.data?.data
+        };
     } catch (error) {
-        return rejectWithValue(error.message);
+        return rejectWithValue(error?.response?.data?.message || error.message);
     }
 });
 
@@ -65,7 +80,7 @@ export const fetchVideoComment = createAsyncThunk('getComment/VideoComment', asy
         console.log(videoComment?.data?.data?.data)
         return videoComment?.data?.data?.data;
     } catch (error) {
-        return rejectWithValue(error.message);
+        return rejectWithValue(error?.response?.data?.message || error.message);
     }
 });
 
@@ -77,7 +92,7 @@ export const fetchShortComment = createAsyncThunk('getComment/ShortComment', asy
         console.log(shortComment?.data?.data?.data)
         return shortComment?.data?.data?.data;
     } catch (error) {
-        return rejectWithValue(error.message);
+        return rejectWithValue(error?.response?.data?.message || error.message);
     }
 });
 
@@ -85,25 +100,46 @@ export const commentSlice = createSlice({
   name: "comments",
   initialState: {
       videosComments: [],
-      shortComments: [],
-      repliesOnCommentVideos: [],
-      replisOncommentShort: [],
-      repliesOnComment: [],
-
       videosCommentsLoading: false,
-      shortCommentLoading: false,
-      repliesOnCommentVideosLoading: false,
-      replisOncommentShortLoading: false,
-
       videosCommentsError: null,
+
+      shortComments: [],
+      shortCommentLoading: false,
       shortCommentsError: null,
-      repliesOnCommentVideosError: null,
-      replisOncommentShortError:null
+
+      repliesOnComment: [],
+      repliesOnCommentLoading: false,
+      repliesOnCommentError: null,
+
+      addingVideoComment: false,
+      addingShortComment: false,
+      addingReply: false,
+
+      addVideoCommentError: null,
+      addShortCommentError: null,
+      addReplyError: null,
   },
   reducers: {
-
+      clearVideoCommentsError: (state) => {
+          state.videosCommentsError = null;
+      },
+      clearShortCommentsError: (state) => {
+          state.shortCommentsError = null;
+      },
+      clearRepliesError: (state) => {
+          state.repliesOnCommentError = null;
+      },
+      resetVideoComments: (state) => {
+          state.videosComments = [];
+          state.videosCommentsError = null;
+      },
+      resetShortComments: (state) => {
+          state.shortComments = [];
+          state.shortCommentsError = null;
+      },
     },
     extraReducers: (builder) => {
+        // ✅ Fetch Video Comments
         builder
             .addCase(fetchVideoComment.pending, (state) => {
                 state.videosCommentsLoading = true;
@@ -116,26 +152,106 @@ export const commentSlice = createSlice({
             })
             .addCase(fetchVideoComment.rejected, (state, action) => {
                 state.videosCommentsLoading = false;
-                state.videosCommentsError = action.payload || 'Failed to fetch videos';
-                state.videosComments = [];
+                state.videosCommentsError = action.payload || 'Failed to fetch video comments';
+                // Don't clear comments on error - keep previous data
             });
 
-        builder.addCase(fetchCommentReplies.pending, (state) => {
-            state.repliesOnCommentVideosLoading = true;
-            state.repliesOnCommentVideosError = null;
-        }).addCase(fetchCommentReplies.fulfilled, (state,action) => {
-            state.repliesOnCommentVideosLoading = false;
-            state.repliesOnComment = action.payload;
-            state.repliesOnCommentVideosError = null;
-        }).addCase(fetchCommentReplies.rejected, (state,action) => {
-            state.repliesOnCommentVideosLoading = false;
-            state.repliesOnCommentVideosError = action.payload || 'Failed to fetch videos';
-            state.repliesOnComment = [];
-        })
+        // ✅ Fetch Short Comments
+        builder
+            .addCase(fetchShortComment.pending, (state) => {
+                state.shortCommentLoading = true;
+                state.shortCommentsError = null;
+            })
+            .addCase(fetchShortComment.fulfilled, (state, action) => {
+                state.shortCommentLoading = false;
+                state.shortComments = action.payload;
+                state.shortCommentsError = null;
+            })
+            .addCase(fetchShortComment.rejected, (state, action) => {
+                state.shortCommentLoading = false;
+                state.shortCommentsError = action.payload || 'Failed to fetch short comments';
+            });
 
-        
+        // ✅ Fetch Comment Replies
+        builder
+            .addCase(fetchCommentReplies.pending, (state) => {
+                state.repliesOnCommentLoading = true;
+                state.repliesOnCommentError = null;
+            })
+            .addCase(fetchCommentReplies.fulfilled, (state, action) => {
+                state.repliesOnCommentLoading = false;
+                state.repliesOnComment = action.payload.replies;
+                state.repliesOnCommentError = null;
+            })
+            .addCase(fetchCommentReplies.rejected, (state, action) => {
+                state.repliesOnCommentLoading = false;
+                state.repliesOnCommentError = action.payload || 'Failed to fetch replies';
+                state.repliesOnComment = [];
+            });
+
+        // ✅ Add Video Comment
+        builder
+            .addCase(fetchAddVideoComment.pending, (state) => {
+                state.addingVideoComment = true;
+                state.addVideoCommentError = null;
+            })
+            .addCase(fetchAddVideoComment.fulfilled, (state, action) => {
+                state.addingVideoComment = false;
+                // Add new comment to the beginning of the array
+                if (action.payload.newComment) {
+                    state.videosComments.unshift(action.payload.newComment);
+                }
+                state.addVideoCommentError = null;
+            })
+            .addCase(fetchAddVideoComment.rejected, (state, action) => {
+                state.addingVideoComment = false;
+                state.addVideoCommentError = action.payload || 'Failed to add comment';
+            });
+
+        // ✅ Add Short Comment
+        builder
+            .addCase(fetchAddShortComment.pending, (state) => {
+                state.addingShortComment = true;
+                state.addShortCommentError = null;
+            })
+            .addCase(fetchAddShortComment.fulfilled, (state, action) => {
+                state.addingShortComment = false;
+                // Add new comment to the beginning of the array
+                if (action.payload.newComment) {
+                    state.shortComments.unshift(action.payload.newComment);
+                }
+                state.addShortCommentError = null;
+            })
+            .addCase(fetchAddShortComment.rejected, (state, action) => {
+                state.addingShortComment = false;
+                state.addShortCommentError = action.payload || 'Failed to add comment';
+            });
+
+        // ✅ Add Comment Reply
+        builder
+            .addCase(fetchAddCommentReplies.pending, (state) => {
+                state.addingReply = true;
+                state.addReplyError = null;
+            })
+            .addCase(fetchAddCommentReplies.fulfilled, (state, action) => {
+                state.addingReply = false;
+                // Add new reply to the replies array
+                if (action.payload.newReply) {
+                    state.repliesOnComment.unshift(action.payload.newReply);
+                }
+                state.addReplyError = null;
+            })
+            .addCase(fetchAddCommentReplies.rejected, (state, action) => {
+                state.addingReply = false;
+                state.addReplyError = action.payload || 'Failed to add reply';
+            });
     },
 });
 
-export const { videosComments,shortComments,repliesOnComment } = commentSlice.actions;
+export const {
+    clearVideoCommentsError,
+    clearShortCommentsError,
+    clearRepliesError,
+    resetVideoComments,
+    resetShortComments } = commentSlice.actions;
 export default commentSlice.reducer;

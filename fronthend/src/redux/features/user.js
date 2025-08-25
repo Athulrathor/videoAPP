@@ -1,20 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../libs/axios";
+import { googleLogout } from "@react-oauth/google";
 
 
-export const fetchLoginUser = createAsyncThunk("login/userFetching", async ({email,password},{rejectWithValue}) => {
+export const fetchLoginUser = createAsyncThunk("login/userFetching", async ({ email, password }, { rejectWithValue }) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
   if (!email && !password) return rejectWithValue("User crendencial not found!");
 
   try {
-
     const logging = await axiosInstance.post('/users/login', { email, password });
-
     sessionStorage.setItem("accessToken", logging?.data?.data?.accessToken);
-
+    clearTimeout(timeoutId);
     return logging?.data?.data;
-    
   } catch (error) {
+    clearTimeout(timeoutId);
+    console.log(error)
     return rejectWithValue(error.message);
   }
 })
@@ -24,7 +27,7 @@ export const fetchLogoutUser = createAsyncThunk("logout/userFetching", async ({ 
   try {
 
     const loggingOut = await axiosInstance.post("/users/logout");
-
+    googleLogout();
     sessionStorage.removeItem("accessToken");
 
     return loggingOut?.data?.message;
@@ -184,18 +187,21 @@ export const userSlice = createSlice({
       builder
         .addCase(fetchLoginUser.pending, (state) => {
           state.loading = true;
+          state.error = null;
         })
         .addCase(fetchLoginUser.fulfilled, (state, action) => {
           state.user = action.payload?.user;
           state.loggedIn = true;
           state.token = action.payload?.accessToken || null;
           state.loading = false;
+          state.error = null
         })
         .addCase(fetchLoginUser.rejected, (state,action) => {
           state.loggedIn = false;
           state.token = null;
           state.error = action.payload;
           state.loading = false;
+          state.user = {};
         });
     
     builder
@@ -207,19 +213,33 @@ export const userSlice = createSlice({
         state.loggedIn = false;
         state.token = null;
         state.loading = false;
+        state.error = null;
       })
-        .addCase(fetchLogoutUser.rejected, (state) => {
-        state.loggedIn = false;
+        .addCase(fetchLogoutUser.rejected, (state,action) => {
+          state.loggedIn = false;
+          state.loading = false;
+          state.error = action.payload; // ✅ Show error
         })
     
     builder
       .addCase(updateAccountDetails.pending, (state) => {
         state.updateAccountLoading = true;
         state.updateAccountStatus = "loading";
+        state.updateAccountError = null;
       })
-      .addCase(updateAccountDetails.fulfilled, (state) => {
+      .addCase(updateAccountDetails.fulfilled, (state,action) => {
         state.updateAccountLoading = false;
         state.updateAccountStatus = 'success';
+        if (action.payload) {
+          state.user = {
+            ...state.user,
+            avatar: action.payload?.avatar,
+            coverImage: action.payload?.coverImage,
+            fullname: action.payload?.fullname,
+            username: action.payload?.username,
+            email: action.payload?.email
+          };
+        }
       })
       .addCase(updateAccountDetails.rejected, (state,action) => {
         state.updateAccountLoading = false;
@@ -231,10 +251,15 @@ export const userSlice = createSlice({
       .addCase(updateAvatar.pending, (state) => {
         state.updateAvatarStatus = "loading";
         state.updateAvatarProgress = 0;
+        state.updateAvatarError = null;
       })
       .addCase(updateAvatar.fulfilled, (state,action) => {
         state.updateAvatarStatus = "success";
-        state.updateAvatarProgress = action.payload;
+        state.updateAvatarProgress = 100;
+        state.updateAvatarError = null;
+        if (action.payload?.avatar) {
+          state.user.avatar = action.payload.avatar;
+        }
       })
       .addCase(updateAvatar.rejected, (state,action) => {
         state.updateAvatarStatus = "failed";
@@ -246,10 +271,16 @@ export const userSlice = createSlice({
       .addCase(updateCoverImage.pending, (state) => {
         state.updateCoverImageProgress = 0;
         state.updateCoverImageStatus = "loading";
+        state.updateCoverImageError = null;
       })
       .addCase(updateCoverImage.fulfilled, (state,action) => {
         state.updateCoverImageProgress = action.payload;
+        state.updateCoverImageProgress = 100;
         state.updateCoverImageStatus = "success";
+        if (action.payload?.coverImage) {
+          state.user.coverImage = action.payload.coverImage;
+        }
+
       })
       .addCase(updateCoverImage.rejected, (state,action) => {
         state.updateCoverImageProgress = 0;
@@ -257,9 +288,9 @@ export const userSlice = createSlice({
         state.updateCoverImageError = action.payload;
       })
     
-    builder.addCase(currentUpdatedUser.fulfilled, (state, action) => {
-        state.user = action.payload;
-      })
+    // builder.addCase(currentUpdatedUser.fulfilled, (state, action) => {
+    //     state.user = action.payload;
+    //   })
   },
 });
 

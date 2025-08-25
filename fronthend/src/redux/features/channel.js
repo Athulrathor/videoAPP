@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../libs/axios";
-import { Pen } from "lucide-react";
 
 export const getChannelProfileOfUser = createAsyncThunk('get/userChannel', async (userName, { rejectWithValue }) => {
     if (!userName) return rejectWithValue("username not found!");
@@ -26,14 +25,18 @@ export const userSlice = createSlice({
         error:null,
     },
     reducers: {
-
+        clearChannel: (state) => {
+            state.channel = { };
+        }
     },
     extraReducers: (builder) => {
         builder.addCase(getChannelProfileOfUser.pending, (state) => {
             state.loading = true;
+            state.error = null;
         }).addCase(getChannelProfileOfUser.fulfilled, (state,action) => {
             state.loading = false;
             state.channel = action.payload;
+            state.error = null;
         }).addCase(getChannelProfileOfUser.rejected, (state,action) => {
             state.loading = false;
             state.error = action.payload;
@@ -43,6 +46,6 @@ export const userSlice = createSlice({
 
 
 
-// export const {  } =
-//     userSlice.actions;
+export const { clearChannel } =
+    userSlice.actions;
 export default userSlice.reducer;

@@ -146,6 +146,8 @@ const VideoPages = (props) => {
     Navigate(`/video/${video_id}`)
   }
 
+  console.log(videos)
+
   const togglePauseRecommendation = (videoId2) => {
     const video = videoRecommendationRefs.current[videoId2];
     if (video) {
@@ -235,7 +237,7 @@ const VideoPages = (props) => {
 
   const handleIsVideoLiked = () => {
     dispatch(isVideoLiked(VideoId));
-    dispatch(fetchVideosById(VideoId));
+    // dispatch(fetchVideosById(VideoId));
     setCurrentStatus((prev) => ({
       ...prev,
       likeStatus: videoLiked,
@@ -314,7 +316,7 @@ const VideoPages = (props) => {
       {/* <SideMenu /> */}
       <div className="h-[calc(100vh-70px)] max-lg:flex-col flex justify-evenly max-md:pl-0 max-md:pr-0 pl-4 pr-4 pt-2 overflow-y-scroll scroll-smooth scrollBar overflow-x-hidden">
         {/* video section */}
-        <div className=" w-[68%] max-lg:w-full max-lg:flex-shrink-0 h-auto">
+        <div className=" w-[70%] max-lg:w-full max-lg:flex-shrink-0 px-2 max-md:px-0 h-auto">
           {/* video and its controls */}
           <div className="relative">
             {/* videos */}
@@ -644,7 +646,7 @@ const VideoPages = (props) => {
           </div>
         </div>
         {/* recommandation section */}
-        <div className=" w-[29%] max-lg:mt-2 max-lg:w-full max-lg:rounded-none rounded-2xl flex flex-col space-y-3">
+        <div className=" w-[30%] max-lg:mt-2 px-2 max-md:px-0 max-lg:w-full max-lg:rounded-none rounded-lg flex flex-col space-y-3">
           {filteredVideos.map((video) => (
             <div
               key={video._id}
@@ -653,7 +655,7 @@ const VideoPages = (props) => {
             >
               {/* video */}
               <div
-                className="relative w-1/2 max-lg:w-full  h-fit"
+                className="relative w-[40%] max-lg:w-full  h-fit"
                 onMouseEnter={(prev) => {
                   setRecommendationStates({
                     ...prev,
@@ -680,7 +682,7 @@ const VideoPages = (props) => {
                   poster={video?.thumbnail}
                   onTimeUpdate={() => handleOnTimeUpdate(video._id)}
                   preload="metadata"
-                  className="bg-black/90 aspect-video max-md:rounded-none max-lg:w-full rounded-2xl"
+                  className="bg-black/90 aspect-video max-md:rounded-none max-lg:w-full rounded-lg"
                 ></video>
                 <div className="absolute inset-0 p-2">
                   <div className="flex justify-end">
@@ -722,7 +724,7 @@ const VideoPages = (props) => {
                   </div>
                 </div>
               </div>
-              <div className="w-1/2 max-lg:w-full flex justify-base flex-col max-md:py-0 py-1 pl-2 max-md:my-1">
+              <div className="w-[60%] max-lg:w-full flex justify-base flex-col max-md:py-0 py-1 pl-2 max-md:my-1">
                 {/* title */}
                 <div className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]">
                   <h2>{video?.title}</h2>
@@ -743,6 +745,7 @@ const VideoPages = (props) => {
                     {/* view and month ago */}
                     <div className="text-[11px] font-normal  text-gray-500 max-md:text-[11px] space-x-1.5">
                       <span>{video?.views} views</span>
+                      <span className="mx-1">•</span>
                       <span>
                         {formatTimeAgo(video?.createdAt) || "12 year ago"}
                       </span>

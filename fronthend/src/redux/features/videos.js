@@ -21,7 +21,6 @@ export const fetchVideos = createAsyncThunk('getVideo/videoDetailsList', async(v
       try {
         const videos = await axiosInstance.get("/videos/get-all-videos",{params: videoParams});
         sessionStorage.setItem("videos", JSON.stringify(videos?.data?.data?.data));
-        console.log(videos)
         return videos?.data?.data?.data;
       } catch (error) {
         console.log("Error :", error?.message);
@@ -34,7 +33,6 @@ export const fetchVideosById = createAsyncThunk('getVideo/videoDetails', async (
 
   try {
     const videoById = await axiosInstance.post(`videos/get-video/${id}`);
-    console.log(videoById?.data)
     return videoById?.data?.data[0];
   } catch (error) {
     console.log("Error :", error?.message);
@@ -57,9 +55,7 @@ export const fetchVideoDelete = createAsyncThunk('delete/fetchvideoId', async (i
 
 });
 
-export const fetchUpdateVideo = createAsyncThunk(
-  'update/fetchVideos',
-  async ({ id, formData,newThumbnail }, { rejectWithValue }) => {
+export const fetchUpdateVideo = createAsyncThunk('update/fetchVideos',async ({ id, formData,newThumbnail }, { rejectWithValue }) => {
 
     if (id == null) return rejectWithValue("id not found!");
 
@@ -101,8 +97,6 @@ export const fetchVideosSuggestion = createAsyncThunk('suggestion/videosSearchPa
   try {
 
     const VideosSuggestion = await axiosInstance.get("videos/get-all-suggestion", {params:param});
-
-    console.log(VideosSuggestion?.data?.data);
     return VideosSuggestion?.data?.data
 
   } catch (error) {
@@ -110,26 +104,30 @@ export const fetchVideosSuggestion = createAsyncThunk('suggestion/videosSearchPa
   }
 });
 
-export const videoSlice = createSlice({
+const videosSlice = createSlice({
   name: "videos",
   initialState: {
     videos: [],
     videoLoading: false,
-    videoError: false,
+    videoError: null,
 
     targetVideo: [],
     targetVideoLoading: false,
-    targetVideoError:false,
+    targetVideoError: null,
 
     videoByOwner: [],
-    videoByOwnerLoading: true,
-    videoByOwnerError: false,
+    videoByOwnerLoading: false,
+    videoByOwnerError: null,
 
+    videoDeleting: false,
     videoDeleted: null,
-
     videoUpdate: null,
-    
-    suggestionLoading:false,
+
+    updateUploadProgress: 0,
+    updateVideoError: null,
+    updateVideoLoading: false,
+
+    suggestionLoading: false,
     getsuggestion: "",
     suggestionError: null,
   },
@@ -137,6 +135,21 @@ export const videoSlice = createSlice({
     setUploadProgress: (state, action) => {
       state.uploadProgress = action.payload;
     },
+    resetVideoError: (state) => {
+      state.videoError = null;
+    },
+    resetTargetVideo: (state) => {
+      state.targetVideo = [];
+      state.targetVideoError = null;
+    },
+
+    setAddNewVideos: (state, action) => {
+      state.videos = [...state, action.payload];
+      state.videoByOwner = [...state, action.payload];
+      if (state.targetVideo._id === action.payload?._id) {
+        state.targetVideo = action.payload;
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -152,22 +165,23 @@ export const videoSlice = createSlice({
       .addCase(fetchVideos.rejected, (state, action) => {
         state.videoLoading = false;
         state.videoError = action.payload || 'Failed to fetch videos';
-        state.videos = [];
       });
 
     builder
       .addCase(fetchVideoByOwner.pending, (state) => {
         state.videoByOwnerLoading = true;
+        state.videoByOwnerError = null;
       })
       .addCase(fetchVideoByOwner.fulfilled, (state, action) => {
         state.videoByOwnerLoading = false;
         state.videoByOwner = action.payload;
+        state.videoByOwnerError = null;
       })
       .addCase(fetchVideoByOwner.rejected, (state, action) => {
         state.videoByOwnerLoading = false;
         state.videoByOwnerError = action.payload || 'Failed to fetch videos';
       });
-    
+
     builder
       .addCase(fetchVideosById.pending, (state) => {
         state.targetVideoLoading = true;
@@ -183,29 +197,72 @@ export const videoSlice = createSlice({
         state.targetVideoError = action.payload || 'Failed to fetch videos';
         state.targetVideo = [];
       });
-    
 
-    builder.addCase(fetchVideoDelete.fulfilled, (state, action) => {
-      state.videoByOwner = state.videoByOwner.filter(
-        video => video._id !== action.payload
-      );
-    }).addCase(fetchVideoDelete.rejected, (state, action) => {
-      state.videoDeleted = action.payload;
-    });
+    builder
+      .addCase(fetchVideoDelete.pending, (state) => {
+        state.videoDeleting = true;
+        state.videoDeleted = null;
+      })
+      .addCase(fetchVideoDelete.fulfilled, (state, action) => {
+        state.videoDeleting = false;
+        state.videoByOwner = state.videoByOwner.filter(
+          video => video._id !== action.payload?._id
+        );
+        state.videos = state.videos.filter(
+          video => video._id !== action.payload?._id
+        );
+        state.videoDeleted = action.payload;
+      })
+      .addCase(fetchVideoDelete.rejected, (state, action) => {
+        state.videoDeleting = false;
+        state.videoDeleted = action.payload;
+      });
+    
+    builder
+      .addCase(fetchUpdateVideo.pending, (state) => {
+        state.updateVideoLoading = true;
+        state.updateVideoError = null;
+        state.updateUploadProgress = 0;
+      })
+      .addCase(fetchUpdateVideo.fulfilled, (state, action) => {
+        state.updateVideoLoading = false;
+        state.updateUploadProgress = 100;
+        if (action.payload?._id) {
+          state.videoByOwner = state.videoByOwner.map(video =>
+            video._id === action.payload._id
+              ? { ...video, ...action.payload }
+              : video
+          );
+
+          state.videos = state.videos.map(video =>
+            video._id === action.payload._id
+              ? { ...video, ...action.payload }
+              : video
+          );
+        }
+        state.updateVideoError = null;
+      })
+      .addCase(fetchUpdateVideo.rejected, (state, action) => {
+        state.updateVideoLoading = false;
+        state.updateVideoError = action.payload;
+      });
 
     builder
       .addCase(fetchVideosSuggestion.pending, (state) => {
         state.suggestionLoading = true;
+        state.suggestionError = null;
       })
       .addCase(fetchVideosSuggestion.fulfilled, (state, action) => {
         state.suggestionLoading = false;
         state.getsuggestion = action.payload;
-    }).addCase(fetchVideosSuggestion.rejected, (state, action) => {
-      state.suggestionLoading = false;
-      state.suggestionError = action.payload;
-    });
+        state.suggestionError = null;
+      })
+      .addCase(fetchVideosSuggestion.rejected, (state, action) => {
+        state.suggestionLoading = false;
+        state.suggestionError = action.payload;
+      });
   },
 });
 
-export const { setUploadProgress, videoLoading, targetVideo, videoError,videos } = videoSlice.actions;
-export default videoSlice.reducer;
+export const { setUploadProgress, resetVideoError, resetTargetVideo,setAddNewVideos } = videosSlice.actions;
+export default videosSlice.reducer;

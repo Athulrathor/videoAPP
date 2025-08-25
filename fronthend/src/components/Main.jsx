@@ -1,6 +1,5 @@
 import React,{ lazy } from "react";
 import { useSelector } from "react-redux";
-import { shortLoading } from "../redux/features/shorts";
 import Channel from "../pages/Channel";
 
 const Videos = lazy(() => import('../pages/Videos'))
@@ -48,7 +47,6 @@ const Main = ({ setToggleVideoUploading, toggleVideoUploading, timeAgo, videoLoa
             width={showMenu}
             timeAgo={timeAgo}
             formatTime={formatTime}
-            shortLoading={shortLoading}
           fetchViewCounter={fetchViewCounter}
           setToggleVideoUploading={setToggleVideoUploading}
           toggleVideoUploading={toggleVideoUploading}

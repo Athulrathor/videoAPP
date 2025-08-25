@@ -1,106 +1,132 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../libs/axios";
 
-export const createAPlayList = createAsyncThunk('create/playlist', async ({name,description},{rejectWithValue}) => {
-    if (!name && !description) return rejectWithValue("name and description not fond!");
+export const createAPlayList = createAsyncThunk(
+    'create/playlist',
+    async ({ name, description }, { rejectWithValue }) => {
+        if (!name || !description) {
+            return rejectWithValue("Name and description are required!");
+        }
 
-    try {
-        
-        const playlist = await axiosInstance.post(`playlist/create-playlist`, { name: name, description: description });
-        console.log(playlist);
-        return playlist.data.data;
-
-    } catch (error) {
-        console.error(error);
-        return rejectWithValue(error.message);
+        try {
+            const response = await axiosInstance.post(`playlist/create-playlist`, {
+                name,
+                description
+            });
+            return response?.data?.data;
+        } catch (error) {
+            return rejectWithValue(error?.response?.data?.message || error.message);
+        }
     }
-});
+);
 
-export const getUserPlayList = createAsyncThunk('getByUser/playlist', async (userId, { rejectWithValue }) => {
-    if (!userId) return rejectWithValue("id not fond!");
+export const getUserPlayList = createAsyncThunk(
+    'getByUser/playlist',
+    async (userId, { rejectWithValue }) => {
+        if (!userId) return rejectWithValue("User ID is required!");
 
-    try {
-
-        const getPlaylist = await axiosInstance.get(`playlist/user-playlist/${userId}`);
-        return getPlaylist?.data?.data;
-
-    } catch (error) {
-        console.error(error);
-        return rejectWithValue(error.message);
+        try {
+            const response = await axiosInstance.get(`playlist/user-playlist/${userId}`);
+            return response?.data?.data;
+        } catch (error) {
+            return rejectWithValue(error?.response?.data?.message || error.message);
+        }
     }
-});
+);
 
-export const getUserPlayListById = createAsyncThunk('getById/playlist', async (playlistId, { rejectWithValue }) => {
-    if (!playlistId) return rejectWithValue("id not fond!");
+export const getUserPlayListById = createAsyncThunk(
+    'getById/playlist',
+    async (playlistId, { rejectWithValue }) => {
+        if (!playlistId) return rejectWithValue("Playlist ID is required!");
 
-    try {
-        const getPlaylistById = await axiosInstance.get(`playlist/get-playlist/${playlistId}`);
-        console.log(getPlaylistById);
-        return getPlaylistById.data.data;
-
-    } catch (error) {
-        console.error(error);
-        return rejectWithValue(error.message);
+        try {
+            const response = await axiosInstance.get(`playlist/get-playlist/${playlistId}`);
+            return response?.data?.data;
+        } catch (error) {
+            return rejectWithValue(error?.response?.data?.message || error.message);
+        }
     }
-});
+);
 
-export const addAVideoToPlaylist = createAsyncThunk('addingAVideo/playlist', async ({playlistId,VideoId}, { rejectWithValue }) => {
-    if (!playlistId && !VideoId) return rejectWithValue("id not fond!");
+export const addAVideoToPlaylist = createAsyncThunk(
+    'addingAVideo/playlist',
+    async ({ playlistId, VideoId }, { rejectWithValue }) => {
+        if (!playlistId || !VideoId) {
+            return rejectWithValue("Playlist ID and Video ID are required!");
+        }
 
-    try {
-        const adddedVideoToPlaylist = await axiosInstance.patch(`playlist/add-video-to-playlist/${VideoId}/${playlistId}`);
-        console.log(adddedVideoToPlaylist);
-        return adddedVideoToPlaylist.data.data;
-
-    } catch (error) {
-        console.error(error);
-        return rejectWithValue(error.message);
+        try {
+            const response = await axiosInstance.patch(
+                `playlist/add-video-to-playlist/${VideoId}/${playlistId}`
+            );
+            return {
+                playlistId,
+                videoId: VideoId,
+                updatedPlaylist: response?.data?.data
+            };
+        } catch (error) {
+            return rejectWithValue(error?.response?.data?.message || error.message);
+        }
     }
-});
+);
 
-export const removedVideoToPlaylist = createAsyncThunk('removingAVideo/playlist', async ({ playlistId, VideoId }, { rejectWithValue }) => {
-    if (!playlistId && !VideoId) return rejectWithValue("id not fond!");
+export const removedVideoToPlaylist = createAsyncThunk(
+    'removingAVideo/playlist',
+    async ({ playlistId, VideoId }, { rejectWithValue }) => {
+        if (!playlistId || !VideoId) {
+            return rejectWithValue("Playlist ID and Video ID are required!");
+        }
 
-    try {
-        const removedVideoToPlaylist = await axiosInstance.patch(`playlist/remove-video-to-playlist/${VideoId}/${playlistId}`);
-        console.log(removedVideoToPlaylist);
-        return removedVideoToPlaylist.data.data;
-
-    } catch (error) {
-        console.error(error);
-        return rejectWithValue(error.message);
+        try {
+            const response = await axiosInstance.patch(
+                `playlist/remove-video-to-playlist/${VideoId}/${playlistId}`
+            );
+            return {
+                playlistId,
+                videoId: VideoId,
+                updatedPlaylist: response?.data?.data
+            };
+        } catch (error) {
+            return rejectWithValue(error?.response?.data?.message || error.message);
+        }
     }
-});
+);
 
-export const deleteAPlaylist = createAsyncThunk('delete/playlist', async (playlistId, { rejectWithValue }) => {
-    if (!playlistId) return rejectWithValue("id not fond!");
+export const deleteAPlaylist = createAsyncThunk(
+    'delete/playlist',
+    async (playlistId, { rejectWithValue }) => {
+        if (!playlistId) return rejectWithValue("Playlist ID is required!");
 
-    try {
-        const deletedPlaylist = await axiosInstance.get(`playlist/delete-playlist/${playlistId}`);
-        console.log(deletedPlaylist);
-        return deletedPlaylist.data.data;
-
-    } catch (error) {
-        console.error(error);
-        return rejectWithValue(error.message);
+        try {
+            const response = await axiosInstance.delete(`playlist/delete-playlist/${playlistId}`);
+            return {
+                deletedPlaylistId: playlistId,
+                message: response?.data?.message
+            };
+        } catch (error) {
+            return rejectWithValue(error?.response?.data?.message || error.message);
+        }
     }
-});
+);
 
-export const updateAPlaylist = createAsyncThunk('update/playlist', async ({playlistId,name,description}, { rejectWithValue }) => {
-    if (!playlistId) return rejectWithValue("id not fond!");
-    if (!name) return rejectWithValue("name not fond!");
-    if (!description) return rejectWithValue("description not fond!");
+export const updateAPlaylist = createAsyncThunk(
+    'update/playlist',
+    async ({ playlistId, name, description }, { rejectWithValue }) => {
+        if (!playlistId) return rejectWithValue("Playlist ID is required!");
+        if (!name) return rejectWithValue("Name is required!");
+        if (!description) return rejectWithValue("Description is required!");
 
-    try {
-        const updatedPlaylist = await axiosInstance.post(`playlist/update-playlist/${playlistId}`,{body:{name:name,description:description}});
-        console.log(updatedPlaylist);
-        return updatedPlaylist.data.data;
-
-    } catch (error) {
-        console.error(error);
-        return rejectWithValue(error.message);
+        try {
+            const response = await axiosInstance.patch(
+                `playlist/update-playlist/${playlistId}`,
+                { name, description }
+            );
+            return response?.data?.data;
+        } catch (error) {
+            return rejectWithValue(error?.response?.data?.message || error.message);
+        }
     }
-});
+);
 
 const playListSlice = createSlice({
     name: 'Playlists',
@@ -109,91 +135,165 @@ const playListSlice = createSlice({
         loading: false,
         error: null,
 
-        newloading: false,
-        newerror: null,
-        
         playlistById: null,
         playlistByIdLoading: false,
-        playListByIdError:null,
+        playListByIdError: null,
+
+        creating: false,
+        createError: null,
+
+        addingVideo: false,
+        removingVideo: false,
+        videoOperationError: null,
+
+        updating: false,
+        deleting: false,
+        updateError: null,
+        deleteError: null,
     },
     reducers: {
-
+        clearErrors: (state) => {
+            state.error = null;
+            state.createError = null;
+            state.playListByIdError = null;
+            state.videoOperationError = null;
+            state.updateError = null;
+            state.deleteError = null;
+        },
+        clearPlaylistById: (state) => {
+            state.playlistById = null;
+            state.playListByIdError = null;
+        },
+        resetPlaylistState: (state) => {
+            state.playlist = [];
+            state.error = null;
+            state.loading = false;
+        },
     },
-    extraReducers: (builder) => {      
-        builder.addCase(createAPlayList.pending, (state) => {
-            state.newloading = true;
-        }).addCase(createAPlayList.fulfilled, (state, action) => {
-            state.playlist = [...state,action.payload];
-            state.newloading = false;
-        }).addCase(createAPlayList.rejected, (state,action) => {
-            state.newerror = action.payload;
-            state.newloading = false;
-        })
+    extraReducers: (builder) => {
+        builder
+            .addCase(createAPlayList.pending, (state) => {
+                state.creating = true;
+                state.createError = null;
+            })
+            .addCase(createAPlayList.fulfilled, (state, action) => {
+                state.creating = false;
+                state.playlist.unshift(action.payload);
+                state.createError = null;
+            })
+            .addCase(createAPlayList.rejected, (state, action) => {
+                state.creating = false;
+                state.createError = action.payload || "Failed to create playlist";
+            });
+
+        builder
             .addCase(getUserPlayList.pending, (state) => {
                 state.loading = true;
-            }).addCase(getUserPlayList.fulfilled, (state, action) => {
-                state.playlist = action.payload;
-                state.loading = false;
-            }).addCase(getUserPlayList.rejected, (state, action) => {
-                state.error = action.payload;
-                state.loading = false;
+                state.error = null;
             })
-        
+            .addCase(getUserPlayList.fulfilled, (state, action) => {
+                state.loading = false;
+                state.playlist = action.payload;
+                state.error = null;
+            })
+            .addCase(getUserPlayList.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to fetch playlists";
+            });
+
+        builder
             .addCase(getUserPlayListById.pending, (state) => {
                 state.playlistByIdLoading = true;
-            }).addCase(getUserPlayListById.fulfilled, (state, action) => {
+                state.playListByIdError = null;
+            })
+            .addCase(getUserPlayListById.fulfilled, (state, action) => {
+                state.playlistByIdLoading = false;
                 state.playlistById = action.payload;
-                state.playlistByIdLoading = false;
-            }).addCase(getUserPlayListById.rejected, (state, action) => {
-                state.playListByIdError = action.payload;
-                state.playlistByIdLoading = false;
+                state.playListByIdError = null;
             })
-        
-            // .addCase(addAVideoToPlaylist.pending, (state) => {
-            //     state.playlistByIdLoading = true;
-            // }).addCase(addAVideoToPlaylist.fulfilled, (state, action) => {
-            //     state.playlistById = action.payload;
-            //     state.playlistByIdLoading = false;
-            // }).addCase(addAVideoToPlaylist.rejected, (state, action) => {
-            //     state.playListByIdError = action.payload;
-            //     state.playlistByIdLoading = false;
-        // })
-        // .addCase(removeAVideoToPlaylist.pending, (state) => {
-        //     state.playlistByIdLoading = true;
-        // }).addCase(removeAVideoToPlaylist.fulfilled, (state, action) => {
-        //     state.playlistById = action.payload;
-        //     state.playlistByIdLoading = false;
-        // }).addCase(removeAVideoToPlaylist.rejected, (state, action) => {
-        //     state.playListByIdError = action.payload;
-        //     state.playlistByIdLoading = false;
-        // })
+            .addCase(getUserPlayListById.rejected, (state, action) => {
+                state.playlistByIdLoading = false;
+                state.playListByIdError = action.payload || "Failed to fetch playlist";
+            });
 
-        .addCase(deleteAPlaylist.pending, (state) => {
-            state.loading = true;
-        }).addCase(deleteAPlaylist.fulfilled, (state, action) => {
-            state.data = {
-                ...state,
-                playlist: state.playlist.filter(playlist => playlist.id !== action.payload.id)
-            };
-            state.loading = false;
-        }).addCase(deleteAPlaylist.rejected, (state, action) => {
-            state.error = action.payload;
-            state.loading = false;
-        })
+        builder
+            .addCase(addAVideoToPlaylist.pending, (state) => {
+                state.addingVideo = true;
+                state.videoOperationError = null;
+            })
+            .addCase(addAVideoToPlaylist.fulfilled, (state, action) => {
+                state.addingVideo = false;
+                if (state.playlistById && state.playlistById._id === action.payload.playlistId) {
+                    state.playlistById = action.payload.updatedPlaylist;
+                }
+                state.videoOperationError = null;
+            })
+            .addCase(addAVideoToPlaylist.rejected, (state, action) => {
+                state.addingVideo = false;
+                state.videoOperationError = action.payload || "Failed to add video to playlist";
+            });
 
-            .addCase(updateAPlaylist.pending, (state) => {
-                state.loading = true;
-            }).addCase(updateAPlaylist.fulfilled, (state, action) => {
-                state.playlist = state.playlist.map(playlist =>
-                    playlist.id === action.payload.id ? action.payload : playlist
+        builder
+            .addCase(removedVideoToPlaylist.pending, (state) => {
+                state.removingVideo = true;
+                state.videoOperationError = null;
+            })
+            .addCase(removedVideoToPlaylist.fulfilled, (state, action) => {
+                state.removingVideo = false;
+                if (state.playlistById && state.playlistById._id === action.payload.playlistId) {
+                    state.playlistById = action.payload.updatedPlaylist;
+                }
+                state.videoOperationError = null;
+            })
+            .addCase(removedVideoToPlaylist.rejected, (state, action) => {
+                state.removingVideo = false;
+                state.videoOperationError = action.payload || "Failed to remove video from playlist";
+            });
+
+        builder
+            .addCase(deleteAPlaylist.pending, (state) => {
+                state.deleting = true;
+                state.deleteError = null;
+            })
+            .addCase(deleteAPlaylist.fulfilled, (state, action) => {
+                state.deleting = false;
+                state.playlist = state.playlist.filter(
+                    playlist => playlist._id !== action.payload.deletedPlaylistId
                 );
-                state.loading = false;
-            }).addCase(updateAPlaylist.rejected, (state, action) => {
-                state.error = action.payload;
-                state.loading = false;
+                if (state.playlistById?._id === action.payload.deletedPlaylistId) {
+                    state.playlistById = null;
+                }
+                state.deleteError = null;
             })
+            .addCase(deleteAPlaylist.rejected, (state, action) => {
+                state.deleting = false;
+                state.deleteError = action.payload || "Failed to delete playlist";
+            });
+
+        builder
+            .addCase(updateAPlaylist.pending, (state) => {
+                state.updating = true;
+                state.updateError = null;
+            })
+            .addCase(updateAPlaylist.fulfilled, (state, action) => {
+                state.updating = false;
+                const index = state.playlist.findIndex(
+                    playlist => playlist._id === action.payload._id
+                );
+                if (index !== -1) {
+                    state.playlist[index] = action.payload;
+                }
+                if (state.playlistById?._id === action.payload._id) {
+                    state.playlistById = action.payload;
+                }
+                state.updateError = null;
+            })
+            .addCase(updateAPlaylist.rejected, (state, action) => {
+                state.updating = false;
+                state.updateError = action.payload || "Failed to update playlist";
+            });
     },
 });
 
-// export const {  } = uploadSlice.actions;
+export const { clearErrors, clearPlaylistById, resetPlaylistState } = playListSlice.actions;
 export default playListSlice.reducer;

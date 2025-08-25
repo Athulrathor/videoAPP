@@ -13,20 +13,17 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { loading,token,user } = useSelector(state => state.user)
+  const { loading,loggedIn } = useSelector(state => state.user)
 
   const dispatch = useDispatch();
   const Navigate = useNavigate();
-
-  console.log(token,user)
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
     try {
 
-      const logging = dispatch(fetchLoginUser({ email: email, password: password })).unwrap();
-
+      const logging = dispatch(fetchLoginUser({ email: email, password: password }));
       console.log(logging);
 
       Navigate("/");
@@ -44,7 +41,7 @@ const Login = () => {
     onSuccess: async ({ access_token }) => {
       const result = await AuthService.loginWithGoogle(access_token);
       if (result.user && result.accessToken) {
-        await dispatch(setAuth({loggedIn:true, user: result.user, token: result.accessToken }));
+        dispatch(setAuth({loggedIn:true, user: result.user, token: result.accessToken }));
         toast.success('Google login successful');
         Navigate('/',{replace:true});
       } else {
@@ -114,9 +111,9 @@ const Login = () => {
                 <button
                   type="submit"
                   className={`w-2xs outline-2 disabled:opacity-80 disabled:grayscale-25 mt-6 py-2 text-2xl font-bold rounded-xs outline-[#e62d27] hover:bg-[#e62d27] hover:text-white active:outline-black black:active:outline-white  active:bg-[#e62d27] active:text-white transition duration-200 ease-in-out`}
-                  disabled={loading}
+                  disabled={loading && loggedIn}
                 >
-                  {loading ? <h2>Loading</h2> : "Login"}
+                  {loading && loggedIn ? <h2>Loading</h2> : "Login"}
                 </button>
                 <div className="mt-4 flex items-center justify-center">
                   <Link
@@ -133,7 +130,7 @@ const Login = () => {
             <span>OR</span>
 
             <div className="flex space-x-4 mt-2">
-              <button onClick={() => googleLogin()} className="w-14 text-white rounded-full hover:opacity-75 h-14 active:border-2 active:border-black flex items-center justify-center active:shadow-lg transition duration-200 ease-in-out">
+              <button onClick={googleLogin} className="w-14 text-white rounded-full hover:opacity-75 h-14 active:border-2 active:border-black flex items-center justify-center active:shadow-lg transition duration-200 ease-in-out">
                 <img
                   src={google}
                   alt=""

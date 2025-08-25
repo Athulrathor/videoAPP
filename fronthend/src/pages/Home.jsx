@@ -3,8 +3,8 @@ import Header from "../components/Header";
 import SideMenu from "../components/SideMenu";
 import Main from "../components/Main";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchVideos, videoLoading } from "../redux/features/videos";
-import { fetchShort, shortLoading } from "../redux/features/shorts";
+import { fetchVideos } from "../redux/features/videos";
+import { fetchShort } from "../redux/features/shorts";
 import { axiosInstance } from "../libs/axios";
 
 const UploadVideo = lazy(() => import('../components/UploadVideo'));
@@ -147,8 +147,6 @@ function Home() {
           <Main
             showMenu={showMenu}
             timeAgo={timeAgo}
-            shortLoading={shortLoading}
-            videoLoading={videoLoading}
             fetchViewCounter={fetchViewCounter}
             setToggleVideoUploading={setToggleVideoUploading}
             toggleVideoUploading={toggleVideoUploading}
