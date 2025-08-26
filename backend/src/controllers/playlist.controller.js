@@ -9,11 +9,11 @@ const createPlaylist = asyncHandler(async (req, res) => {
   //TODO: create playlist
 
   try {
-    const { name, description } = req.body;
+    const { title, description,privacy } = req.body;
 
     const userId = req.user._id;
 
-    if (!name) {
+    if (!title) {
       throw new ApiError(400, "Name is not found!");
     }
 
@@ -24,9 +24,10 @@ const createPlaylist = asyncHandler(async (req, res) => {
     // }
 
     const createUserPlaylist = await Playlist.create({
-      name: name,
+      title: title,
       description: description,
-      owner: req.user._id,
+      privacy:privacy,
+      owner: userId,
     });
 
     return res

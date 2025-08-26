@@ -65,7 +65,9 @@ const Main = ({ setToggleVideoUploading, toggleVideoUploading, timeAgo, videoLoa
           ""
         )) ||
         (sideActive === "history" ? <History /> : "") ||
-        (sideActive === "playlists" ? <Playlist /> : "") ||
+        (sideActive === "playlists" ? <Playlist
+          timeAgo={timeAgo}
+          formatTime={formatTime} /> : "") ||
         (sideActive === "your videos" ? (
           <UserVideos
             timeAgo={timeAgo}

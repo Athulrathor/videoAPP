@@ -3,15 +3,17 @@ import { axiosInstance } from "../../libs/axios";
 
 export const createAPlayList = createAsyncThunk(
     'create/playlist',
-    async ({ name, description }, { rejectWithValue }) => {
-        if (!name || !description) {
+    async ({ title, description, privacy = "Public" }, { rejectWithValue }) => {
+        console.log(title,description,privacy)
+        if (!title || !description) {
             return rejectWithValue("Name and description are required!");
         }
 
         try {
             const response = await axiosInstance.post(`playlist/create-playlist`, {
-                name,
-                description
+                title,
+                description,
+                privacy
             });
             return response?.data?.data;
         } catch (error) {

@@ -9,10 +9,10 @@ const LikedVideos = (props) => {
 
   const dispatch = useDispatch();
 
-  const { timeAgo, formatTime, setToggleVideoUploading, toggleVideoUploading } = props;
+  const { timeAgo, formatTime } = props;
 
-  const { userLikeVideos, userLikeVideosError, userLikeVideosLoading } = useSelector(state => state.likes);
-  const { sideActive } = useSelector(state => state.user);
+  const { userLikedVideos, userLikedVideosError, userLikedVideosLoading } = useSelector(state => state.likes);
+  // const { } = useSelector(state => state.user);
 
   const [videoStatus, setVideoStatus] = useState({
     isPlaying: false,
@@ -29,7 +29,7 @@ const LikedVideos = (props) => {
     dispatch(getUserLikeVideos());
   }, [dispatch]);
 
-  console.log(userLikeVideos,userLikeVideosLoading,userLikeVideosError)
+  console.log(userLikedVideos, userLikedVideosLoading, userLikedVideosError)
 
   const togglePlay = (videoId2) => {
     const video = videoRef.current[videoId2];
@@ -86,8 +86,8 @@ const LikedVideos = (props) => {
         <h1>Liked Videos</h1>
       </div>
       {/* videoList */}
-      {userLikeVideos?.length > 0 ? (<div className="w-[calc(190px - 100%)] px-2 space-y-3 h-[calc(113px - 100vh)]">
-        {userLikeVideos.map((video) => (
+      {userLikedVideos?.length > 0 ? (<div className="w-[calc(190px - 100%)] px-2 space-y-3 h-[calc(113px - 100vh)]">
+        {userLikedVideos.map((video) => (
           <div
             key={video._id}
             className="flex h-fit"
@@ -95,7 +95,7 @@ const LikedVideos = (props) => {
           >
             {/* video */}
             <div
-              className="relative max-lg:w-1/2 w-96  h-fit"
+              className="relative max-md:w-[36%] max-sm:w-[42%] w-64  h-fit"
               onMouseEnter={() => {
                 setVideoStatus((prev) => ({
                   ...prev,
@@ -122,7 +122,7 @@ const LikedVideos = (props) => {
                 poster={video?.thumbnail}
                 onTimeUpdate={() => handleOnTimeUpdate(video._id)}
                 preload="metadata"
-                className="bg-black aspect-video rounded-2xl"
+                className="bg-black aspect-video rounded-lg"
               ></video>
               <div
                 className={`${videoStatus[video._id]?.showControl ? "" : "hidden"
@@ -153,8 +153,8 @@ const LikedVideos = (props) => {
                 </div>
               </div>
             </div>
-            <div className="w-1/2  flex-col flex justify-center py-1 pl-2">
-              <div className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]">
+            <div className="max-md:w-[60%] max-w-96  flex-col flex py-1 pl-2">
+              <div className="line-clamp-2 w-full font-medium text-3xl pb-2 max-md:text-xl">
                 <h2>{video?.title}</h2>
               </div>
               <div className="flex">
@@ -162,7 +162,7 @@ const LikedVideos = (props) => {
                   <img
                     src={video?.owner?.avatar}
                     alt=""
-                    className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                    className="w-6 mr-3 max-sm:w-6 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
                   />
                 </div>
                 <div className="flex flex-col leading-tight">

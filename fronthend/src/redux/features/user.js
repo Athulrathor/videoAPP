@@ -5,20 +5,17 @@ import { googleLogout } from "@react-oauth/google";
 
 
 export const fetchLoginUser = createAsyncThunk("login/userFetching", async ({ email, password }, { rejectWithValue }) => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-  if (!email && !password) return rejectWithValue("User crendencial not found!");
+  if (!email || !password) {console.log("email :  ", email, "pass : ", password); rejectWithValue("User crendencial not found!")};
 
   try {
-    const logging = await axiosInstance.post('/users/login', { email, password });
+    const logging = await axiosInstance.post('/users/login', { email:email, password:password });
     sessionStorage.setItem("accessToken", logging?.data?.data?.accessToken);
-    clearTimeout(timeoutId);
+    console.log(logging)
     return logging?.data?.data;
   } catch (error) {
-    clearTimeout(timeoutId);
     console.log(error)
-    return rejectWithValue(error.message);
+    return rejectWithValue(error.response?.data?.message || error.message);
   }
 })
 
@@ -125,7 +122,6 @@ export const currentUpdatedUser = createAsyncThunk('current/userDetails', async 
 export const AuthService = {
   loginWithGoogle: async (googleAccessToken) => {
     const response = await axiosInstance.post('users/google', { googleAccessToken });
-    console.log(response?.data);
     return response.data;
   },
 };
@@ -184,26 +180,28 @@ export const userSlice = createSlice({
 
   },
   extraReducers: (builder) => {
-      builder
-        .addCase(fetchLoginUser.pending, (state) => {
-          state.loading = true;
-          state.error = null;
-        })
-        .addCase(fetchLoginUser.fulfilled, (state, action) => {
-          state.user = action.payload?.user;
-          state.loggedIn = true;
-          state.token = action.payload?.accessToken || null;
-          state.loading = false;
-          state.error = null
-        })
-        .addCase(fetchLoginUser.rejected, (state,action) => {
-          state.loggedIn = false;
-          state.token = null;
-          state.error = action.payload;
-          state.loading = false;
-          state.user = {};
-        });
-    
+    builder
+      .addCase(fetchLoginUser.pending, (state) => {
+        console.log("📋 Setting loading to true");
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchLoginUser.fulfilled, (state, action) => {
+        console.log("✅ Login fulfilled", action.payload);
+        state.loading = false; // ← Make sure this is here!
+        state.user = action.payload?.user || {};
+        state.loggedIn = true;
+        state.token = action.payload?.accessToken || null;
+        state.error = null;
+      })
+      .addCase(fetchLoginUser.rejected, (state, action) => {
+        console.log("❌ Login rejected", action.payload);
+        state.loading = false; // ← Make sure this is here!
+        state.loggedIn = false;
+        state.token = null;
+        state.error = action.payload || "Login failed";
+        state.user = {};
+      });
     builder
       .addCase(fetchLogoutUser.pending, (state) => {
         state.loading = true;

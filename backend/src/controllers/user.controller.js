@@ -96,34 +96,33 @@ const loginUser = asyncHandler(async (req, res) => {
 
       if (!username && !email) {
         throw new ApiError(400, "Username or email is required!");
-      }
-
+    }
+    
   const user = await User.findOne({
-    $or: [{ email }, { username }],
+    // $or: [{ email }, { username }],
+    email:email
   });
 
   if (!user) {
     throw new ApiError(400, "User is not found!");
   }
 
-    if (!user.through) {
-      const isPasswordValid = await user.isPasswordCorrect(password);
-      if (!isPasswordValid) {
-        throw new ApiError(401, "Invalid user credentials!");
-      }
+    if (user.through) return;
+
+    console.log(user,await user.isPasswordCorrect(password))
+
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if (!isPasswordValid) {
+      throw new ApiError(401, "Invalid user credentials!");
     }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
     user._id
     );
-    
-    console.log("accesstoken and refress token :  ",accessToken, refreshToken)
 
   const loggedUser = await User.findById(user._id).select(
     "-password -refreshToken"
     );
-    
-    console.log("logged user :  ",loggedUser)
 
   const options = {
     httpOnly: true,
@@ -162,7 +161,7 @@ const googleLogin = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: 'Email not provided' });
     }
 
-    let user = await User.findOne({ email: data.email });
+    let user = await User.find({ email: data.email });
 
     if (!user) {
       user = await User.create({

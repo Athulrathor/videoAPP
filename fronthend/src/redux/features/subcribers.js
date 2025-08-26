@@ -85,7 +85,8 @@ export const subcribedUserContent = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`subcriber/get-subcribers-videos-and-short`);
-      return response?.data?.data?.data;
+      console.log(response)
+      return response?.data?.data;
     } catch (error) {
       return rejectWithValue(error?.response?.data?.message || error.message);
     }

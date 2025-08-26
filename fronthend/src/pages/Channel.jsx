@@ -321,7 +321,7 @@ const Channel = () => {
               </div>
               {/* main content portions */}
               <div className=" overflow-y-scroll scrollBar mt-1">
-                <div className="w-[calc(190px - 100%)] px-2 space-y-3 h-[calc(113px - 100vh)]">
+                <div className="w-screen px-2 space-y-3 h-[calc(113px - 100vh)]">
                   {videoByOwner &&
                     videoByOwner.map((video) => (
                       <div
@@ -331,7 +331,7 @@ const Channel = () => {
                       >
                         {/* video */}
                         <div
-                          className="relative max-lg:w-1/2 w-96  h-fit"
+                          className="relative max-md:w-[36%] max-sm:w-[42%] w-64 h-fit"
                           onMouseEnter={() => {
                             setVideoStatus((prev) => ({
                               ...prev,
@@ -364,7 +364,7 @@ const Channel = () => {
                             poster={video?.thumbnail}
                             onTimeUpdate={() => handleOnTimeUpdate(video._id)}
                             preload="metadata"
-                            className="bg-black aspect-video rounded-2xl"
+                            className="bg-black aspect-video rounded-lg"
                           ></video>
                           <div
                             className={`${
@@ -400,9 +400,9 @@ const Channel = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="w-1/2  flex-col flex py-1 pl-2">
+                        <div className="max-md:w-[60%] max-w-96   flex-col flex py-1 pl-2">
                           {/* title */}
-                          <div className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]">
+                          <div className="line-clamp-2 w-full font-medium text-3xl pb-2 max-md:text-2xl">
                             <h2>{video?.title}</h2>
                           </div>
                           <div className="flex">
@@ -410,7 +410,7 @@ const Channel = () => {
                               <img
                                 src={video?.userInfo?.avatar}
                                 alt=""
-                                className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                                className="w-6 mr-3 max-sm:w-6 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
                               />
                             </div>
                             <div className="flex flex-col leading-tight">

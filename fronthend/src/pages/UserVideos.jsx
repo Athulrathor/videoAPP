@@ -72,7 +72,7 @@ const UserVideos = ({toggleVideoUploading,setToggleVideoUploading,timeAgo,format
   return (
     <>
       <UploadVideo toggleVideoUploading={toggleVideoUploading} setToggleVideoUploading={setToggleVideoUploading} />
-    <div className="h-[90vh] overflow-y-scroll ">
+    <div className="h-[90vh] w-screen overflow-y-scroll scrollBar ">
       {/* title */}
       <div className="w-full flex items-center font-bold text-2xl max-md:text-lg max-sm:text-sm p-2">
         <h1>User Videos</h1>
@@ -117,7 +117,7 @@ const UserVideos = ({toggleVideoUploading,setToggleVideoUploading,timeAgo,format
               </div>
 
               {/* Upload tips */}
-              <div className="bg-blue-50 rounded-xl p-6 text-center">
+              <div className="bg-blue-50 rounded-lg p-6 text-center">
                 <h4 className="font-semibold text-blue-900 mb-4">Tips for your first upload:</h4>
                 <div className="grid md:grid-cols-2 text-sm text-blue-800">
                   <div className="text-left">
@@ -155,7 +155,7 @@ const UserVideos = ({toggleVideoUploading,setToggleVideoUploading,timeAgo,format
             >
               {/* video */}
               <div
-                className="relative max-lg:w-1/2 w-96  h-fit"
+              className="relative max-md:w-[36%] max-sm:w-[42%] w-64  h-fit"
                 onMouseEnter={() => {
                   setVideoStatus((prev) => ({
                     ...prev,
@@ -182,7 +182,7 @@ const UserVideos = ({toggleVideoUploading,setToggleVideoUploading,timeAgo,format
                   poster={video?.thumbnail}
                   onTimeUpdate={() => handleOnTimeUpdate(video?._id)}
                   preload="metadata"
-                  className="bg-black aspect-video rounded-2xl"
+                  className="bg-black aspect-video rounded-lg"
                 ></video>
                 <div
                   className={`${
@@ -214,7 +214,7 @@ const UserVideos = ({toggleVideoUploading,setToggleVideoUploading,timeAgo,format
                   </div>
                 </div>
               </div>
-              <div className="w-1/2  flex-col flex justify-center py-1 pl-2">
+              <div className="max-md:w-[60%] max-w-96  flex-col flex py-1 pl-2">
                 {/* title */}
                 {/* <div className="line-clamp-2 w-full font-medium text-sm">
                   <h2>{video?.title}</h2>
@@ -229,7 +229,7 @@ const UserVideos = ({toggleVideoUploading,setToggleVideoUploading,timeAgo,format
                   <span>{timeAgo(video?.createdAt) || "12 year ago"}</span>
                 </div> */}
                 {/* title */}
-                <div className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]">
+              <div className="line-clamp-2 w-full font-medium text-3xl pb-2 max-md:text-2xl">
                   <h2>{video?.title}</h2>
                 </div>
                 <div className="flex">
@@ -237,7 +237,7 @@ const UserVideos = ({toggleVideoUploading,setToggleVideoUploading,timeAgo,format
                     <img
                       src={video?.userInfo?.avatar}
                       alt=""
-                      className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                      className="w-6 mr-3 max-sm:w-6 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
                     />
                   </div>
                   <div className="flex flex-col leading-tight">

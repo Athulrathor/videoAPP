@@ -8,32 +8,37 @@ import facebook from "../assets/facebook.svg";
 import { AuthService, fetchLoginUser, setAuth, setSideActive } from "../redux/features/user.js";
 import { useGoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
+import { useEffect } from "react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { loading,loggedIn } = useSelector(state => state.user)
+  const { loading, error, user, loggedIn } = useSelector(state => {
+    console.log("📊 Current auth state:", state.user);
+    return state.user;
+  });
+  
+  useEffect(() => {
+    console.log("📈 Loading state changed:", loading);
+  }, [loading]);
 
   const dispatch = useDispatch();
   const Navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
+      await dispatch(fetchLoginUser({email: email,password: password}));
 
-      const logging = dispatch(fetchLoginUser({ email: email, password: password }));
-      console.log(logging);
+        Navigate("/");
+        dispatch(setSideActive("home"));
 
-      Navigate("/");
-      dispatch(setSideActive("home"));
-
-      setEmail("");
-      setPassword("");
+        setEmail("");
+        setPassword("");
     } catch (error) {
-      console.error("Error:", error);
-      console.warn("Login failed. Please check your credentials.");
+      console.error("Unexpected error:", error);
     }
   };
 
@@ -111,9 +116,9 @@ const Login = () => {
                 <button
                   type="submit"
                   className={`w-2xs outline-2 disabled:opacity-80 disabled:grayscale-25 mt-6 py-2 text-2xl font-bold rounded-xs outline-[#e62d27] hover:bg-[#e62d27] hover:text-white active:outline-black black:active:outline-white  active:bg-[#e62d27] active:text-white transition duration-200 ease-in-out`}
-                  disabled={loading && loggedIn}
+                  // disabled={loading}
                 >
-                  {loading && loggedIn ? <h2>Loading</h2> : "Login"}
+                  {loading ? <h2>Loading</h2> : "Login"}
                 </button>
                 <div className="mt-4 flex items-center justify-center">
                   <Link

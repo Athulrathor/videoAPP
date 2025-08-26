@@ -7,13 +7,12 @@ import { setSideActive } from '../redux/features/user';
 
 const Subscription = (props) => {
 
-  const dispatch = useDispatch();
-
   const { timeAgo, formatTime } = props;
+
+  const dispatch = useDispatch();
+  const Navigate = useNavigate();
   
   const { subcribedContent } = useSelector(state => state.subscriber);
-
-  const Navigate = useNavigate();
 
       const [videoStatus, setVideoStatus] = useState({
         isPlaying: false,
@@ -29,6 +28,8 @@ const Subscription = (props) => {
   //       error: "",
   //       data: null,
   //     })
+
+  console.log(subcribedContent)
 
   // const fetchSubcriberVideosAndShort = async () => {
   //   setSubcribersData((prev) => ({
@@ -109,13 +110,13 @@ const Subscription = (props) => {
   };
 
   return (
-    <div className="h-[90vh] scroll-smooth overflow-y-scroll">
+    <div className="h-[90vh] max-md:h-screen max-md:w-screen scroll-smooth overflow-y-scroll scrollBar">
       {/* {loggedIn ? "" : */}
       <div className="w-full flex items-center font-bold text-2xl max-md:text-lg max-sm:text-sm p-2">
         <h1>User Subcriber Videos</h1>
       </div>
       {/* videoList */}
-      {subcribedContent.videos?.length > 0 ? (<div className="w-[calc(190px - 100%)] px-2 space-y-3 h-[calc(113px - 100vh)]">
+      {subcribedContent?.videos?.length > 0 ? (<div className="w-[calc(190px - 100%)] px-2 space-y-3 h-[calc(113px - 100vh)]">
         {subcribedContent?.videos.map((video) => (
           <div
             key={video._id}
@@ -124,7 +125,7 @@ const Subscription = (props) => {
           >
             {/* video */}
             <div
-              className="relative max-lg:w-1/2 w-96  h-fit"
+              className="relative max-md:w-[36%] max-sm:w-[42%] w-64  h-fit"
               onMouseEnter={() => {
                 setVideoStatus((prev) => ({
                   ...prev,
@@ -151,7 +152,7 @@ const Subscription = (props) => {
                 poster={video?.thumbnail}
                 onTimeUpdate={() => handleOnTimeUpdate(video._id)}
                 preload="metadata"
-                className="bg-black aspect-video rounded-2xl"
+                className="bg-black aspect-video rounded-lg"
               ></video>
               <div
                 className={`${videoStatus[video._id]?.showControl ? "" : "hidden"
@@ -182,7 +183,7 @@ const Subscription = (props) => {
                 </div>
               </div>
             </div>
-            <div className="w-1/2  flex-col flex justify-center py-1 pl-2">
+            <div className="max-w-96 max-md:w-[60%]  flex-col flex py-1 pl-2">
               {/* title */}
               {/* <div className="line-clamp-2 w-full font-medium text-sm">
                   <h2>{video?.title}</h2>
@@ -197,7 +198,7 @@ const Subscription = (props) => {
                   <span>{timeAgo(video?.createdAt) || "12 year ago"}</span>
                 </div> */}
               {/* title */}
-              <div className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]">
+              <div className="line-clamp-2 w-full font-medium text-3xl pb-2 max-md:text-2xl">
                 <h2>{video?.title}</h2>
               </div>
               <div className="flex">
@@ -205,7 +206,7 @@ const Subscription = (props) => {
                   <img
                     src={video?.owner?.avatar}
                     alt=""
-                    className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                    className="w-6 mr-3 max-sm:w-6 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
                   />
                 </div>
                 <div className="flex flex-col leading-tight">
