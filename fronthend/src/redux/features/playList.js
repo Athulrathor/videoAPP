@@ -52,21 +52,23 @@ export const getUserPlayListById = createAsyncThunk(
 
 export const addAVideoToPlaylist = createAsyncThunk(
     'addingAVideo/playlist',
-    async ({ playlistId, VideoId }, { rejectWithValue }) => {
-        if (!playlistId || !VideoId) {
+    async ({ playlistId, arrayVideoId }, { rejectWithValue }) => {
+        if (!playlistId || !arrayVideoId) {
             return rejectWithValue("Playlist ID and Video ID are required!");
         }
 
         try {
-            const response = await axiosInstance.patch(
-                `playlist/add-video-to-playlist/${VideoId}/${playlistId}`
+            const response = await axiosInstance.post(
+                `playlist/add-video-to-playlist`, { arrayVideoId: arrayVideoId, playlistId: playlistId }
             );
+            console.log(response)
             return {
                 playlistId,
-                videoId: VideoId,
+                videoIdList: arrayVideoId,
                 updatedPlaylist: response?.data?.data
             };
         } catch (error) {
+            console.log(error)
             return rejectWithValue(error?.response?.data?.message || error.message);
         }
     }
@@ -143,6 +145,7 @@ const playListSlice = createSlice({
 
         creating: false,
         createError: null,
+        createdId: "",
 
         addingVideo: false,
         removingVideo: false,
@@ -181,6 +184,7 @@ const playListSlice = createSlice({
             .addCase(createAPlayList.fulfilled, (state, action) => {
                 state.creating = false;
                 state.playlist.unshift(action.payload);
+                state.createdId = action.payload._id;
                 state.createError = null;
             })
             .addCase(createAPlayList.rejected, (state, action) => {

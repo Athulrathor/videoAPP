@@ -54,7 +54,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
       throw new ApiError(404, "User id is missing!");
     }
 
-    const userPlaylist = await Playlist.find({ owner: userId });
+    const userPlaylist = await Playlist.find({ owner: userId }).populate('owner','username avatar fullname').populate('video');
 
     if (!userPlaylist) {
       throw new ApiError(403, "Playlist is not found!");
@@ -96,20 +96,29 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
   try {
-    const { playlistId, videoId } = req.params;
+    // const { playlistId } = req.params;
+    const { arrayVideoId = [], playlistId } = req.body;
 
     if (!playlistId) {
       throw new ApiError(403, "Playlist id not found!");
     }
 
-    if (!videoId) {
+    if (!arrayVideoId) {
       throw new ApiError(403, "video id not found!");
     }
 
+    // if (videoId) {
+    //   const addVideoToUserPlaylist = await Playlist.findByIdAndUpdate(
+    //     playlistId,
+    //     {
+    //       video: videoId,
+    //     }
+    //   );
+    // }
     const addVideoToUserPlaylist = await Playlist.findByIdAndUpdate(
       playlistId,
       {
-        video: videoId,
+        video: [...arrayVideoId]
       }
     );
 

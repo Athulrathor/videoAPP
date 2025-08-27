@@ -237,7 +237,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
         const isLiked = localCommentData[comment._id]?.isLiked ?? commentStatus[comment._id]?.like ?? comment.isLiked ?? false;
 
         return (
-            <div className={`flex gap-3 ${isReply ? 'ml-6 mt-3' : 'mb-4'}`}>
+            <div className={`flex gap-3 ${isReply ? 'ml-6 max-sm:ml-0 max-sm:mt-1 mt-3' : 'mb-4 max-sm:mb-2'}`}>
                 <div className={`${isReply ? 'w-6 h-6' : 'w-10 h-10'} rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs`}>
                     {comment?.user_info?.avatar}
                 </div>
@@ -254,20 +254,20 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                         {comment?.content}
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center">
                         <div className="flex items-center gap-1">
                             <button
                                 onClick={() => handleLikeToggleComment(comment._id)}
-                                className={`p-2 flex items-center rounded-full hover:bg-gray-800 transition-colors ${isLiked ? 'text-blue-500' : 'text-gray-400'}`}
+                                className={` flex items-center rounded-full transition-colors ${isLiked ? 'text-blue-500' : 'text-gray-400'}`}
                             >
                                 <ThumbsUp className="w-4 h-4" />
-                                <span className='ml-1 text-black'>{currentLikes}</span>
+                                <span className='ml-1 text-black'>{currentLikes === 0 ? "" : currentLikes}</span>
                             </button>
                         </div>
 
                         <button
                             onClick={() => handleDisLike(comment._id)}
-                            className={`p-2 rounded-full hover:bg-gray-800 transition-colors ${commentStatus[comment?._id]?.dislike ? 'text-red-500' : 'text-gray-400'}`}
+                            className={`p-2 rounded-full transition-colors ${commentStatus[comment?._id]?.dislike ? 'text-red-500' : 'text-gray-400'}`}
                         >
                             <ThumbsDown className="w-4 h-4" />
                         </button>
@@ -275,20 +275,20 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                         {!isReply && (
                             <button
                                 onClick={() => handleReplyToggle(comment._id)}
-                                className="text-xs font-medium text-gray-400 hover:text-white px-3 py-1 rounded-full hover:bg-gray-800 transition-colors"
+                                className="text-xs font-medium bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full  transition-colors"
                             >
                                 Reply
                             </button>
                         )}
 
-                        <button className="p-2 rounded-full hover:bg-gray-800 transition-colors text-gray-400">
+                        <button className="p-2 rounded-full transition-colors hover:bg-gray-100 active:bg-gray-300 text-gray-800">
                             <MoreVertical className="w-4 h-4" />
                         </button>
                     </div>
 
                     {replyingTo === comment?._id && (
-                        <div className="mt-3 flex gap-2">
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs">
+                        <div className="mt-3 max-sm:mt-1.5 flex gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs">
                                 y
                             </div>
                             <div className="flex-1">
@@ -303,7 +303,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                                     <button
                                         onClick={() => handleAddCommentReplies(comment._id, commentStatus[comment._id]?.repliesInput)}
                                         className="px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-full hover:bg-blue-700 transition-colors"
-                                        disabled={!commentStatus[comment._id]?.repliesInput?.trim()}
+                                        disabled={!commentStatus[comment._id]?.repliesInput}
                                     >
                                         Reply
                                     </button>
@@ -318,7 +318,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                                                 }
                                             }));
                                         }}
-                                        className="px-4 py-2 text-gray-400 text-xs font-medium rounded-full hover:bg-gray-800 transition-colors"
+                                        className="px-4 py-2 bg-gray-100 text-xs font-medium rounded-full active:opacity-75 active:bg-gray-300 hover:bg-gray-200 transition-colors"
                                     >
                                         Cancel
                                     </button>
@@ -338,7 +338,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                             } active:bg-gray-200 transition-colors`}
                         >
                             {showRepliesFor === comment._id ? 'Hide Replies' : 'Show Replies'} 
-                            <span className='ml-1'>{comment?.totalReplies}</span>
+                            <span className='ml-1'>{comment?.totalReplies === 0 ? "" : comment?.totalReplies}</span>
                         </button>
                     )}
 
@@ -360,13 +360,13 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
 
     return (
         <div>
-            <div className={`${toggle.showComment ? "" : ""} z-21 border-2 border-gray-200 ${!minimiseComment ? "h-fit" : "min-h-screen"} p-4`}>
+            <div className={`${toggle.showComment ? "" : ""} z-21 border-2 border-gray-200 ${!minimiseComment ? "h-[100px]" : "h-fit"} overflow-hidden p-3`}>
                 <div className="max-w-4xl mx-auto">
                     {/* Comments Header */}
                     <div>
-                        <div className="flex items-center gap-8 mb-6">
+                        <div className="flex items-center justify-between gap-6 mb-2 max-sm:mb-1">
                             <h3 className="text-xl font-medium">Comments</h3>
-                            <button className="flex items-center gap-2 text-sm font-medium text-gray-300">
+                            <button className="flex items-center gap-2 text-sm font-medium text-gray-700">
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z" />
                                 </svg>
@@ -385,7 +385,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                     </div>
 
                     {/* Add Comment */}
-                    <div className="flex gap-3 mb-6">
+                    <div className="flex gap-3 max-sm:gap-1.5 mb-3 max-sm:mb-1.5">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
                             y
                         </div>
@@ -395,11 +395,11 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                                 onChange={(e) => setNewComment(e.target.value)}
                                 onFocus={() => setShowCommentActions(true)}
                                 placeholder="Add a comment..."
-                                className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none resize-none text-sm p-2"
+                                className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none resize-none text-sm pt-2"
                                 rows="2"
                             />
                             {showCommentActions && (
-                                <div className="flex gap-2 mt-3">
+                                <div className="flex gap-2 mt-3 max-sm:mt-1.5">
                                     <button
                                         onClick={handleAddComment}
                                         className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-full hover:bg-blue-600 transition-colors"
@@ -428,409 +428,12 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                         ))}
                     </div>
                 </div>
-            </div>
-            
-            <div className={`${!minimiseComment ? "hidden" : ""} cursor-pointer ${whichContent === "shorts" ? "hidden" : ""}`}  onClick={() => setMinimiseComment(!minimiseComment)}>
-                see Less
+                <div className={`${!minimiseComment ? "hidden" : ""} cursor-pointer ${whichContent === "shorts" ? "hidden" : ""}`} onClick={() => setMinimiseComment(!minimiseComment)}>
+                    see Less
+                </div>
             </div>
         </div>
     );
 };
 
 export default Comments;
-
-// <div
-//     onClick={() => { handleVideoComment(); setMinimiseComment(true) }}
-//     className={`w-full p-2 h-auto max-lg:flex-shrink-0 max-lg:p-1 max-lg:my-2 border-2 bg-gray-200 border-gray-300 max-md:rounded-none rounded-2xl mb-2 ${minimiseComment
-//             ? "max-lg:h-fit"
-//             : "max-lg:h-32 max-lg:overflow-hidden"
-//         }  `}
-// >
-//     <div className="font-semibold max-lg:lg text-2xl mb-1 flex items-center">
-//         {/* comments title  */}
-//         <div className="space-x-1 text-md max-sm:text-[16px] flex">
-//             <h1>Comments</h1>
-//             <span className="opacity-40">{videoCommentCount}</span>
-//         </div>
-//         {/* comments filter box */}
-//     </div>
-//     <div className="w-full  flex items-center h-fit">
-//         {/* input field */}
-//         <div className="flex w-full">
-//             {/* image of user */}
-//             <div className="aspect-square">
-//                 <img
-//                     src={user?.avatar}
-//                     className="w-14 max-md:p-1 max-md:w-12 rounded-full aspect-square p-2"
-//                 />
-//             </div>
-//             {/* comment input box */}
-//             <div className="w-full  h-12 max-md:h-8 flex items-center justify-center">
-//                 <input
-//                     type="text"
-//                     placeholder="Add a comment..."
-//                     value={videoCommentInput}
-//                     onChange={(e) => setVideoCommentInput(e.target.value)}
-//                     className="border-b pl-3 max-md:text-md max-md:pl-1 text-lg w-full border-gray-300 focus:outline-none focus:ring-0"
-//                 />
-//             </div>
-//             {/* comment send button */}
-//             <div className="aspect-square flex items-center justify-center w-14 max-md:w-8">
-//                 <button
-//                     onClick={() => {
-//                         handleAddVideoComment(videoCommentInput);
-//                         setVideoCommentInput("");
-//                     }}
-//                     className="w-14 max-md:w-8 max-md:p-0 p-2 hover:bg-gray-100 active:bg-gray-200  aspect-square flex justify-center items-center"
-//                 >
-//                     <SendHorizonal className="max-md:size-4" />
-//                 </button>
-//             </div>
-//         </div>
-//     </div>
-//     {/* comment content section */}
-//     <div className="w-full p-3 max-md:p-0">
-//         {videosComments?.map((comment) => (
-//             <div key={comment?._id}>
-//                 {/* username, time ago and image */}
-//                 <div>
-//                     <div className="flex items-center ">
-//                         <div className="aspect-square max-md:p-1 p-2">
-//                             <img
-//                                 src={comment?.user_info?.avatar}
-//                                 className="max-md:p-1 rounded-full w-8 aspect-square"
-//                             />
-//                         </div>
-
-//                         <div className="space-x-3 max-md:space-x-1.5">
-//                             <span className="text-lg max-md:text-sm font-medium">
-//                                 {comment?.user_info?.username}
-//                             </span>
-//                             <span className="text-gray-500 text-md max-md:text-sm">
-//                                 {formatTimeAgo(comment?.createdAt)}
-//                             </span>
-//                         </div>
-//                     </div>
-//                     {/* content */}
-//                     <div className="scrollBar ml-12 max-md:ml-10 max-md:text-[15px] text-md overflow-y-auto">
-//                         {comment?.content}
-//                     </div>
-//                     <div className="ml-10  flex items-center p-1">
-//                         {/* liked button */}
-//                         <div className="flex items-center mr-2">
-//                             <button
-//                                 onClick={() => handlelikeComment(comment?._id)}
-//                                 className="mr-1"
-//                             >
-//                                 {commentStatus[comment?._id]?.like ? (
-//                                     <ThumbsUp
-//                                         fill="black"
-//                                         size={20}
-//                                         className="max-md:size-4"
-//                                     />
-//                                 ) : (
-//                                     <ThumbsUp
-//                                         size={20}
-//                                         className="max-md:size-4"
-//                                     />
-//                                 )}
-//                             </button>
-//                             <span>{comment?.totalLikes}</span>
-//                         </div>
-//                         {/* disliked button */}
-//                         <div className="flex items-center  mr-2">
-//                             <button
-//                                 onClick={() => handleDislikeComment(comment?._id)}
-//                                 className="mr-1"
-//                             >
-//                                 {commentStatus[comment?._id]?.disLike ? (
-//                                     <ThumbsDown
-//                                         fill="black"
-//                                         size={20}
-//                                         className="max-md:size-4"
-//                                     />
-//                                 ) : (
-//                                     <ThumbsDown
-//                                         size={20}
-//                                         className="max-md:size-4"
-//                                     />
-//                                 )}
-//                             </button>
-//                             <span></span>
-//                         </div>
-//                         {/* reply button */}
-//                         <div className="flex items-center">
-//                             <button
-//                                 onClick={() =>
-//                                     setRepliesCommentInput((prev) => ({
-//                                         ...prev,
-//                                         [comment?._id]: {
-//                                             ...prev[comment?._id],
-//                                             inputStatus:
-//                                                 !repliesCommentInput[comment?._id]
-//                                                     ?.inputStatus,
-//                                         },
-//                                     }))
-//                                 }
-//                                 className="py-1 px-3 rounded-[11px]  hover:bg-gray-100 active:bg-gray-200"
-//                             >
-//                                 Reply
-//                             </button>
-//                         </div>
-//                     </div>
-//                     {/* input for taking replies */}
-//                     <div
-//                         className={`${!repliesCommentInput[comment?._id]?.inputStatus
-//                                 ? "hidden"
-//                                 : ""
-//                             } w-full flex items-center`}
-//                     >
-//                         {/* input field */}
-//                         <div className="flex w-full ml-8">
-//                             {/* image of user */}
-//                             <div className="aspect-square">
-//                                 <img
-//                                     src={user?.data?.user?.avatar}
-//                                     className="w-14 max-md:p-1 max-md:w-12 rounded-full max-w-8 aspect-square p-2"
-//                                 />
-//                             </div>
-//                             {/* comment input box */}
-//                             <div className="w-full h-14 max-md:h-8  flex items-center justify-center">
-//                                 <input
-//                                     type="text"
-//                                     placeholder="Add a comment..."
-//                                     value={
-//                                         repliesCommentInput[comment?._id]?.inputValue
-//                                     }
-//                                     onChange={(e) =>
-//                                         setRepliesCommentInput((prev) => ({
-//                                             ...prev,
-//                                             [comment?._id]: {
-//                                                 ...prev[comment?._id],
-//                                                 inputValue: e.target.value,
-//                                             },
-//                                         }))
-//                                     }
-//                                     className="border-b pl-3 max-md:[15px] text-lg w-full border-gray-300 focus:outline-none focus:ring-0"
-//                                 />
-//                             </div>
-//                             {/* comment send button */}
-//                             <div className="aspect-square flex items-center justify-center w-14 max-w-8">
-//                                 <button
-//                                     onClick={() => {
-//                                         handleAddCommentReplies(
-//                                             comment?._id,
-//                                             repliesCommentInput[comment?._id]?.inputValue
-//                                         );
-//                                     }}
-//                                     className="w-14 max-md:w-8 px-2 hover:bg-gray-100 active:bg-gray-200 aspect-square flex justify-center items-center"
-//                                 >
-//                                     <SendHorizonal />
-//                                 </button>
-//                             </div>
-//                         </div>
-//                     </div>
-
-//                     {/* replied list */}
-//                     <div className="ml-12 mt-2 flex items-center">
-//                         <button
-//                             onClick={() => {
-//                                 setCommentStatus((prev) => ({
-//                                     ...prev,
-//                                     [comment?._id]: {
-//                                         ...prev[comment?._id],
-//                                         repliesToggle:
-//                                             !commentStatus[comment?._id]?.repliesToggle,
-//                                     },
-//                                 }));
-//                                 setGetCommentRepliesId(comment?._id);
-//                                 handleCommentReplies(comment?._id);
-//                             }}
-//                             className="space-y-2 pt-1 pb-1 pl-3 pr-3 rounded-[11px] bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-500 flex justify-center items-center"
-//                         >
-//                             Replies{" "}
-//                             <span>
-//                                 <ChevronDown size={20} />
-//                             </span>
-//                         </button>
-//                     </div>
-
-//                     <div></div>
-//                     {/* sub comment means replies */}
-//                     <div
-//                         className={`${commentStatus[comment?._id]?.repliesToggle
-//                                 ? ""
-//                                 : "hidden"
-//                             }  overfolw-y-scroll scroll-smooth scrollBar `}
-//                     >
-//                         {repliesOnComment.map((replies) => (
-//                             <div
-//                                 key={replies._id}
-//                                 // id={replies._id || "userid"}
-//                                 className="ml-12"
-//                             >
-//                                 {/* image,username and time ago */}
-//                                 <div className="flex items-center ">
-//                                     <div className="aspect-square p-2">
-//                                         <img
-//                                             src={replies?.user_info?.avatar}
-//                                             className="min-w-6 bg-blue-300 rounded-full w-8 aspect-square"
-//                                         />
-//                                     </div>
-//                                     <div className="-space-x-3">
-//                                         <span className="text-lg max-md:text-[15px] font-medium">
-//                                             {replies?.user_info?.username}
-//                                         </span>
-//                                         <span className="text-gray-500 max-md:text-sm text-md">
-//                                             {replies?.createdAt}
-//                                         </span>
-//                                     </div>
-//                                 </div>
-//                                 {/* sub content */}
-//                                 <div className="scrollBar ml-12 max-md:ml-12 max-md:text-sm text-md overflow-y-auto">
-//                                     {replies?.content}
-//                                 </div>
-//                                 <div className="ml-12  flex items-center p-1">
-//                                     {/* liked button sub comment */}
-//                                     <div className="flex items-center mr-2">
-//                                         <button
-//                                             onClick={() => handlelikeReplies(replies._id)}
-//                                             className="mr-1"
-//                                         >
-//                                             {commentStatus[replies._id]?.repliesLike ? (
-//                                                 <ThumbsUp
-//                                                     fill={"black"}
-//                                                     size={20}
-//                                                     className="max-md:size-4"
-//                                                 />
-//                                             ) : (
-//                                                 <ThumbsUp
-//                                                     size={20}
-//                                                     className="max-md:size-4"
-//                                                 />
-//                                             )}
-//                                         </button>
-//                                         <span>{replies?.totalLikes}</span>
-//                                     </div>
-//                                     {/* disliked button sub comment */}
-//                                     <div className="flex items-center  mr-2">
-//                                         <button
-//                                             onClick={() =>
-//                                                 handleDislikeReplies(replies._id)
-//                                             }
-//                                             className="mr-1"
-//                                         >
-//                                             {commentStatus[replies._id]
-//                                                 ?.repliesDisLike ? (
-//                                                 <ThumbsDown
-//                                                     fill={"black"}
-//                                                     size={20}
-//                                                     className="max-md:size-4"
-//                                                 />
-//                                             ) : (
-//                                                 <ThumbsDown
-//                                                     size={20}
-//                                                     className="max-md:size-4"
-//                                                 />
-//                                             )}
-//                                         </button>
-//                                         <span></span>
-//                                     </div>
-//                                     {/* reply button sub comment */}
-//                                     <div className="flex items-center">
-//                                         <button
-//                                             onClick={() =>
-//                                                 setCommentStatus((prev) => ({
-//                                                     ...prev,
-//                                                     [replies._id]: {
-//                                                         ...prev[replies._id],
-//                                                         replyToggle:
-//                                                             !commentStatus[replies._id]
-//                                                                 ?.replyToggle,
-//                                                     },
-//                                                 }))
-//                                             }
-//                                             className="py-1 px-3 rounded-[11px]  hover:bg-gray-100 active:bg-gray-200"
-//                                         >
-//                                             Reply
-//                                         </button>
-//                                     </div>
-//                                 </div>
-//                                 {/* replies input set */}
-//                                 <div
-//                                     className={`${commentStatus[replies._id]?.replyToggle
-//                                             ? ""
-//                                             : "hidden"
-//                                         } w-full flex items-center`}
-//                                 >
-//                                     {/* input field */}
-//                                     <div className="flex w-full">
-//                                         {/* image of user */}
-//                                         <div className="aspect-square flex justify-center items-center mr-2">
-//                                             <img
-//                                                 src={user?.userInfo?.avatar}
-//                                                 className="w-14 rounded-full max-md:p-0 max-md:w-8 aspect-square p-2"
-//                                             />
-//                                         </div>
-//                                         {/* comment input box */}
-//                                         <div className="w-full max-md:text-sm h-14 max-md:h-12 flex items-center justify-center">
-//                                             <span className="text-sm max-md:text-[12px] font-stretch-extra-condensed ">{`@${replies?.user_info?.username}`}</span>
-
-//                                             <input
-//                                                 type="text"
-//                                                 placeholder="Add a comment..."
-//                                                 value={
-//                                                     commentStatus[replies._id]?.replyInput
-//                                                 }
-//                                                 onChange={(e) => {
-//                                                     setCommentStatus((prev) => ({
-//                                                         ...prev,
-//                                                         [replies._id]: {
-//                                                             ...prev[replies._id],
-//                                                             replyInput: e.target.value,
-//                                                         },
-//                                                     }));
-//                                                 }}
-//                                                 className="border-b pl-3 max-md:pl-1.5 max-md:text-sm text-lg w-full border-gray-300 focus:outline-none focus:ring-0"
-//                                             />
-//                                         </div>
-//                                         {/* comment send button */}
-//                                         <div className="aspect-square flex items-center justify-center w-14 max-md:w-8">
-//                                             <button
-//                                                 onClick={() => {
-//                                                     handleAddCommentReplies(
-//                                                         replies._id,
-//                                                         commentStatus[replies._id]?.replyInput
-//                                                     );
-//                                                     setCommentStatus((prev) => ({
-//                                                         ...prev,
-//                                                         [replies._id]: {
-//                                                             ...prev[replies._id],
-//                                                             replyInput: "",
-//                                                         },
-//                                                     }));
-//                                                 }}
-//                                                 className="w-14 max-md:w-8 max-md:p-0 p-2.5 hover:bg-gray-100 active:bg-gray-200 aspect-square flex justify-center items-center"
-//                                             >
-//                                                 <SendHorizonal />
-//                                             </button>
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             </div>
-//                         ))}
-//                     </div>
-//                 </div>
-//             </div>
-//         ))}
-//     </div>
-//     <button
-//         className={`${!minimiseComment ? "hidden" : "max-lg:text-xs"}`}
-//         onClick={(e) => {
-//             e.stopPropagation();
-//             setMinimiseComment(false);
-//         }}
-//     >
-//         show less
-//     </button>
-// </div>

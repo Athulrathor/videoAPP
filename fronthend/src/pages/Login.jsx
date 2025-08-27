@@ -46,7 +46,8 @@ const Login = () => {
     onSuccess: async ({ access_token }) => {
       const result = await AuthService.loginWithGoogle(access_token);
       if (result.user && result.accessToken) {
-        dispatch(setAuth({loggedIn:true, user: result.user, token: result.accessToken }));
+        dispatch(setAuth({ loggedIn: true, user: result.user[0], token: result?.accessToken }));
+        console.log(result.accessToken,typeof(result.accessToken))
         toast.success('Google login successful');
         Navigate('/',{replace:true});
       } else {

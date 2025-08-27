@@ -11,7 +11,7 @@ router.route("/user-playlist/:userId").get(verifyToken, getUserPlaylists);
 
 router.route("/get-playlist/:playlistId").get(verifyToken, getPlaylistById);
 
-router.route("/add-video-to-playlist/:videoId/:playlistId").patch(verifyToken, addVideoToPlaylist);
+router.route("/add-video-to-playlist").post(verifyToken, addVideoToPlaylist);
 
 router
   .route("/remove-video-to-playlist/:videoId/:playlistId")

@@ -177,8 +177,12 @@ const googleLogin = asyncHandler(async (req, res) => {
       secure: true,
     };
 
-    const accessToken = user.generateAccessToken();
-    res.status(200).cookie("accessToken", accessToken, options).json({ user,accessToken });
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    );
+
+    // const accessToken = user.generateAccessToken();
+    res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json({ user,accessToken });
   } catch (error) {
     console.error(error.message);
     throw new ApiError(500,"Error in google login part!");

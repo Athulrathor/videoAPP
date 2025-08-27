@@ -132,7 +132,7 @@ export const userSlice = createSlice({
     user: {},
     loading: false,
     error: null,
-    token: null,
+    token: "",
     loggedIn: false,
     sideActive: "home",
     settingsActive: "Accounts",

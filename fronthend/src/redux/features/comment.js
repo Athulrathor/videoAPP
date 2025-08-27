@@ -9,7 +9,7 @@ export const fetchAddCommentReplies = createAsyncThunk('add/commentReplies', asy
 
     try {
         const commentAdded = await axiosInstance.post(`comment/add-comment-to-comment/${id}`, { comment: newComment, });
-        console.log(commentAdded.data.data)
+        console.log("comment Added!")
         return {
             parentId: id,
             comment: commentAdded?.data?.data?.data
@@ -27,7 +27,7 @@ export const fetchAddVideoComment = createAsyncThunk('add/VideoComment', async (
 
     try {
         const videoCommentAdded = await axiosInstance.post(`comment/add-comment-to-video/${id}`, { comment: newComment });
-
+        console.log("Video comment Added!")
         return {
             videoId: id,
             newComment: videoCommentAdded?.data?.data,
@@ -45,7 +45,7 @@ export const fetchAddShortComment = createAsyncThunk('addComment/ShortComment', 
 
     try {
         const shortComment = await axiosInstance.post(`comment/add-comment-to-short/${id}`, { comment: newComment });
-        
+        console.log("Short comment Added!")
         return {
             shortId: id,
             newComment: shortComment?.data?.data,
@@ -62,7 +62,7 @@ export const fetchCommentReplies = createAsyncThunk('getComment/commentReplies',
     try {
         
         const commentReplies = await axiosInstance.get(`comment//get-comment-to-comment/${id}`);
-        console.log(commentReplies)
+        console.log("comment fetched!")
         return {
             commentId: id,
             replies: commentReplies?.data?.data
@@ -77,7 +77,7 @@ export const fetchVideoComment = createAsyncThunk('getComment/VideoComment', asy
 
     try {
         const videoComment = await axiosInstance.get(`comment/get-video-comment/${id}`);
-        console.log(videoComment?.data?.data?.data)
+        console.log("video Comment Fetched!")
         return videoComment?.data?.data?.data;
     } catch (error) {
         return rejectWithValue(error?.response?.data?.message || error.message);
@@ -89,7 +89,7 @@ export const fetchShortComment = createAsyncThunk('getComment/ShortComment', asy
 
     try {
         const shortComment = await axiosInstance.get(`comment/get-short-comment/${id}`);
-        console.log(shortComment?.data?.data?.data)
+        console.log("Short comment fetched!")
         return shortComment?.data?.data?.data;
     } catch (error) {
         return rejectWithValue(error?.response?.data?.message || error.message);

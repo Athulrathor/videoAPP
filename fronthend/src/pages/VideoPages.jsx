@@ -1,7 +1,7 @@
 import React, { lazy, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
-import { ArrowDownToLine, EllipsisVertical, Maximize, Pause, Play, Settings, Share2, SkipForward, ThumbsDown, ThumbsUp, Video, Volume2, VolumeX } from "lucide-react";
+import { ArrowDownToLine, EllipsisVertical, Maximize, Pause, Play, Plus, Settings, Share2, SkipForward, ThumbsDown, ThumbsUp, Video, Volume2, VolumeX } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import SideMenu from "../components/SideMenu";
 import { fetchVideosById, fetchViewCounter } from "../redux/features/videos";
@@ -23,7 +23,9 @@ const VideoPages = (props) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setisMuted] = useState(false);
   const [volume, setVolume] = useState(80);
-  const [currentVolumeBar, setCurrentVolumeBar] = useState(false)
+  const [currentVolumeBar, setCurrentVolumeBar] = useState(false);
+
+  const [ToggleAddPlaylistBtn, setToggleAddPlaylistBtn] = useState(false);
 
   const [recommendationStates, setRecommendationStates] = useState({});
   const [currentDuration, setCurrentDuration] = useState(false)
@@ -49,6 +51,7 @@ const VideoPages = (props) => {
   const { videos, targetVideo } = useSelector((state) => state.videos);
   const {  videoLiked } = useSelector(state => state.likes);
   const { isSubcribedStatus } = useSelector(state => state.subscriber);
+  const { playlist } = useSelector(state => state.Playlists)
   
   const filteredVideos = useMemo(() => 
     videos.filter(video => video?._id !== targetVideo?._id)
@@ -57,6 +60,7 @@ const VideoPages = (props) => {
   useEffect(() => {
     dispatch(fetchVideosById(VideoId));
   }, [dispatch, VideoId]);
+
 
   useEffect(() => {
     if (videos.length > 0 && targetVideo?._id) {
@@ -145,8 +149,6 @@ const VideoPages = (props) => {
 
     Navigate(`/video/${video_id}`)
   }
-
-  console.log(videos)
 
   const togglePauseRecommendation = (videoId2) => {
     const video = videoRecommendationRefs.current[videoId2];
@@ -291,7 +293,13 @@ const VideoPages = (props) => {
       const formattedDateTime = now.toLocaleString("en-US", options);
 
       return formattedDateTime;
-  }; 
+  };
+
+  // const getvideoInPlaylist = () => {
+  //   playlist?.video.map(video => video._id === VideoId);
+  // }
+
+  // getvideoInPlaylist();
 
   return (
     <div className="relative h-full">
@@ -314,7 +322,7 @@ const VideoPages = (props) => {
         setToggleLiveUploading={setToggleLiveUploading}
       />
       {/* <SideMenu /> */}
-      <div className="h-[calc(100vh-70px)] max-lg:flex-col flex justify-evenly max-md:pl-0 max-md:pr-0 pl-4 pr-4 pt-2 overflow-y-scroll scroll-smooth scrollBar overflow-x-hidden">
+      <div className="h-[calc(100vh-70px)] max-lg:flex-col flex justify-evenly max-sm:justify-baseline max-md:pl-0 max-md:pr-0 pl-4 pr-4 pt-2 overflow-y-scroll scroll-smooth scrollBar overflow-x-hidden">
         {/* video section */}
         <div className=" w-[70%] max-lg:w-full max-lg:flex-shrink-0 px-2 max-md:px-0 h-auto">
           {/* video and its controls */}
@@ -614,6 +622,26 @@ const VideoPages = (props) => {
                     <span>Download</span>
                   </button>
                 </div>
+                {/* add video to playlist */}
+                
+                <div className=" h-full justify-center items-center">
+                  <div className={`${ToggleAddPlaylistBtn ? "-translate-y-[104%] max-sm:-translate-x-[25%]" : "hidden translate-x-[4%] -translate-y-[4%]"} absolute max-sm:right-1  h-[160px] aspect-square   transition-all duration-1000 overflow-hidden bg-gray-50 rounded-lg shadow-2xs`}>
+                    <h3 className="text-center mt-1">Add To PlayList</h3>
+                    <ul className=" overflow-y-scroll scrollBar w-full h-full">
+                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
+                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
+                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
+                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
+                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
+                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
+                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
+                    </ul>
+                  </div>
+                  <button onClick={() => setToggleAddPlaylistBtn(!ToggleAddPlaylistBtn)} className="pt-2 max-lg:text-sm max-sm:px-2 max-sm:py-1 pb-2 pl-4 pr-4 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-4xl flex justify-center items-center font-medium max-sm:space-x-0 space-x-2">
+                    <Plus className={`max-lg:w-4`} />{" "}
+                    <span className="max-sm:hidden">Add to playList</span>
+                  </button>
+                </div>
                 {/* more list */}
                 <div className="h-full flex justify-center items-center">
                   <button className="max-sm:py-1 sm:px-4 sm:py-2 max-sm:px-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-4xl flex justify-center items-center font-medium">
@@ -647,11 +675,120 @@ const VideoPages = (props) => {
         </div>
         {/* recommandation section */}
         <div className=" w-[30%] max-lg:mt-2 px-2 max-md:px-0 max-lg:w-full max-lg:rounded-none rounded-lg flex flex-col space-y-3">
+          <div className={``}>
+            {playlist?.video?.map((video) => (
+              <div
+                key={video._id}
+                className="flex max-lg:flex-col max-lg:w-full h-fit"
+                onClick={() => Navigate(`/video/${video?._id}`)}
+              >
+                {/* video */}
+                <div
+                  className="relative w-[40%] max-lg:w-full  h-fit"
+                  onMouseEnter={(prev) => {
+                    setRecommendationStates({
+                      ...prev,
+                      [video?._id]: { ...prev[video?._id], mutedStatus: true },
+                    });
+                    togglePlayRecommendation(video?._id);
+                  }}
+                  onMouseLeave={(prev) => {
+                    setRecommendationStates({
+                      ...prev,
+                      [video?._id]: { ...prev[video?._id], mutedStatus: false },
+                    });
+                    togglePauseRecommendation(video?._id);
+                  }}
+                >
+                  <video
+                    src={video?.videoFile}
+                    ref={(el) => {
+                      if (el) {
+                        videoRecommendationRefs.current[video?._id] = el;
+                      }
+                    }}
+                    muted={recommendationStates[video?._id]?.isMuted}
+                    poster={video?.thumbnail}
+                    onTimeUpdate={() => handleOnTimeUpdate(video?._id)}
+                    preload="metadata"
+                    className="bg-black/90 aspect-video max-md:rounded-none max-lg:w-full rounded-lg"
+                  ></video>
+                  <div className="absolute inset-0 p-2">
+                    <div className="flex justify-end">
+                      <button
+                        ref={(el) => {
+                          if (el) {
+                            muteButtonRef.current[video?._id] = el;
+                          }
+                        }}
+                        onClick={(e) => toggleMuteRecommendation(e, video?._id)}
+                        className={`${recommendationStates[video?._id]?.mutedStatus
+                            ? ""
+                            : "hidden"
+                          } p-2 rounded-full hover:bg-black30 active:bg-black/50 z-13`}
+                      >
+                        {recommendationStates[video?._id]?.isMuted === true &&
+                          recommendationStates[video?._id]?.mutedStatus === true ? (
+                          <VolumeX
+                            size={16}
+                            color="white"
+                          />
+                        ) : (
+                          <Volume2
+                            size={16}
+                            color="white"
+                          />
+                        )}
+                      </button>
+                    </div>
+                    <div className="absolute inset-0 flex items-end justify-end bottom-0 p-2 text-[10px]">
+                      <h1 className="text-white text-lg max-md:text-sm bg-black/30 font-semibold px-1 py-0.1 rounded-sm">
+                        {recommendationStates[video?._id]?.isPlaying === true
+                          ? formatTime(
+                            recommendationStates[video?._id]?.duration || 0
+                          )
+                          : formatTime(video?.duration || 0)}
+                      </h1>
+                    </div>
+                  </div>
+                </div>
+                <div className="w-[60%] max-lg:w-full flex justify-base flex-col max-md:py-0 py-1 pl-2 max-md:my-1">
+                  {/* title */}
+                  <div className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]">
+                    <h2>{video?.title}</h2>
+                  </div>
+                  <div className="flex">
+                    <div className="flex items-baseline ">
+                      <img
+                        src={video?.userInfo?.avatar}
+                        alt=""
+                        className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                      />
+                    </div>
+                    <div className="flex flex-col leading-tight">
+                      {/* user name */}
+                      <div className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
+                        <h3>{video?.userInfo?.username}</h3>
+                      </div>
+                      {/* view and month ago */}
+                      <div className="text-[11px] font-normal  text-gray-500 max-md:text-[11px] space-x-1.5">
+                        <span>{video?.views} views</span>
+                        <span className="mx-1">•</span>
+                        <span>
+                          {formatTimeAgo(video?.createdAt) || "12 year ago"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
           {filteredVideos.map((video) => (
             <div
               key={video._id}
               className="flex max-lg:flex-col max-lg:w-full h-fit"
-              onClick={() => Navigate(`/video/${video._id}`)}
+              onClick={() => Navigate(`/video/${video?._id}`)}
             >
               {/* video */}
               <div
@@ -659,14 +796,14 @@ const VideoPages = (props) => {
                 onMouseEnter={(prev) => {
                   setRecommendationStates({
                     ...prev,
-                    [video._id]: { ...prev[video._id], mutedStatus: true },
+                    [video?._id]: { ...prev[video?._id], mutedStatus: true },
                   });
-                  togglePlayRecommendation(video._id);
+                  togglePlayRecommendation(video?._id);
                 }}
                 onMouseLeave={(prev) => {
                   setRecommendationStates({
                     ...prev,
-                    [video._id]: { ...prev[video._id], mutedStatus: false },
+                    [video?._id]: { ...prev[video._id], mutedStatus: false },
                   });
                   togglePauseRecommendation(video._id);
                 }}
@@ -675,12 +812,12 @@ const VideoPages = (props) => {
                   src={video?.videoFile}
                   ref={(el) => {
                     if (el) {
-                      videoRecommendationRefs.current[video._id] = el;
+                      videoRecommendationRefs.current[video?._id] = el;
                     }
                   }}
-                  muted={recommendationStates[video._id]?.isMuted}
+                  muted={recommendationStates[video?._id]?.isMuted}
                   poster={video?.thumbnail}
-                  onTimeUpdate={() => handleOnTimeUpdate(video._id)}
+                  onTimeUpdate={() => handleOnTimeUpdate(video?._id)}
                   preload="metadata"
                   className="bg-black/90 aspect-video max-md:rounded-none max-lg:w-full rounded-lg"
                 ></video>
@@ -689,18 +826,18 @@ const VideoPages = (props) => {
                     <button
                       ref={(el) => {
                         if (el) {
-                          muteButtonRef.current[video._id] = el;
+                          muteButtonRef.current[video?._id] = el;
                         }
                       }}
-                      onClick={(e) => toggleMuteRecommendation(e, video._id)}
+                      onClick={(e) => toggleMuteRecommendation(e, video?._id)}
                       className={`${
-                        recommendationStates[video._id]?.mutedStatus
+                        recommendationStates[video?._id]?.mutedStatus
                           ? ""
                           : "hidden"
                       } p-2 rounded-full hover:bg-black30 active:bg-black/50 z-13`}
                     >
-                      {recommendationStates[video._id]?.isMuted === true &&
-                      recommendationStates[video._id]?.mutedStatus === true ? (
+                      {recommendationStates[video?._id]?.isMuted === true &&
+                      recommendationStates[video?._id]?.mutedStatus === true ? (
                         <VolumeX
                           size={16}
                           color="white"
@@ -715,9 +852,9 @@ const VideoPages = (props) => {
                   </div>
                   <div className="absolute inset-0 flex items-end justify-end bottom-0 p-2 text-[10px]">
                     <h1 className="text-white text-lg max-md:text-sm bg-black/30 font-semibold px-1 py-0.1 rounded-sm">
-                      {recommendationStates[video._id]?.isPlaying === true
+                      {recommendationStates[video?._id]?.isPlaying === true
                         ? formatTime(
-                            recommendationStates[video._id]?.duration || 0
+                            recommendationStates[video?._id]?.duration || 0
                           )
                         : formatTime(video?.duration || 0)}
                     </h1>
