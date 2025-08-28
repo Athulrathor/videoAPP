@@ -72,7 +72,7 @@ const UserVideos = ({toggleVideoUploading,setToggleVideoUploading,timeAgo,format
   return (
     <>
       <UploadVideo toggleVideoUploading={toggleVideoUploading} setToggleVideoUploading={setToggleVideoUploading} />
-    <div className="h-[90vh] w-screen overflow-y-scroll scrollBar ">
+    <div className="h-full w-full overflow-y-scroll scrollBar ">
       {/* title */}
       <div className="w-full flex items-center font-bold text-2xl max-md:text-lg max-sm:text-sm p-2">
         <h1>User Videos</h1>

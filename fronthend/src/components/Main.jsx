@@ -27,9 +27,7 @@ const Main = ({ setToggleVideoUploading, toggleVideoUploading, timeAgo, videoLoa
   
   return (
     <main
-      className={`flex flex-col max-md:w-full ${
-        mainWidth ? "w-[calc(100vw-66px)]" : "w-[calc(100vw-200px)]"
-      } h-[calc(100vh - 65px)] bg-[#f9f9f9]`}
+      className={`flex flex-col w-full h-full bg-[#f9f9f9]`}
     >
       {(sideActive === "home" ? (
         <Videos

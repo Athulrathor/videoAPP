@@ -36,6 +36,14 @@ const VideoPages = (props) => {
     subcriberStatus: false
   });
 
+    const [videoParams, setVideoParams] = useState({
+      page: 1,
+      limit: 20,
+      query: "",
+      sortBy: 1,
+      sortType: "createdAt",
+    });
+
   const [functionCalled, setFunctionCalled] = useState(false);
 
   const [minimiseComment, setMinimiseComment] = useState(false);
@@ -45,6 +53,7 @@ const VideoPages = (props) => {
   const muteButtonRef = useRef({})
 
   const [isAutoplayOn, setIsAutoplayOn] = useState(false);
+  const [showDesc, setshowDesc] = useState(false);
 
   const Navigate = useNavigate();
 
@@ -322,9 +331,14 @@ const VideoPages = (props) => {
         setToggleLiveUploading={setToggleLiveUploading}
       />
       {/* <SideMenu /> */}
-      <div className="h-[calc(100vh-70px)] max-lg:flex-col flex justify-evenly max-sm:justify-baseline max-md:pl-0 max-md:pr-0 pl-4 pr-4 pt-2 overflow-y-scroll scroll-smooth scrollBar overflow-x-hidden">
+      <div className="h-[calc(100vh_-_57px)] max-md;h-[calc(100vh_-_41px)] max-lg:flex-col flex justify-evenly max-sm:justify-baseline max-md:pl-0 max-md:pr-0 w-full pb-2  pr-4  overflow-y-scroll scroll-smooth scrollBar overflow-x-hidden">
+        
+        <div className="max-lg:absolute top-[57px] max-md:top-[41px] md:max-lg:z-40 left-0">
+          <SideMenu menuToggle={{ showMenu, setShowMenu }}
+            videoParam={{ setVideoParams, videoParams }} />
+        </div>
         {/* video section */}
-        <div className=" w-[70%] max-lg:w-full max-lg:flex-shrink-0 px-2 max-md:px-0 h-auto">
+        <div className=" w-[70%] max-lg:w-full pl-4 pt-2 max-lg:flex-shrink-0 px-2 max-md:px-0 h-auto">
           {/* video and its controls */}
           <div className="relative">
             {/* videos */}
@@ -625,7 +639,7 @@ const VideoPages = (props) => {
                 {/* add video to playlist */}
                 
                 <div className=" h-full justify-center items-center">
-                  <div className={`${ToggleAddPlaylistBtn ? "-translate-y-[104%] max-sm:-translate-x-[25%]" : "hidden translate-x-[4%] -translate-y-[4%]"} absolute max-sm:right-1  h-[160px] aspect-square   transition-all duration-1000 overflow-hidden bg-gray-50 rounded-lg shadow-2xs`}>
+                  <div className={`${ToggleAddPlaylistBtn ? "-translate-y-[104%] max-sm:-translate-x-[25%] translate-x-[5%] max-lg:-translate-x-[3%]" : "hidden"} absolute max-sm:right-1  h-[160px] aspect-square   transition-all duration-1000 overflow-hidden bg-gray-50 rounded-lg shadow-2xs`}>
                     <h3 className="text-center mt-1">Add To PlayList</h3>
                     <ul className=" overflow-y-scroll scrollBar w-full h-full">
                       <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
@@ -652,10 +666,10 @@ const VideoPages = (props) => {
               </div>
             </div>
             {/* descriptions  */}
-            <div className="flex justify-center w-full my-2  max-md:rounded-none rounded-2xl line-clamp-2 max-md:line-clamp-1">
-              <div className="w-full p-3 max-md:p-1.5 flex-col bg-gray-200  border-2 border-gray-300">
+            <div onClick={() => setshowDesc(true)} onBlur={() =>showDesc(false)} className={`${showDesc ? "h-fit" : "line-clamp-2"} w-full my-2.5`}>
+              <div className={`p-3 max-md:p-1.5 max-md:mx-2 flex-col bg-gray-50  border-2 border-gray-200   rounded-lg ${showDesc ? "" : "line-clamp-2 max-md:line-clamp-1"}`}>
                 {/* views and day date year */}
-                <div className="flex space-x-3 text-[11px] font-medium ">
+                <div className={`${showDesc ? "" : "hidden"} flex space-x-2 text-[11px] font-medium `}>
                   <span>
                     {targetVideo?.views} <span>View</span>
                   </span>
@@ -664,17 +678,22 @@ const VideoPages = (props) => {
                   </span>
                 </div>
                 {/* description */}
-                <p className="">{targetVideo?.description}</p>
+                <p className="w-full">{targetVideo?.description}</p>
+                <div className="text-xs cursor-pointer" onClick={(e) => {
+                  e.stopPropagation();
+                  setshowDesc(false);
+                }}>Show Less</div>
               </div>
+              
             </div>
             {/* comments setion */}
-            <div onClick={() => setMinimiseComment(true)}>
+            <div onClick={() => setMinimiseComment(true)} className="border-2 my-2 max-md:mx-2 border-gray-200 bg-gray-50 rounded-2xl">
               <Comments whichContent={"videos"} contentId={VideoId} timeAgo={timeAgo} minimiseComment={minimiseComment} setMinimiseComment={setMinimiseComment} />
             </div>
           </div>
         </div>
         {/* recommandation section */}
-        <div className=" w-[30%] max-lg:mt-2 px-2 max-md:px-0 max-lg:w-full max-lg:rounded-none rounded-lg flex flex-col space-y-3">
+        <div className=" w-[30%] max-lg:mt-2 px-2 pt-2 max-md:px-0 max-lg:w-full max-lg:rounded-none rounded-lg flex flex-col space-y-3">
           <div className={``}>
             {playlist?.video?.map((video) => (
               <div

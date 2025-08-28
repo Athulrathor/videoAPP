@@ -17,9 +17,9 @@ const Playlist = ({ formatTime, timeAgo }) => {
   const [counter, setCounter] = useState(0);
   const [toggleCreatePlaylist, setToggleCreatePlaylist] = useState(false);
   const [formData, setFormData] = useState({
-    title: "user playlist",
+    title: "",
     description: " ",
-    privacy: "public"
+    privacy: ""
   });
 
   useEffect(() => {
@@ -89,8 +89,8 @@ const Playlist = ({ formatTime, timeAgo }) => {
   }
 
   return (
-    <div className='max-md:w-screen max-w-screen h-screen overflow-y-scroll scrollBar py-3 max-md:py-2 px-6 max-md:px-2'>
-      <div className='flex items-center justify-between border-b-1 py-1'>
+    <div className='py-3 max-md:py-2 w-full h-full px-6 max-md:px-2 overflow-y-scroll'>
+      <div className='flex items-center justify-between border-b-1 py-1 sticky'>
         <h1 className='text-2xl max-md:text-lg max-sm:text-sm font-bold stroke-2 mb-2'>User Playlists</h1>
         <button onClick={() => setToggleCreatePlaylist(true)} className='mr-4 px-4 py-1 stroke-2 bg-blue-300 hover:bg-blue-200 hover:opacity-85 active:bg-blue-300 rounded-lg '>
           Create
@@ -274,7 +274,7 @@ const Playlist = ({ formatTime, timeAgo }) => {
         </div>
 
         {playlist.length === 0 ? (
-          <div className="hidden flex flex-col items-center justify-center w-full p-8 max-md:p-4 max-sm:p-0 mt-30 max-md:mt-16">
+          <div className="flex flex-col items-center justify-center w-full p-8 max-md:p-4 max-sm:p-0 mt-30 max-md:mt-16">
             {/* Animated Video Icon Container */}
             <div className="relative mb-6">
               {/* Background Pulse Effect */}
@@ -327,7 +327,7 @@ const Playlist = ({ formatTime, timeAgo }) => {
         
 
         <div className={`${toggleCreatePlaylist ? "hidden" : ""} mt-1`} >
-          <div className="w-full space-y-3 h-[calc(113px - 100vh)]">
+          <div className="w-full space-y-3">
             {playlist &&
               playlist.map((video) => (
                 <div
@@ -340,21 +340,21 @@ const Playlist = ({ formatTime, timeAgo }) => {
                   >
                     <div className="relative aspect-video mt-4 ml-4">
                       {/* Stack Layers */}
-                      <div className="absolute -left-3 -top-3 h-full w-full rounded-lg overflow-hidden bg-gray-400 dark:bg-gray-700">
+                      <div className="absolute -left-3 -top-3 h-full w-full rounded-lg overflow-hidden shadow-2x1 opacity-66">
                         <img
                           src={video?.video[0]?.thumbnail || video?.thumbnail}
                           alt={video?.title}
                           className="h-full w-full object-cover"
                         />
                       </div>
-                      <div className="absolute -left-2 -top-2 h-full w-full overflow-hidden rounded-lg bg-gray-300 dark:bg-gray-600">
+                      <div className="absolute -left-2 -top-2 h-full w-full overflow-hidden rounded-lg shadow-2x1 opacity-75">
                         <img
                           src={video?.video[0]?.thumbnail || video?.thumbnail}
                           alt={video?.title}
                           className="h-full w-full object-cover"
                         />
                       </div>
-                      <div className="absolute -left-1 -top-1 h-full w-full rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-500">
+                      <div className="absolute -left-1 -top-1 h-full w-full rounded-lg overflow-hidden shadow-2x1">
                         <img
                           src={video?.video[1]?.thumbnail || video?.thumbnail}
                           alt={video?.title}

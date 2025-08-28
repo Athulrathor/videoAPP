@@ -44,7 +44,7 @@ const Videos = (props) => {
     <div className="min-h-screen w-full bg-white">
 
       {/* Video Grid */}
-      <div className="scrollBar max-w-full max-md:w-screen mx-auto overflow-y-scroll h-[calc(100vh-65px)] max-md:h-[calc(100vh-53px)] max-sm:h-[calc(100vh-39px)] max-sm:pb-6 sm:px-0 lg:px-2">
+      <div className="scrollBar max-w-full max-md:w-screen mx-auto overflow-y-scroll h-[calc(100vh-65px)] max-md:h-[calc(100vh-53px)] max-sm:h-[calc(100vh-39px)] max-sm:pb-6 max-md:px-0 px-2">
         {(!videoError || videos.length > 0) ? (
         <div>
           {videoLoading ? ( 

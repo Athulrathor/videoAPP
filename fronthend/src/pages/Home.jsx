@@ -133,15 +133,15 @@ function Home() {
         videoQueries={{ videoParams, setVideoParams }}
         shortQueries={{shortParams,setShortParams}}
       />
-      <div className={`w-fit flex justify-end`}>
-        <div className="w-fit">
+      <div className={`w-screen h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] flex`}>
+        <div className=" h-full">
           <SideMenu
             menuToggle={{ showMenu, setShowMenu }}
             videoParam={{ setVideoParams, videoParams }}
           />
         </div>
 
-        <div className="">
+        <div className="w-full h-full">
           {/* <TagSection /> */}
 
           <Main

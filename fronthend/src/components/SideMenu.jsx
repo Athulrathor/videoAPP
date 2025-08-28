@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { PiQueueBold } from "react-icons/pi";
 import { GoVideo } from "react-icons/go";
 import { IoIosArrowForward } from "react-icons/io";
@@ -27,35 +27,25 @@ function SideMenu(props) {
 
   const dispatch = useDispatch();
   const getLocation = useLocation();
+  const Navigate = useNavigate();
 
   const { user, loggedIn, sideActive } = useSelector((state) => state.user);
   const { subcriber } = useSelector(state => state.subscriber)
-
-  const Navigate = useNavigate();
-
-  const [hideName, setHideName] = useState(false);
 
   useEffect(() => {
     dispatch(userSubcribers());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (window.innerWidth > 768) {
-      setHideName(true)
-    } else {
-      setHideName(false)
-    }
-  }, [setHideName, props.menuToggle?.showMenu]);
-
   return (
+    <div>
     <div
-      className={`scroll h-screen ${
-        props.menuToggle?.showMenu ? hideName ? "w-fit" : "hidden" : "w-[200px] z-14"
-      } max-md:absolute bg-white shadow-lg p-2.5 overflow-y-scroll transition-transform duration-1000 ease-in-out scroll-smooth`}
+      className={`scrollBar h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] ${
+        props.menuToggle?.showMenu ? `-translate-x-[100%] absolute` : "translate-x-[0%]"
+      } max-md:absolute bg-white shadow-2xl  p-2.5 max-w-[224px] z-14  -translate-x-[100%] overflow-y-scroll transition-transform duration-1000 ease-in-out scroll-smooth`}
     >
       <div className="border-b border-gray-300 pb-5 gap-1">
         <div
-          className={`hover:bg-gray-100 font-semibold rounded-lg px-3 py-2 flex items-center gap-4 ${
+          className={`hover:bg-gray-100 cursor-pointer rounded-lg px-3 py-2 flex items-center gap-4 ${
             sideActive === "home" ? "bg-gray-200" : ""
           }`}
           onClick={() => {
@@ -72,7 +62,7 @@ function SideMenu(props) {
           {props.menuToggle?.showMenu === true ? "" : <h1>Home</h1>}
         </div>
         <div
-          className={`hover:bg-gray-100 font-normal rounded-lg px-3 py-2 gap-4 flex items-center ${
+          className={`hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 gap-4 flex items-center ${
             sideActive === "shorts" ? "bg-gray-200" : ""
           }`}
           onClick={() => {
@@ -98,7 +88,7 @@ function SideMenu(props) {
           {props.menuToggle?.showMenu === true ? "" : <h1>Shorts</h1>}
         </div>
         <div
-          className={`hover:bg-gray-100 font-normal rounded-lg px-3 py-2 gap-4 flex items-center ${
+          className={`hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 gap-4 flex items-center ${
             sideActive === "subscription" ? "bg-gray-200" : ""
           }`}
           onClick={() => {
@@ -123,7 +113,7 @@ function SideMenu(props) {
           ) : (
             <h1
               onClick={() => Navigate(`/channel/${user?.username}`)}
-              className="flex items-center gap-4 font-semibold rounded-lg px-3"
+                className="flex items-center gap-4 py-1 font-semibold cursor-pointer rounded-lg px-3"
             >
               {loggedIn ? user?.username : "You"}{" "}
               <IoIosArrowForward />
@@ -144,20 +134,20 @@ function SideMenu(props) {
               {props.menuToggle?.showMenu === true ? "" : "History"}
             </h1> */}
             <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
+              className={`flex items-center gap-4 text-nowrap hover:bg-gray-100  cursor-pointer font-normal rounded-lg px-3 py-2 ${
                 sideActive === "Manage Videos" ? "bg-gray-200" : ""
               }`}
               onClick={() => { dispatch(setSideActive("Manage Videos")); props.menuToggle?.setShowMenu(true); dispatch(fetchVideoByOwner(user?.data?.user?._id))}}
             >
               {sideActive === "Manage Videos" ? (
-                <ChartNoAxesGanttIcon className="text-xl fill-black stroke-3" />
+                <ChartNoAxesGanttIcon className="text-xl stroke-3" />
               ) : (
                   <ChartNoAxesGanttIcon className="text-xl" />
               )}
               {props.menuToggle?.showMenu === true ? "" : "Manage Videos"}
             </h1>
             <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
+              className={`flex items-center gap-4 hover:bg-gray-100 cursor-pointer font-normal rounded-lg px-3 py-2 ${
                 sideActive === "playlists" ? "bg-gray-200" : ""
               }`}
               onClick={() => {
@@ -173,7 +163,7 @@ function SideMenu(props) {
               {props.menuToggle?.showMenu === true ? "" : "Playlists"}
             </h1>
             <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
+              className={`flex items-center gap-4 hover:bg-gray-100 cursor-pointer font-normal rounded-lg px-3 py-2 ${
                 sideActive === "your videos" ? "bg-gray-200" : ""
               }`}
               onClick={() => {
@@ -204,7 +194,7 @@ function SideMenu(props) {
               {props.menuToggle?.showMenu === true ? "" : "Watch later"}
             </h1> */}
             <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
+              className={`flex items-center gap-4 hover:bg-gray-100 cursor-pointer font-normal rounded-lg px-3 py-2 ${
                 sideActive === "likedVideos" ? "bg-gray-200" : ""
               }`}
               onClick={() => {
@@ -232,7 +222,7 @@ function SideMenu(props) {
             ""
           ) : (
             <h1
-              className={`flex items-center gap-4 font-semibold rounded-lg px-3 mb-2`}
+                className={`flex items-center gap-4 font-semibold cursor-pointer rounded-lg px-3 mb-2`}
             >
               {/* <GrChannel className="text-xl" /> */}
               Subcribers
@@ -243,7 +233,7 @@ function SideMenu(props) {
               subcriber.map((sub) => (
                 <div
                   key={sub?._id}
-                  className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2`}
+                  className={`flex items-center gap-4 hover:bg-gray-100 cursor-pointer font-normal rounded-lg px-3 py-2`}
                   onClick={() =>{
                     Navigate(`/channel/${sub?.subcribers?.username}`);
                     props.menuToggle?.setShowMenu(true); }
@@ -370,7 +360,7 @@ function SideMenu(props) {
 
       <div className="border-b border-gray-300 py-5">
         <h1
-          className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
+          className={`flex items-center gap-4 hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 ${
             sideActive === "settings" ? "bg-gray-200" : ""
           }`}
           // onClick={() => dispatch(setSideActive("settings"))}
@@ -380,7 +370,7 @@ function SideMenu(props) {
           {props.menuToggle?.showMenu === true ? "" : "Settings"}
         </h1>
         <h1
-          className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
+          className={`flex items-center gap-4 text-nowrap hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 ${
             sideActive === "report history" ? "bg-gray-200" : ""
           }`}
           onClick={() => { dispatch(setSideActive("report history")); props.menuToggle?.setShowMenu(true); }}
@@ -389,7 +379,7 @@ function SideMenu(props) {
           {props.menuToggle?.showMenu === true ? "" : "Report history"}
         </h1>
         <h1
-          className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
+          className={`flex items-center gap-4 hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 ${
             sideActive === "help" ? "bg-gray-200" : ""
           }`}
           onClick={() => { dispatch(setSideActive("help")); props.menuToggle?.setShowMenu(true); }}
@@ -398,7 +388,7 @@ function SideMenu(props) {
           {props.menuToggle?.showMenu === true ? "" : "Help"}
         </h1>
         <h1
-          className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
+          className={`flex items-center gap-4 hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 ${
             sideActive === "feedback" ? "bg-gray-200" : ""
           }`}
           onClick={() => { dispatch(setSideActive("feedback")); props.menuToggle?.setShowMenu(true); }}
@@ -423,7 +413,8 @@ function SideMenu(props) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+      </div>
   );
 }
 

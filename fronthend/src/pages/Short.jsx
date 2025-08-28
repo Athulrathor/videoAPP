@@ -37,7 +37,7 @@ const Short = (props) => {
   };
 
   return (
-    <div className="">
+    <div className="w-full h-full">
           <div>
             {shortError && (
               <div className="text-center py-16 px-6">
@@ -82,9 +82,9 @@ const Short = (props) => {
           ) : (
             <div className="">
               <div
-                style={{ height: "calc(100vh - 65px)" }}
-                className=" justify-center items-center w-full snap-y scrollBar max-md:w-screen snap-mandatory scroll-smooth overflow-y-scroll flex-col"
+                className={` items-center flex w-full ${showComment ? "justify-center" : "justify-evenly"}  snap-y h-[calc(100vh_-_60px)] max-md:h-[calc(100vh_-_41px)] p-2 max-sm:p-0 snap-mandatory max-sm:overflow-hidden scroll-smooth overflow-y-scroll`}
               >
+                
                 {short?.map((shortVideo) => (
                   <div
                     key={shortVideo._id}
@@ -102,10 +102,13 @@ const Short = (props) => {
                     />
                   </div>
                 ))}
+                <div className={`${showComment ? "translate-x-[200%] absolute" : ""} ${window.innerWidth < 768 ? "hidden" : ""} z-22 bg-gray-100 rounded-lg right-0 ml-2 transition-all w-96 duration-500 h-full`}>
+                  <Comments whichContent={"shorts"} contentId={getShortId} toggle={{ showComment, setShowComment }} />
+                </div>
               </div>
               {/* comments start hear */}
-                <div className={`${showComment ? "" : ""} flex justify-center items-center z-30`}>
-                    <Comments whichContent={"shorts"} contentId={getShortId} toggle={{showComment,setShowComment}} />
+              <div className={`${showComment ? "" : "max-md:-translate-y-[100%]"} ${window.innerWidth >= 768 ? "hidden" : ""} z-22 bg-gray-100 max-md:rounded-t-2xl transition-all duration-500 h-full  max-sm:mx-0`}>
+                <Comments whichContent={"shorts"} contentId={getShortId} toggle={{showComment,setShowComment}} />
               </div>
             </div>
           )}

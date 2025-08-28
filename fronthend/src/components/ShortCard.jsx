@@ -219,33 +219,28 @@ const ShortCard = (props) => {
   return (
     <div>
       <div
-        className="relative  max-md:rounded-none rounded-4xl overflow-hidden  aspect-[9/16]
-         m-auto snap-start max-sm:w-screen max-sm:h-screen"
+        className="relative  max-sm:rounded-none max-sm:h-[calc(100vh_-_41px)] rounded-2xl h-[calc(100vh_-_75px)] max-sm:w-screen aspect-[9/16] overflow-hidden"
         ref={containerRef}
         key={short._id}
         onClick={(e) => togglePlay(e)}
         onDoubleClick={() => handleLikeToggle(short._id)}
         style={{
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          background: "#000",
-          height: "fit",
-          objectFit: "cover"
-          
+          objectFit: "contain"
         }}
       >
-        <div className="rounded-4xl max-md:rounded-none overflow-hidden">
+        <div className="max-md:rounded-none overflow-hidden">
           <video
             ref={shortRef}
             id={short._id}
             src={short.shortFile}
             poster={short.thumbnail}
-            className=" w-full h-full overflow-clip"
+            className=" w-full h-full"
             muted={isMuted}
             volume={volume}
             loop
           ></video>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-1 z-9">
+        <div className="absolute bottom-0 left-0 right-0 h-1 z-8">
           <div
             className="h-full bg-red-500 ransition-all duration-100"
             style={{ width: `${progressPercentage}%` }}

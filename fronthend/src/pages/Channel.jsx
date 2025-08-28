@@ -186,9 +186,9 @@ const Channel = () => {
         <SideMenu
           menuToggle={{ showMenu, setShowMenu }}
         />
-        <div className="flex w-full flex-col h-[92vh] max-sm:h-screen overflow-y-scroll scroll-smooth scrollBar">
+        <div className="flex w-full  flex-col h-[calc(100vh_-_57px)]  max-md:h-[calc(100vh_-_41px)] overflow-y-scroll scroll-smooth pb-2 scrollBar">
           {/* channel */}
-          <div className="h-1/3 max-sm:h-50 w-full">
+          <div className="h-96 max-sm:h-50 w-full">
             <img
               src={channel?.coverImage}
               alt=""
@@ -320,8 +320,8 @@ const Channel = () => {
                 </div>
               </div>
               {/* main content portions */}
-              <div className=" overflow-y-scroll scrollBar mt-1">
-                <div className="w-screen px-2 space-y-3 h-[calc(113px - 100vh)]">
+              <div className="mt-1">
+                <div className="px-2 space-y-3">
                   {videoByOwner &&
                     videoByOwner.map((video) => (
                       <div

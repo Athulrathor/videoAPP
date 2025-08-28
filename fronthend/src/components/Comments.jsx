@@ -360,7 +360,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
 
     return (
         <div>
-            <div className={`${toggle.showComment ? "" : ""} z-21 border-2 border-gray-200 ${!minimiseComment ? "h-[100px]" : "h-fit"} overflow-hidden p-3`}>
+            <div className={`${toggle.showComment ? "" : ""} ${!minimiseComment ? "h-[100px]" : "h-fit"} overflow-hidden p-3`}>
                 <div className="max-w-4xl mx-auto">
                     {/* Comments Header */}
                     <div>

@@ -10,17 +10,16 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Tooltip } from "@mui/material";
 import { useDispatch } from "react-redux";
-import Login from "../pages/Login.jsx";
-import { X } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 import MicSpeechToText from "./TextToSpeach.jsx";
-import { fetchLogoutUser,logOut } from "../redux/features/user.js";;
+import { fetchLogoutUser,logOut,setSideActive } from "../redux/features/user.js";;
 import { toast } from "react-toastify";
 import { fetchVideosSuggestion } from "../redux/features/videos.js";
 
 const Header = (props) => {
   const { setToggleVideoUploading, setToggleShortUploading, setToggleLiveUploading, videoQueries } = props;
   
-  const { user, loggedIn } = useSelector((state) => state.user);
+  const { user, loggedIn,sideActive } = useSelector((state) => state.user);
   const { getsuggestion } = useSelector(state => state.videos);
 
   const [showDropdown, setShowDropdown] = useState(false);
@@ -37,9 +36,6 @@ const Header = (props) => {
 
   const Navigate = useNavigate();
   const dispatch = useDispatch();
-
-  // const hasQuery = useMemo(() => inputBar.query.trim() !== "", [inputBar.query]);
-  // const hasSuggestions = useMemo(() => getsuggestion?.length > 0, [getsuggestion?.length]);
 
   const handleKeyDown = useCallback((e) => {
     if (e.key === "ArrowDown") {
@@ -114,16 +110,17 @@ const Header = (props) => {
           <Tooltip title="Menu" arrow placement="bottom">
             <button
               type="button"
-              onClick={() => props.menuToggle.setShowMenu(!props.menuToggle.showMenu)}
-              className="w-10 h-10 max-md:w-8 max-md:h-8 max-[400px]:w-7 max-[400px]:h-7 flex items-center justify-center rounded-full hover:bg-gray-200 p-0"
+              onClick={() => { props.menuToggle.setShowMenu(!props.menuToggle.showMenu); if (sideActive === "shorts") setSideActive("home") }}
+              className="w-10 h-10 max-md:w-8 max-md:h-8 max-[400px]:w-7 max-[400px]:h-7 flex items-center justify-center cursor-pointer rounded-full hover:bg-gray-200 p-0"
             >
-              <HiMenu className="text-2xl max-md:text-xl max-[400px]:text-base" />
+              {sideActive === "shorts" ? <ChevronLeft className="text-2xl max-md:text-xl max-[400px]:text-base" /> :
+              <HiMenu className="text-2xl max-md:text-xl max-[400px]:text-base" />}
             </button>
           </Tooltip>
           <Tooltip title="VidTube" arrow placement="bottom">
             <button
               type="button"
-              onClick={() => Navigate("/")}
+              onClick={() => { Navigate("/"); setSideActive("home"); }}
               className="
             flex items-center font-bold 
             text-2xl max-md:text-lg max-[400px]:text-base
@@ -156,7 +153,7 @@ const Header = (props) => {
         ${suggestionBar ? "rounded-t-2xl" : "rounded-full"} 
         h-11 max-xl:h-10 max-[400px]:h-8 
         transition-all 
-        w-full max-w-[650px] max-xl:max-w-[420px] max-lg:max-w-[200px] max-[400px]:max-w-[120px]
+        w-full max-w-[650px] max-xl:max-w-[420px] max-lg:max-w-[200px] max-[400px]:max-w-[120px] cursor-pointer
         pl-2 pr-1
       `}>
             <input
@@ -185,14 +182,14 @@ const Header = (props) => {
                   onClick={e => { e.preventDefault(); if (inputBar.query === "") return; videoQueries.setVideoParams((prev) => ({ ...prev, query: inputBar.query })) }}
                   className="p-1"
                 >
-                  <IoIosSearch className="text-2xl max-md:text-lg max-[400px]:text-base m-0" />
+                  <IoIosSearch className="text-2xl max-md:text-lg max-[400px]:text-base m-0 cursor-pointer" />
                 </button>
               </Tooltip>
             </div>
 
             {/* Suggestion Bar */}
             {suggestionBar && getsuggestion.length > 0 && (
-              <ul className="absolute top-full left-0 right-0 z-15 bg-white space-y-1 border border-gray-300 py-1 max-h-80 overflow-y-auto transition-transform duration-500 w-full">
+              <ul className="absolute top-full left-0 right-0 z-15 bg-white space-y-1 border cursor-pointer border-gray-300 py-1 max-h-80 overflow-y-auto transition-transform duration-500 w-full">
                 {getsuggestion.map((title, index) => (
                   <li
                     key={title._id}
@@ -217,7 +214,7 @@ const Header = (props) => {
           {/* Mic Icon */}
           <div className="ml-2 max-lg:ml-1">
             <Tooltip title="Mic" arrow placement="bottom">
-              <div onClick={() => setMicOpen(!micOpen)} className="bg-gray-200 p-2 max-md:p-1 rounded-full flex items-center justify-center">
+              <div onClick={() => setMicOpen(!micOpen)} className="bg-gray-200 p-2 cursor-pointer max-md:p-1 rounded-full flex items-center justify-center">
                 <MdMic className="text-2xl max-md:text-lg max-[400px]:text-base" />
               </div>
             </Tooltip>
@@ -230,7 +227,7 @@ const Header = (props) => {
         {/* === MOBILE SEARCH OVERLAY/MODAL === */}
         {showMobileSearch && (
           <div
-            className="fixed inset-0 z-50 bg-black/60 flex flex-col"
+            className="fixed inset-0 z-50 bg-black/60 flex flex-col cursor-pointer"
             role="dialog"
             aria-modal="true"
             aria-label="Search"
@@ -276,7 +273,7 @@ const Header = (props) => {
                   videoQueries.setVideoParams(prev => ({ ...prev, query: inputBar.query }));
                   setShowMobileSearch(false);
                 }}
-                className="p-2"
+                className="p-2 cursor-pointer"
                 aria-label="Search"
               >
                 <IoIosSearch className="text-2xl" />
@@ -286,7 +283,7 @@ const Header = (props) => {
                 onClick={() => setMicOpen(!micOpen)}
                 aria-label="Voice search"
                 className={`
-              ml-1 bg-gray-200 rounded-full p-2 transition-transform duration-200
+              ml-1 bg-gray-200 rounded-full p-2 transition-transform cursor-pointer duration-200
               ${micOpen ? "animate-pulse scale-110 bg-blue-200" : ""}
             `}
               >
@@ -342,27 +339,27 @@ const Header = (props) => {
         {/* CONTROL SECTION */}
         <div className="
       flex items-center 
-      gap-4 max-lg:gap-2 max-md:gap-1 
+      space-x-2 max-lg:gap-2 max-md:gap-1 
       text-xl 
       relative
       min-w-0
     ">
           {/* Video Upload Dropdown */}
-          <div className="relative">
+          <div className="relative space-x-1.5">
 
             <button
               onClick={() => setShowMobileSearch(true)}
               aria-label="Open search"
-              className="md:hidden hover:bg-gray-200 p-2 max-md:p-1 rounded-full"
+              className="md:hidden hover:bg-gray-200 cursor-pointer p-2 max-md:p-1 rounded-full"
             >
               <IoIosSearch stroke="4" className="text-2xl max-md:text-lg max-[400px]:text-base" />
             </button>
             <button
               type="button"
-              className="hover:bg-gray-200 p-2 max-md:p-1 rounded-full"
+              className="hover:bg-gray-200 p-2 max-md:p-1 cursor-pointer rounded-full"
               onClick={() => setShowDropdown(!showDropdown)}
             >
-              <RiVideoAddLine className="text-2xl max-md:text-lg max-[400px]:text-base" />
+              <RiVideoAddLine stroke="4" className="text-2xl max-md:text-lg max-[400px]:text-base" />
             </button>
             {showDropdown && (
               <ul className="absolute right-0 top-10 mt-2 w-28 max-[400px]:w-20 z-12 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer text-xs">
@@ -376,7 +373,7 @@ const Header = (props) => {
           {/* Notification */}
           <div>
             <Tooltip title="Notifications" arrow placement="bottom">
-              <div className="hover:bg-gray-200 p-2 max-md:p-1 rounded-full flex items-center">
+              <div className="hover:bg-gray-200 p-2 max-md:p-1 cursor-pointer rounded-full flex items-center">
                 <HiOutlineBell className="text-2xl max-md:text-lg max-[400px]:text-base" />
               </div>
             </Tooltip>
@@ -390,7 +387,7 @@ const Header = (props) => {
             >
               <button
                 onClick={handleLoginAndProfile}
-                className="hover:bg-gray-200 px-2 py-1 max-lg:px-1 rounded-full flex items-center gap-1 min-w-0"
+                className="hover:bg-gray-200 px-2 py-1 max-lg:px-1 cursor-pointer rounded-full flex items-center gap-1 min-w-0"
               >
                 {!loggedIn ? (
                   <CgProfile className="w-7 h-7 max-md:w-6 max-md:h-6" />
@@ -406,7 +403,7 @@ const Header = (props) => {
                 </span>
               </button>
             </Tooltip>
-            <ul className={`${openDropMenu ? "" : "hidden"} z-18 w-fit h-fit p-1 translate-y-2 text-lg max-md:text-sm absolute py-2 max-md:py-1 right-px shadow-2xs backdrop-blur-3xl bg-white`}>
+            <ul className={`${openDropMenu ? "" : "hidden"} cursor-pointer z-18 w-fit h-fit p-1 translate-y-2 text-lg max-md:text-sm absolute py-2 max-md:py-1 right-px shadow-2xs backdrop-blur-3xl bg-white`}>
               <li onClick={() => {  setOpenDropMenu(false) }} className="px-1 active:bg-gray-300 hover:bg-gray-200 ">Profile</li>
               <li onClick={() => { Navigate(`/channel/${user?.username.replace(' ','')}`); setOpenDropMenu(false)}} className="px-1  active:bg-gray-300 hover:bg-gray-200">View channel</li>
               <li onClick={() => { Navigate("/settings"); setOpenDropMenu(false) }} className="px-1  active:bg-gray-300 hover:bg-gray-200">Settings</li>

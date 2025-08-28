@@ -127,7 +127,7 @@ const VideoCard = ({video,timeAgo,formatTime}) => {
 
         {/* Video Details */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 leading-5 group-hover:text-gray-700">
+          <h3 className="max-sm:text-lg text-xl font-medium text-gray-900 line-clamp-2 leading-5 group-hover:text-gray-700">
             {video.title}
           </h3>
 
@@ -140,7 +140,7 @@ const VideoCard = ({video,timeAgo,formatTime}) => {
             </div> */}
 
             <div className="text-sm text-gray-600 mt-0.5">
-              <span>{video.views}</span>
+              <span className="space-x-1">{video.views} views </span>
               <span className="mx-1">•</span>
               <span>{timeAgo(video.createdAt)}</span>
             </div>
