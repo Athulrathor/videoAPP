@@ -333,7 +333,7 @@ const VideoPages = (props) => {
       {/* <SideMenu /> */}
       <div className="h-[calc(100vh_-_57px)] max-md;h-[calc(100vh_-_41px)] max-lg:flex-col flex justify-evenly max-sm:justify-baseline max-md:pl-0 max-md:pr-0 w-full pb-2  pr-4  overflow-y-scroll scroll-smooth scrollBar overflow-x-hidden">
         
-        <div className="max-lg:absolute top-[57px] max-md:top-[41px] md:max-lg:z-40 left-0">
+        <div className="max-lg:absolute top-[57px] fixed max-md:top-[41px] z-40 left-0">
           <SideMenu menuToggle={{ showMenu, setShowMenu }}
             videoParam={{ setVideoParams, videoParams }} />
         </div>
@@ -564,7 +564,7 @@ const VideoPages = (props) => {
           </div>
 
           {/* button and some details */}
-          <div>
+          <div className="pb-2">
             {/* title */}
             <div className="flex items-center justify-between max-sm:p-1 max-sm:text-sm p-2.5 text-lg font-bold">
               <span className="line-clamp-2">{targetVideo?.title}</span>
@@ -687,7 +687,7 @@ const VideoPages = (props) => {
               
             </div>
             {/* comments setion */}
-            <div onClick={() => setMinimiseComment(true)} className="border-2 my-2 max-md:mx-2 border-gray-200 bg-gray-50 rounded-2xl">
+            <div onClick={() => setMinimiseComment(true)} className="border-2 my-3 border-gray-200 bg-gray-50 rounded-2xl overflow-hidden">
               <Comments whichContent={"videos"} contentId={VideoId} timeAgo={timeAgo} minimiseComment={minimiseComment} setMinimiseComment={setMinimiseComment} />
             </div>
           </div>

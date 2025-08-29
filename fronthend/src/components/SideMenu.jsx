@@ -217,7 +217,7 @@ function SideMenu(props) {
       )}
 
       {loggedIn ? (
-        <div className="border-b border-gray-300 py-5">
+          <div className={`${subcriber.length === 0 ? "hidden" : ""} border-b border-gray-300 py-5`}>
           {props.menuToggle?.showMenu === true ? (
             ""
           ) : (

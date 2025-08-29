@@ -1,28 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { ThumbsUp, ThumbsDown, MoreVertical, Heart, X } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, MoreVertical, Heart, X, User } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAddCommentReplies, fetchAddShortComment, fetchAddVideoComment, fetchCommentReplies, fetchVideoComment } from '../redux/features/comment';
+import { fetchAddCommentReplies, fetchAddShortComment, fetchAddVideoComment, fetchCommentReplies, fetchShortComment, fetchVideoComment } from '../redux/features/comment';
 import { fetchLikeToggleComment } from '../redux/features/likes';
 import { isCommentLiked } from '../redux/features/likes';
 
-const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment, toggle={shortComments:true,setShowComment:null} }) => {
+const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseComment, toggle={shortComments:true,setShowComment:null} }) => {
     const dispatch = useDispatch();
 
     const { videosComments, repliesOnComment,shortComments } = useSelector(state => state.comments);
-    const { commentLiked } = useSelector(state => state.likes)
+    const { commentLiked } = useSelector(state => state.likes);
+    const { user } = useSelector(state => state.user);
     
-    // Local state to track UI updates
     const [localCommentData, setLocalCommentData] = useState({});
 
     const [newComment, setNewComment] = useState('');
     const [showCommentActions, setShowCommentActions] = useState(false);
     const [replyingTo, setReplyingTo] = useState(null);
-    const [showRepliesFor, setShowRepliesFor] = useState(null); // Track which comment's replies are shown
+    const [showRepliesFor, setShowRepliesFor] = useState(null);
 
-    // Fixed: Initialize commentStatus as an empty object instead of with nested properties
     const [commentStatus, setCommentStatus] = useState({});
 
-    // Initialize local comment data when comments load
+    console.log(shortComments,videosComments)
+
     useEffect(() => {
         if (videosComments && videosComments?.length > 0) {
             const initialData = {};
@@ -57,6 +57,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
         }
     }, [contentId, dispatch, whichContent]);
 
+    console.log(shortComments,videosComments)
     // Handle functions
     const handleLikeToggleComment = (id) => {
         const currentLiked = localCommentData[id]?.isLiked || commentStatus[id]?.like || false;
@@ -137,7 +138,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                         setNewComment('');
                         setShowCommentActions(false);
                         // Refresh comments to get updated list
-                        dispatch(fetchVideoComment(contentId));
+                        // dispatch(fetchVideoComment(contentId));
                     })
                     .catch((error) => {
                         console.error('Failed to add comment:', error);
@@ -151,7 +152,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                         setNewComment('');
                         setShowCommentActions(false);
                         // Refresh comments to get updated list
-                        dispatch(fetchVideoComment(contentId));
+                        // dispatch(fetchShortComment(contentId));
                     })
                     .catch((error) => {
                         console.error('Failed to add comment:', error);
@@ -175,7 +176,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                 .unwrap()
                 .then(() => {
                     // Refresh replies for the specific comment
-                    dispatch(fetchCommentReplies(commentId));
+                    // dispatch(fetchCommentReplies(commentId));
                     // Clear reply input and close reply form
                     setCommentStatus((prev) => ({
                         ...prev,
@@ -189,7 +190,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                     setShowRepliesFor(commentId);
                     
                     // Also refresh main comments to get updated reply counts
-                    dispatch(fetchVideoComment(contentId));
+                    // dispatch(fetchVideoComment(contentId));
                 })
                 .catch((error) => {
                     // Revert optimistic update on error
@@ -288,8 +289,8 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
 
                     {replyingTo === comment?._id && (
                         <div className="mt-3 max-sm:mt-1.5 flex gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs">
-                                y
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs">
+                                <img src={comment?.user_info?.avatar} className='w-full h-full aspect-square rounded-full object-fill' />
                             </div>
                             <div className="flex-1">
                                 <textarea
@@ -338,7 +339,7 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                             } active:bg-gray-200 transition-colors`}
                         >
                             {showRepliesFor === comment._id ? 'Hide Replies' : 'Show Replies'} 
-                            <span className='ml-1'>{comment?.totalReplies === 0 ? "" : comment?.totalReplies}</span>
+                            <span className='ml-1'>{(comment?.totalReplies || comment?.totalComment) === 0 ? "" : (comment?.totalReplies || comment?.totalComment)}</span>
                         </button>
                     )}
 
@@ -360,34 +361,39 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
 
     return (
         <div>
-            <div className={`${toggle.showComment ? "" : ""} ${!minimiseComment ? "h-[100px]" : "h-fit"} overflow-hidden p-3`}>
-                <div className="max-w-4xl mx-auto">
+            <div className={`${toggle.showComment ? "" : ""} ${!minimiseComment ? "h-[100px]" : `${whichContent === "shorts" ? "h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)]" : "h-fit"}`} p-3`}>
+                <div className={` max-w-4xl mx-auto`}>
                     {/* Comments Header */}
                     <div>
                         <div className="flex items-center justify-between gap-6 mb-2 max-sm:mb-1">
-                            <h3 className="text-xl font-medium">Comments</h3>
-                            <button className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z" />
-                                </svg>
-                                Sort by
-                            </button>
+                            <div className='flex space-x-2'>
+                                <h3 className="text-xl font-medium">Comments</h3>
+                                <button className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z" />
+                                    </svg>
+                                    Sort by
+                                </button>
+                            </div>
+                            
+                            <div className={`${whichContent === "videos" ? "hidden" : ""}`}>
+                                {/* close button */}
+                                <button
+                                    onClick={() => toggle.setShowComment(true)}
+                                    className="p-3 rounded-full hover:bg-gray-100 active:bg-gray-200"
+                                >
+                                    <X />
+                                </button>
+                            </div>
                         </div>
-                        <div className={`${whichContent === "videos" ? "hidden" : ""}`}>
-                              {/* close button */}
-                              <button
-                        onClick={() => toggle.setShowComment(true)}
-                                className="p-3 rounded-full hover:bg-gray-100 active:bg-gray-200"
-                               >
-                                 <X />
-                               </button>
-                             </div>
+                        
                     </div>
 
+                    {/* <div className={`${whichContent === "shorts" ? "flex-col-reverse" : "" } flex`}></div> */}
                     {/* Add Comment */}
-                    <div className="flex gap-3 max-sm:gap-1.5 mb-3 max-sm:mb-1.5">
+                    <div className={`flex gap-3 max-sm:gap-1.5 mb-3 max-sm:mb-1.5 ${whichContent === "shorts" ? "" : ""} bottom-0`}>
                         <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                            y
+                            <img src={user?.avatar || <User />} className='w-full h-full aspect-square rounded-full object-fill' />
                         </div>
                         <div className="flex-1">
                             <textarea
@@ -422,13 +428,13 @@ const Comments = ({ whichContent, contentId, minimiseComment, setMinimiseComment
                     </div>
 
                     {/* Comments List */}
-                    <div className={`${minimiseComment ? "" : "h-16 overflow-hidden"}`}>
+                    <div className={`${minimiseComment ? "" : "h-16 overflow-hidden"} h-[calc(100vh_-_200px)] overflow-x-hidden max-sm:pb-7 scrollBar overflow-y-scroll`}>
                         {(whichContent === "videos" ? videosComments : shortComments )?.map(comment => (
                             <Comment key={comment?._id} comment={comment} />
                         ))}
                     </div>
                 </div>
-                <div className={`${!minimiseComment ? "hidden" : ""} cursor-pointer ${whichContent === "shorts" ? "hidden" : ""}`} onClick={() => setMinimiseComment(!minimiseComment)}>
+                <div className={`${!minimiseComment ? "hidden" : ""} cursor-pointer ${whichContent === "shorts" ? "hidden" : ""}`} onClick={(e) => { e.stopPropagation(); setMinimiseComment(!minimiseComment);}}>
                     see Less
                 </div>
             </div>

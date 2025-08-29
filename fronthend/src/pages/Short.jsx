@@ -82,7 +82,7 @@ const Short = (props) => {
           ) : (
             <div className="">
               <div
-                className={` items-center flex w-full ${showComment ? "justify-center" : "justify-evenly"}  snap-y h-[calc(100vh_-_60px)] max-md:h-[calc(100vh_-_41px)] p-2 max-sm:p-0 snap-mandatory max-sm:overflow-hidden scroll-smooth overflow-y-scroll`}
+                className={` items-center flex w-full ${showComment ? "justify-center" : "justify-evenly"}  snap-y h-[calc(100vh_-_65px)] max-md:h-[calc(100vh_-_42px)] p-2 max-sm:p-0 snap-mandatory max-sm:overflow-hidden scroll-smooth overflow-y-scroll`}
               >
                 
                 {short?.map((shortVideo) => (
@@ -102,12 +102,12 @@ const Short = (props) => {
                     />
                   </div>
                 ))}
-                <div className={`${showComment ? "translate-x-[200%] absolute" : ""} ${window.innerWidth < 768 ? "hidden" : ""} z-22 bg-gray-100 rounded-lg right-0 ml-2 transition-all w-96 duration-500 h-full`}>
+                <div className={`${showComment ? "translate-x-[200%] absolute" : ""} ${window.innerWidth < 768 ? "hidden" : ""} z-22 bg-gray-100 shadow-2xl rounded-lg right-0 ml-2 transition-all w-96 duration-500 h-full`}>
                   <Comments whichContent={"shorts"} contentId={getShortId} toggle={{ showComment, setShowComment }} />
                 </div>
               </div>
               {/* comments start hear */}
-              <div className={`${showComment ? "" : "max-md:-translate-y-[100%]"} ${window.innerWidth >= 768 ? "hidden" : ""} z-22 bg-gray-100 max-md:rounded-t-2xl transition-all duration-500 h-full  max-sm:mx-0`}>
+              <div className={`${showComment ? "" : "max-md:-translate-y-[70%]"} ${window.innerWidth >= 768 ? "hidden" : ""} z-22 bg-gray-100 shadow-2xl max-md:rounded-t-2xl transition-all duration-500 h-[70%]  max-sm:mx-0`}>
                 <Comments whichContent={"shorts"} contentId={getShortId} toggle={{showComment,setShowComment}} />
               </div>
             </div>

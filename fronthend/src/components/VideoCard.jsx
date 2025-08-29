@@ -140,6 +140,8 @@ const VideoCard = ({video,timeAgo,formatTime}) => {
             </div> */}
 
             <div className="text-sm text-gray-600 mt-0.5">
+              <span className="space-x-1">{video?.userInfo?.username} views </span>
+              <span className="mx-1">•</span>
               <span className="space-x-1">{video.views} views </span>
               <span className="mx-1">•</span>
               <span>{timeAgo(video.createdAt)}</span>

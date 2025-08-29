@@ -120,6 +120,8 @@ const getShortComments = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Short id not found!");
     }
 
+    const count = await Comment.countDocuments({ short: shortId });
+
     const commentOfShort = await Comment.aggregate([
       {
         $match: {

@@ -41,7 +41,7 @@ function Home() {
 
   useEffect(() => {
     if (window.innerWidth <= 768) setShowMenu(true);
-   },[]);
+  }, []);
 
   function timeAgo(createdAt) {
     const now = new Date();
@@ -97,19 +97,6 @@ function Home() {
       dispatch(fetchShort(shortParams));
     }
   }, [dispatch, shortParams, loggedIn, sideActive]);
-
-  //       const fetchLikeToggle = async (getShortId) => {
-  //         try {
-  //           const likes = await axiosInstance.get(
-  //             `like/toggle-like-to-short/${getShortId}`
-  //           );
-  //           console.log("cliked",likes)
-
-  //           dispatch(fetchShort( shortParams));
-  //         } catch (error) {
-  //           console.error(error);
-  //         }
-  // };
 
   return (
     <div className="relative">

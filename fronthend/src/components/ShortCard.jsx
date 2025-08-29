@@ -21,7 +21,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchLikeToggleShort, isShortLiked } from '../redux/features/likes';
 import { fetchShortComment } from '../redux/features/comment';
-import { fetchShort } from '../redux/features/shorts';
 
 const ShortCard = (props) => {
 
@@ -36,6 +35,7 @@ const ShortCard = (props) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [quality, setQuality] = useState("Auto");
+  const [showdesc, setshowdesc] = useState(false);
 
   const shortRef = useRef(null);
   const containerRef = React.useRef(null);
@@ -240,22 +240,22 @@ const ShortCard = (props) => {
             loop
           ></video>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-1 z-8">
+        <div className={`${showComment ? "" : "hidden"} absolute bottom-0 left-0 right-0 h-1 z-1`}>
           <div
-            className="h-full bg-red-500 ransition-all duration-100"
+            className={`h-full bg-red-500`}
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 flex flex-col justify-between p-4">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 flex flex-col justify-between max-sm:p-2 p-4">
           {/* Top Controls */}
           <div className="flex justify-between items-start">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 max-sm:space-x-1">
               <button
                 onClick={(e) => togglePlay(e)}
-                className="p-4 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-200"
+                className="p-4 max-sm:p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-200"
               >
-                {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                {isPlaying ? <Pause className='size-[24px] max-sm:size-[16px]' /> : <Play size={24} className='max-sm:size-[16px]' />}
               </button>
               <div
                 className="flex items-center ml-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors cursor-pointer"
@@ -266,7 +266,7 @@ const ShortCard = (props) => {
                   onClick={(e) => toggleMute(e)}
                   className="flex justify-center items-center p-2 "
                 >
-                  {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                  {isMuted ? <VolumeX size={20} className='max-sm:size-[16px]' /> : <Volume2 size={20} className='max-sm:size-[16px]' />}
                 </button>
                 <input
                   onClick={(e) => e.stopPropagation()}
@@ -293,7 +293,7 @@ const ShortCard = (props) => {
                 }}
                 className="p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
               >
-                <Settings size={20} />
+                <Settings size={20} className='max-sm:size-[16px]' />
               </button>
               <button
                 onClick={(e) => {
@@ -303,7 +303,7 @@ const ShortCard = (props) => {
                 }}
                 className="p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
               >
-                <Maximize size={20} />
+                <Maximize size={20} className='max-sm:size-[16px]' />
               </button>
             </div>
           </div>
@@ -321,33 +321,59 @@ const ShortCard = (props) => {
           {/* Bottom Info and Controls */}
           <div className="flex justify-between  items-end">
             <div className="w-full flex justify-between">
-              <div onClick={(e) => e.stopPropagation()}>
-                <div className="flex text-white text-sm font-medium mb-1 gap-2 text-center">
+              <div className='' onClick={(e) => e.stopPropagation()}>
+                <div className="flex text-white text-sm font-medium mb-1 items-center space-x-2">
                   <img
                     src={short.userInfo[0]?.avatar}
                     alt="#"
-                    className="w-6 aspect-square rounded-full"
+                    className="w-6 max-sm:w-8 aspect-square rounded-full"
                   />
-                  {"@" + short.userInfo[0]?.username || "Unknown User"}
+                  <span>{"@" + short.userInfo[0]?.username || "Unknown User"}</span>
+                  <button
+                    onClick={(e) => handleSubcribeToggle(e, short.owner)}
+                    className={`${isSubcribedStatus === true
+                      ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
+                      : "bg-red-400 hover:bg-red-500 active:bg-red-600"
+                      } text-lg px-2 py-0.5 ml-2  rounded-xl flex justify-center items-center font-medium`}
+                  >
+                    {isSubcribedStatus === true ? "Subcribed" : "Subcribe"}
+                  </button>
                 </div>
-                <div className="text-white text-base opacity-90 mb-2">
-                  {short.title}
+                <div onClick={() => setshowdesc(!showdesc)} className="text-white text-base opacity-90 mb-2">
+                  <span>{short.title}</span>
+                  <p className='line-clamp-1'>{"sdhfosdfhlsdhsifhlsdhfsldfhsdf"+short?.description}</p>
+                </div>
+
+                {/* Description box */}
+                <div className={`${showdesc ? "" : "translate-y-[100%]"} absolute min-w-full z-20 bottom-0 -translate-x-2  border-1 border-gray-300 rounded-t-lg h-[50%] bg-gray-50 transition-all duration-500 ease-in-out`}>
+                  <div className="p-3 flex items-center justify-between border-b-1 border-gray-300">
+                    <h1 className="text-2xl font-medium">Description</h1>
+                    <div>
+                      {/* close button */}
+                      <button onClick={(e) => { e.stopPropagation(); setshowdesc(false)}} className="p-3 rounded-full bg-gray-100 hover:bg-gray-200">
+                        <X className='max-sm:size-[16px]' />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-3 flex items-center justify-between border-gray-300">
+                    <div className="text-xs opacity-80 mb-2  overflow-y-scroll scroll-smooth scrollBar max-h-[96px] ">
+                      <div className="space-x-2">
+                        <span>12k Views</span>
+                        <span>day date year</span>
+                      </div>
+                      <p className="text-sm">{short?.description}</p>
+
+                      <div>Show more</div>
+                      <div>Show less</div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center mr-2">
                 {/* <button className="text-lg px-3 py-1 bg-red-500 hover:bg-red-600 active:bg-red-700 rounded-3xl  flex justify-center items-center font-medium">
                   Subcribe
                 </button> */}
-                <button
-                  onClick={(e) => handleSubcribeToggle(e,short.owner)}
-                  className={`${
-                    isSubcribedStatus === true
-                      ? "bg-gray-300 hover:bg-gray-500 active:bg-gray-600"
-                      : "bg-red-400 hover:bg-red-500 active:bg-red-600"
-                  } text-lg px-3 py-1  rounded-3xl flex justify-center items-center font-medium`}
-                >
-                  {isSubcribedStatus === true ? "Subcribed" : "Subcribe"}
-                </button>
+                
               </div>
             </div>
 
@@ -355,7 +381,7 @@ const ShortCard = (props) => {
             <div className="flex flex-col space-y-4">
               <div className="flex flex-col items-center">
                 <button className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors">
-                  <Eye size={24} />
+                  <Eye size={24} className='max-sm:size-[16px]' />
                 </button>
                 <span className="text-white text-xs mt-1">{short?.views}</span>
               </div>
@@ -373,6 +399,7 @@ const ShortCard = (props) => {
                 >
                   <Heart
                     size={24}
+                    className='max-sm:size-[16px]'
                     fill={shortLiked === true ? "white" : "none"}
                   />
                 </button>
@@ -389,6 +416,7 @@ const ShortCard = (props) => {
                 >
                   <MessageCircle
                     size={24}
+                    className='max-sm:size-[16px]'
                     fill={showComment === false ? "white" : "transparent"}
                   />
                 </button>
@@ -404,7 +432,7 @@ const ShortCard = (props) => {
                   }}
                   className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
                 >
-                  <Share size={24} />
+                  <Share size={24} className='max-sm:size-[16px]' />
                 </button>
                 <span className="text-white text-xs mt-1">{"12"}</span>
               </div>
@@ -415,7 +443,7 @@ const ShortCard = (props) => {
                 }}
                 className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
               >
-                <Download size={24} />
+                <Download size={24} className='max-sm:size-[16px]' />
               </button>
 
               <button
@@ -424,7 +452,7 @@ const ShortCard = (props) => {
                 }}
                 className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
               >
-                <MoreHorizontal size={24} />
+                <MoreHorizontal size={24} className='max-sm:size-[16px]' />
               </button>
             </div>
           </div>
@@ -480,30 +508,6 @@ const ShortCard = (props) => {
                   </div> */}
           </div>
         )}
-      </div>
-      {/* Description box */}
-      <div className="absolute hidden  min-w-80  border-1 border-gray-300 rounded-[9px] top-0 right-0 w-[320px]  ml-8 ">
-        <div className="p-3 flex items-center justify-between border-b-1 border-gray-300">
-          <h1 className="text-2xl font-medium">Description</h1>
-          <div>
-            {/* close button */}
-            <button className="p-3 rounded-full bg-gray-100 hover:bg-gray-200">
-              <X />
-            </button>
-          </div>
-        </div>
-        <div className="p-3 flex items-center justify-between border-gray-300">
-          <div className="text-xs opacity-80 mb-2  overflow-y-scroll scroll-smooth scrollBar max-h-[96px] ">
-            <div className="space-x-2">
-              <span>12k Views</span>
-              <span>day date year</span>
-            </div>
-            <p className="text-sm">{short?.description}</p>
-
-            <div>Show more</div>
-            <div>Show less</div>
-          </div>
-        </div>
       </div>
     </div>
   );
