@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import VideoCard from "../components/VideoCard";
 import VideoPages from "./VideoPages";
 import VideoSkeletonLoading from "../components/LoadingScreen/VideoSkeletonLoading"
 import { RefreshCw, WifiOff } from "lucide-react";
 
 const Videos = (props) => {
-
   const { timeAgo, formatTime } = props;
+  const navigate = useNavigate();
 
-  const { videos, videoLoading,videoError } = useSelector((state) => state.videos);
+  const { videos, videoLoading, videoError } = useSelector((state) => state.videos);
 
   const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [muted, setMuted] = useState(true);
 
   useEffect(() => {
     const handleResize = () => {
@@ -34,71 +35,158 @@ const Videos = (props) => {
 
   const handleRetry = () => {
     setIsRetrying(true);
-    // Simulate retry attempt
     setTimeout(() => {
       setIsRetrying(false);
     }, 2000);
   };
 
+  const handleOverAllEvent = (e) => {
+    const targetId = e.target.id;
+    const targetName = e.target.getAttribute('name');
+    const eventType = e.type;
+
+    console.log(targetName)
+
+    if (eventType === 'click' && (
+      targetName?.includes('mute-button') ||
+      e.target.tagName === "path" ||
+      e.target.tagName === "line" ||
+      e.target.tagName === "svg" ||
+      e.target.closest('[name*="mute-button"]')
+    )) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const videoElements = document.getElementsByName('video');
+
+      const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
+      console.log(targetedVideo);
+
+        const newMutedState = !targetedVideo.muted;
+        console.log("this is video container :  ", targetedVideo)
+        targetedVideo.muted = newMutedState;
+        setMuted(newMutedState);
+      return;
+    }
+
+    if (eventType === 'click' && targetId && (
+      targetName === "video" ||
+      targetName === "title" || targetName === "username"
+    )) {
+      navigate(`/video/${targetId}`);
+      return;
+    }
+
+    if (eventType === 'click' && (targetName === "avatar" || targetName === "title") && e.target.hasAttribute('data-username')) {
+      const videoElements = document.getElementsByName('video');
+
+      const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
+      const username = targetedVideo.getAttribute('data-username');
+      if (username) {
+        navigate(`/channel/${username}`);
+      }
+      return;
+    }
+
+    if (targetName === "progress" || targetName === "video" || targetName === "control-container" || targetName === "control-container1") {
+      const videoElements = document.getElementsByName('video');
+
+      const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
+
+      if (!targetedVideo) return;
+
+      if (eventType === 'mouseenter') {
+        if (targetedVideo.hoverTimeout) {
+          clearTimeout(targetedVideo.hoverTimeout);
+        }
+
+        targetedVideo.hoverTimeout = setTimeout(() => {
+          targetedVideo.play().catch((error) => console.error(error));
+        }, 800);
+      }
+      else if (eventType === 'mouseleave') {
+        console.log(targetedVideo)
+        if (targetedVideo.hoverTimeout) {
+          clearTimeout(targetedVideo.hoverTimeout);
+        }
+
+        targetedVideo.hoverTimeout = setTimeout(() => {
+          targetedVideo.pause();
+          targetedVideo.currentTime = 0;
+        }, 500);
+      }
+      return;
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-white">
-
       {/* Video Grid */}
       <div className="scrollBar max-w-full max-md:w-screen mx-auto overflow-y-scroll h-[calc(100vh-65px)] max-md:h-[calc(100vh-53px)] max-sm:h-[calc(100vh-39px)] max-sm:pb-6 max-md:px-0 px-2">
         {(!videoError || videos.length > 0) ? (
-        <div>
-          {videoLoading ? ( 
-            <div>
-              <VideoSkeletonLoading />
-            </div>
-          ) : (
-            <div className={`grid gap-x-6 gap-y-6 ${getColumnsCount() === 4 ? 'grid-cols-3' :
-              getColumnsCount() === 3 ? 'grid-cols-3' :
-                getColumnsCount() === 2 ? 'grid-cols-2' :
-                  'grid-cols-1'
-              }`}>
-              {videos.map((video) => (
-                <VideoCard key={video.id} video={video} timeAgo={timeAgo} formatTime={formatTime} />
-              ))}
-            </div>
-          )}
+          <div>
+            {videoLoading ? (
+              <div>
+                <VideoSkeletonLoading />
+              </div>
+            ) : (
+              <div
+                  name="video-body"
+                className={`grid gap-x-6 gap-y-6 ${getColumnsCount() === 4 ? 'grid-cols-4' :
+                    getColumnsCount() === 3 ? 'grid-cols-3' :
+                      getColumnsCount() === 2 ? 'grid-cols-2' :
+                        'grid-cols-1' 
+                  }`}
+              >
+                {videos.map((video) => (
+                  <VideoCard
+                    key={video._id || video.id}
+                    video={video}
+                    handleOverAllEvent={handleOverAllEvent}
+                    muted={muted}
+                    timeAgo={timeAgo}
+                    formatTime={formatTime}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         ) : (
-            <div>
-          <div className="text-center py-16 px-6">
-            <div className="max-w-md mx-auto">
-              {/* Wifi Off Icon with animation */}
-              <div className="mb-6">
-                <div className="mx-auto w-24 h-24 bg-red-50 rounded-full flex items-center justify-center relative">
-                  <WifiOff className="w-12 h-12 text-red-400" />
-                  <div className="absolute inset-0 rounded-full border-2 border-red-200 animate-pulse"></div>
+          <div>
+            <div className="text-center py-16 px-6">
+              <div className="max-w-md mx-auto">
+                {/* Wifi Off Icon with animation */}
+                <div className="mb-6">
+                  <div className="mx-auto w-24 h-24 bg-red-50 rounded-full flex items-center justify-center relative">
+                    <WifiOff className="w-12 h-12 text-red-400" />
+                    <div className="absolute inset-0 rounded-full border-2 border-red-200 animate-pulse"></div>
+                  </div>
                 </div>
-              </div>
 
-              <h3 className="text-xl font-semibold text-gray-700 mb-3">
-                No internet connection
-              </h3>
-              <p className="text-gray-500 mb-8">
-                Please check your network connection and try again. Your feed will load once you're back online.
-              </p>
+                <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                  No internet connection
+                </h3>
+                <p className="text-gray-500 mb-8">
+                  Please check your network connection and try again. Your feed will load once you're back online.
+                </p>
 
-              <div className="space-y-4">
-                <button
-                  onClick={handleRetry}
-                  disabled={isRetrying}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg transition-colors duration-200 flex items-center space-x-2 mx-auto"
-                >
-                  <RefreshCw className={`w-5 h-5 ${isRetrying ? 'animate-spin' : ''}`} />
-                  <span>{isRetrying ? 'Checking...' : 'Try Again'}</span>
-                </button>
+                <div className="space-y-4">
+                  <button
+                    onClick={handleRetry}
+                    disabled={isRetrying}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg transition-colors duration-200 flex items-center space-x-2 mx-auto"
+                  >
+                    <RefreshCw className={`w-5 h-5 ${isRetrying ? 'animate-spin' : ''}`} />
+                    <span>{isRetrying ? 'Checking...' : 'Try Again'}</span>
+                  </button>
 
-                <div className="text-sm text-gray-400">
-                  <p>Make sure you're connected to Wi-Fi or mobile data</p>
+                  <div className="text-sm text-gray-400">
+                    <p>Make sure you're connected to Wi-Fi or mobile data</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         )}
       </div>
     </div>
