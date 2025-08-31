@@ -159,14 +159,14 @@ const ContentManager = () => {
                 const result = await dispatch(fetchVideoDelete(id)).unwrap();
                 console.log('🗑 fetchVideoDelete result:', result);
 
-                await dispatch(fetchVideoByOwner(user?.user._id));
+                await dispatch(fetchVideoByOwner(user?._id));
                 console.log('🗑 After re-fetch videos:', videoByOwner);
             } else {
                 console.log('🗑 Calling fetchShortDelete with:', id);
                 const result = await dispatch(fetchShortDelete(id)).unwrap();
                 console.log('🗑 fetchShortDelete result:', result);
 
-                await dispatch(fetchShortByOwner(user?.user._id));
+                await dispatch(fetchShortByOwner(user?._id));
                 console.log('🗑 After re-fetch shorts:', shortByOwner);
             }
 
@@ -191,10 +191,10 @@ const ContentManager = () => {
         try {
             if (userSelected === "videos") {
                 await dispatch(fetchUpdateVideo({ id, formData: updateData[id], newThumbnail: updateImage })).unwrap();
-                await dispatch(fetchVideoByOwner(user?.user._id));
+                await dispatch(fetchVideoByOwner(user?._id));
             } else {
                 await dispatch(fetchUpdateShort({ id, formData: updateData[id] })).unwrap();
-                await dispatch(fetchShortByOwner(user?.user._id));
+                await dispatch(fetchShortByOwner(user?._id));
             }
 
             if (status === "succeeded" || status === "failed") setEditStatus(prev => ({ ...prev, [id]: false }));
@@ -216,6 +216,7 @@ const ContentManager = () => {
         setUpdateImage(file);
     }
 
+    console.log(user)
 
     const handlepublishVideos = async (e) => {
         e.preventDefault();
@@ -223,9 +224,11 @@ const ContentManager = () => {
         try {
 
             const data = new FormData();
-            data.append("title", updateData[user?.user._id].title);
-            data.append("description", updateData[user?.user._id].description);
-            data.append("isPublished", updateData[user?.user._id].isPublished);
+            data.append("title", updateData[user?._id]?.title);
+            data.append("description", updateData[user?._id]?.description);
+            data.append("isPublished", updateData[user?._id]?.isPublished );
+
+            console.log(data.isPublished,typeof(data.isPublished))
 
             let uploadResult;
 
@@ -233,11 +236,11 @@ const ContentManager = () => {
                 if (updateVideo) data.append("videoFile", updateVideo);
                 if (updateImage) data.append("thumbnail", updateImage);
                 uploadResult = await dispatch(uploadVideo(data)).unwrap();
-                await dispatch(fetchVideoByOwner(user?.user._id));
+                await dispatch(fetchVideoByOwner(user?._id));
             } else {
                 if (updateVideo) data.append("shortFile", updateVideo);
                 uploadResult = await dispatch(uploadShort(data)).unwrap();
-                await dispatch(fetchShortByOwner(user?.user._id));
+                await dispatch(fetchShortByOwner(user?._id));
             }
 
             console.log('Upload completed:', uploadResult);
@@ -250,7 +253,7 @@ const ContentManager = () => {
 
             setUpdateData(prev => {
                 const newData = { ...prev };
-                delete newData[user?.user._id];
+                delete newData[user?._id];
                 return newData;
             });
 
@@ -262,11 +265,11 @@ const ContentManager = () => {
     };
 
     useEffect(() => {
-        if (user?.user?._id) {
+        if (user?._id) {
             if (userSelected === "videos") {
-                dispatch(fetchVideoByOwner(user?.user._id));
+                dispatch(fetchVideoByOwner(user?._id));
             } else {
-                dispatch(fetchShortByOwner(user?.user._id));
+                dispatch(fetchShortByOwner(user?._id));
             }
         }
     }, [userSelected, user, dispatch]);
@@ -422,10 +425,10 @@ const ContentManager = () => {
 
                             <div>
                                 <div className={``}>
-                                    <input type="text" ref={firstInputRef} disabled={status === "loading"} value={updateData[user?.data?.user?._id]?.title ?? ""} onChange={(e) => setUpdateData((prev) => ({
+                                    <input type="text" ref={firstInputRef} disabled={status === "loading"} value={updateData[user?._id]?.title ?? ""} onChange={(e) => setUpdateData((prev) => ({
                                         ...prev,
-                                        [user?.data?.user?._id]: {
-                                            ...prev[user?.data?.user?._id],
+                                        [user?._id]: {
+                                            ...prev[user?._id],
                                             title: e.target.value
                                         }
                                     }))} placeholder='Add a title...' className={`${status === "loading" ? "opacity-60 cursor-not-allowed" : ""} w-full p-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300`} />
@@ -436,10 +439,10 @@ const ContentManager = () => {
                         <div className="space-y-3 max-sm:text-xs w-full">
                             <div>
                                 <div className={``}>
-                                    <input type="text" ref={firstInputRef} disabled={status === "loading"} value={updateData[user?.data?.user?._id]?.description ?? ""} placeholder='Add a descriptions..' onChange={(e) => setUpdateData(prev => ({
+                                    <input type="text" ref={firstInputRef} disabled={status === "loading"} value={updateData[user?._id]?.description ?? ""} placeholder='Add a descriptions..' onChange={(e) => setUpdateData(prev => ({
                                         ...prev,
-                                        [user?.data?.user?._id]: {
-                                            ...prev[user?.data?.user?._id],
+                                        [user?._id]: {
+                                            ...prev[user?._id],
                                             description: e.target.value
                                         }
                                     }))} className={`${status === "loading" ? "opacity-60 cursor-not-allowed" : ""} w-full p-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300`} />
@@ -450,10 +453,10 @@ const ContentManager = () => {
                                 <div className="flex items-center space-x-2">
                                     <div className={`flex space-x-2`}>
                                         <label htmlFor="7">Published:</label>
-                                        <input type="checkbox" id='7' ref={firstInputRef} disabled={status === "loading"} value={updateData[user?.data?.user?._id]?.isPublished ?? false} onChange={(e) => setUpdateData(prev => ({
+                                        <input type="checkbox" id='7' ref={firstInputRef} disabled={status === "loading"} value={updateData[user?._id]?.isPublished ?? false} onChange={(e) => setUpdateData(prev => ({
                                             ...prev,
-                                            [user?.data?.user?._id]: {
-                                                ...prev[user?.data?.user?._id],
+                                            [user?._id]: {
+                                                ...prev[user?._id],
                                                 isPublished: e.target.checked
                                             }
                                         }))} className={`${status === "loading" ? "opacity-60 cursor-not-allowed" : ""} w-full p-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300`} />
@@ -789,10 +792,10 @@ const ContentManager = () => {
                                     </td>
                                     <td className="p-2">
                                         <div className={``}>
-                                            <input type="text" ref={firstInputRef} name='title' disabled={status === "loading"} placeholder='Add a title' value={updateData[user?.data?.user?._id]?.title} onChange={(e) => setUpdateData(prev => ({
+                                            <input type="text" ref={firstInputRef} name='title' disabled={status === "loading"} placeholder='Add a title' value={updateData[user?._id]?.title} onChange={(e) => setUpdateData(prev => ({
                                                 ...prev,
-                                                [user?.data?.user?._id]: {
-                                                    ...prev[user?.data?.user?._id],
+                                                [user?._id]: {
+                                                    ...prev[user?._id],
                                                     title: e.target.value
                                                 }
                                             }))} className={`${status === "loading" ? "opacity-60 cursor-not-allowed" : ""} w-full p-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300`} />
@@ -800,10 +803,10 @@ const ContentManager = () => {
                                     </td>
                                     <td className="p-2">
                                         <div className={``}>
-                                            <input type="text" ref={firstInputRef} name='description' disabled={status === "loading"} placeholder='Add a descriptions' value={updateData[user?.data?.user?._id]?.description} onChange={(e) => setUpdateData(prev => ({
+                                            <input type="text" ref={firstInputRef} name='description' disabled={status === "loading"} placeholder='Add a descriptions' value={updateData[user._id]?.description} onChange={(e) => setUpdateData(prev => ({
                                                 ...prev,
                                                 [user?.data?.user?._id]: {
-                                                    ...prev[user?.data?.user?._id],
+                                                    ...prev[user?._id],
                                                     description: e.target.value
                                                 }
                                             }))} className={`${status === "loading" ? "opacity-60 cursor-not-allowed" : ""} w-full p-1 border text-sm border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300`} />
@@ -811,10 +814,10 @@ const ContentManager = () => {
                                     </td>
                                     <td className="p-2 text-center max-w-28">
                                         <div className={``}>
-                                            <input type="checkbox" ref={firstInputRef} disabled={status === "loading"} name='isPublished' value={updateData[user?.data?.user?._id]?.isPublished || false} onChange={(e) => setUpdateData(prev => ({
+                                            <input type="checkbox" ref={firstInputRef} disabled={status === "loading"} name='isPublished' value={updateData[user?._id]?.isPublished || false} onChange={(e) => setUpdateData(prev => ({
                                                 ...prev,
-                                                [user?.data?.user?._id]: {
-                                                    ...prev[user?.data?.user?._id],
+                                                [user?._id]: {
+                                                    ...prev[user?._id],
                                                     isPublished: e.target.checked
                                                 }
                                             }))} className={`${status === "loading" ? "opacity-60 cursor-not-allowed" : ""} p-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300`} />

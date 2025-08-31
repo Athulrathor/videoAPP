@@ -21,8 +21,6 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
 
     const [commentStatus, setCommentStatus] = useState({});
 
-    console.log(shortComments,videosComments)
-
     useEffect(() => {
         if (videosComments && videosComments?.length > 0) {
             const initialData = {};
@@ -56,8 +54,6 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
             dispatch(fetchVideoComment(contentId));
         }
     }, [contentId, dispatch, whichContent]);
-
-    console.log(shortComments,videosComments)
     // Handle functions
     const handleLikeToggleComment = (id) => {
         const currentLiked = localCommentData[id]?.isLiked || commentStatus[id]?.like || false;

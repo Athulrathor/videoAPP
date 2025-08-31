@@ -29,8 +29,6 @@ const Subscription = (props) => {
   //       data: null,
   //     })
 
-  console.log(subcribedContent)
-
   // const fetchSubcriberVideosAndShort = async () => {
   //   setSubcribersData((prev) => ({
   //     ...prev, loading: true
@@ -55,6 +53,7 @@ const Subscription = (props) => {
   //     console.error(error);
   //   }
   // }
+  
 
   useEffect(() => {
     dispatch(subcribedUserContent());
@@ -109,6 +108,88 @@ const Subscription = (props) => {
         }
   };
 
+  const handleOverAllEvent = (e) => {
+    const targetId = e.target.id;
+    const targetName = e.target.getAttribute('name');
+    const eventType = e.type;
+    const tagName = e.target.tagName;
+
+    console.log(targetId,targetName,eventType,tagName,e.target)
+
+
+    if ((targetName === "duration" || targetName === "title") && eventType === 'click' && targetId) {
+      Navigate(`/video/${targetId}`);
+      window.location.reload();
+      return;
+    }
+
+    if ((targetName === "avatar" || targetName === "username") && targetId && eventType === 'click') {
+      const username = e.target.getAttribute('data-username');
+      console.log(e.target)
+      Navigate(`/channel/${username}`)
+      return;
+    }
+
+    if (targetName === "video" || targetName === "duration") {
+
+      const videoElements = document.getElementsByName('video');
+
+      const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
+
+      console.log(targetedVideo)
+
+      if (!targetedVideo) return;
+
+      if (eventType === 'mouseenter') {
+        setVideoStatus((prev) => ({
+          ...prev,
+          [targetId]: { ...prev[targetId], showControl:true },
+        }));
+        if (targetedVideo.hoverTimeout) {
+          clearTimeout(targetedVideo.hoverTimeout);
+        }
+
+        targetedVideo.hoverTimeout = setTimeout(() => {
+          targetedVideo.play().catch((error) => console.error(error));
+        }, 800);
+      }
+      else if (eventType === 'mouseleave') {
+        setVideoStatus((prev) => ({
+          ...prev,
+          [targetId]: { ...prev[targetId], showControl: false },
+        }));
+        if (targetedVideo.hoverTimeout) {
+          clearTimeout(targetedVideo.hoverTimeout);
+        }
+
+        targetedVideo.hoverTimeout = setTimeout(() => {
+          targetedVideo.pause();
+          targetedVideo.currentTime = 0;
+        }, 500);
+      }
+      return
+    }
+
+    if ((targetName === "volume" || tagName === 'svg' || tagName === 'path' || tagName === 'line' || tagName === 'BUTTON') && targetId && eventType === 'click') {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const videoElements = document.getElementsByName('video');
+
+      const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
+
+      const newMutedState = !targetedVideo.muted;
+      targetedVideo.muted = newMutedState;
+
+      setVideoStatus((prev) => ({
+        ...prev,
+        [targetId]: { ...prev[targetId], isMuted: true },
+      }));
+
+      return;
+    }
+  }
+
   return (
     <div className="h-[90vh] max-md:h-screen max-md:w-screen scroll-smooth overflow-y-scroll scrollBar">
       {/* {loggedIn ? "" : */}
@@ -121,33 +202,43 @@ const Subscription = (props) => {
           <div
             key={video._id}
             className="flex h-fit"
-            onClick={() => Navigate(`/video/${video._id}`)}
+            // onClick={() => Navigate(`/video/${video._id}`)}
+            onClick={handleOverAllEvent}
+            id={video._id}
+            name="container"
           >
             {/* video */}
             <div
               className="relative max-md:w-[36%] max-sm:w-[42%] w-64  h-fit"
-              onMouseEnter={() => {
-                setVideoStatus((prev) => ({
-                  ...prev,
-                  [video._id]: { ...prev[video._id], showControl: true },
-                }));
-                togglePlay(video._id);
-              }}
-              onMouseLeave={() => {
-                setVideoStatus((prev) => ({
-                  ...prev,
-                  [video._id]: { ...prev[video._id], showControl: false },
-                }));
-                togglePause(video._id);
-              }}
+              name="video-container"
+              // onMouseEnter={() => {
+              //   setVideoStatus((prev) => ({
+              //     ...prev,
+              //     [video._id]: { ...prev[video._id], showControl: true },
+              //   }));
+              //   togglePlay(video._id);
+              // }}
+              onMouseEnter={handleOverAllEvent}
+              onMouseLeave={handleOverAllEvent}
+              id={video._id}
+              // onMouseLeave={() => {
+              //   setVideoStatus((prev) => ({
+              //     ...prev,
+              //     [video._id]: { ...prev[video._id], showControl: false },
+              //   }));
+              //   togglePause(video._id);
+              // }}
             >
               <video
-                src={video?.videoFile}
-                ref={(el) => {
-                  if (el) {
-                    videoRef.current[video._id] = el;
-                  }
-                }}
+                // src={video?.videoFile}
+                // ref={(el) => {
+                //   if (el) {
+                //     videoRef.current[video._id] = el;
+                //   }
+                // }}
+                name="video"
+                id={video._id}
+                data-username={video?.owner?.username}
                 muted={videoStatus[video._id]?.isMuted}
                 poster={video?.thumbnail}
                 onTimeUpdate={() => handleOnTimeUpdate(video._id)}
@@ -160,7 +251,10 @@ const Subscription = (props) => {
               >
                 <div className="flex justify-end">
                   <button
-                    onClick={(e) => toggleMute(e, video._id)}
+                    // onClick={(e) => toggleMute(e, video._id)}
+                    onClick={handleOverAllEvent}
+                    name='volume'
+                    id={video._id}
                     className={` z-13 p-2 rounded-full hover:bg-black/30 active:bg-black/50 active:border-1 active:border-gray-600 transition-all duration-75`}
                   >
                     {videoStatus[video._id]?.isMuted === true ? (
@@ -176,8 +270,8 @@ const Subscription = (props) => {
                     )}
                   </button>
                 </div>
-                <div className="absolute inset-0 flex items-end justify-end bottom-0 p-2 rounded-[10px] max-lg:text-[2vw] text-lg">
-                  <h1 className="text-white rounded-md bg-black/30 px-1 py-0.1">
+                <div name="duration" id={video._id} className="absolute inset-0 flex items-end justify-end bottom-0 p-2 rounded-[10px] max-lg:text-[2vw] text-lg">
+                  <h1 name="duration" className="text-white rounded-md bg-black/30 px-1 py-0.1">
                     {formatTime(videoStatus[video._id]?.duration || 0)}
                   </h1>
                 </div>
@@ -199,20 +293,24 @@ const Subscription = (props) => {
                 </div> */}
               {/* title */}
               <div className="line-clamp-2 w-full font-medium text-3xl pb-2 max-md:text-2xl">
-                <h2>{video?.title}</h2>
+                <h2 onClick={handleOverAllEvent} id={video._id} name="title">{video?.title}</h2>
               </div>
               <div className="flex">
                 <div className="flex items-baseline ">
                   <img
                     src={video?.owner?.avatar}
                     alt=""
+                    name="avatar"
+                    data-username={video?.owner?.username}
+                    onClick={handleOverAllEvent}
+                    id={video._id}
                     className="w-6 mr-3 max-sm:w-6 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
                   />
                 </div>
                 <div className="flex flex-col leading-tight">
                   {/* user name */}
                   <div className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
-                    <h3>{video?.owner?.username}</h3>
+                    <h3 onClick={handleOverAllEvent} data-username={video?.owner?.username} name="username" id={video._id}>{video?.owner?.username}</h3>
                   </div>
                   {/* view and month ago */}
                   <div className="text-[11px] font-normal  text-gray-500 max-md:text-[11px] space-x-1.5">

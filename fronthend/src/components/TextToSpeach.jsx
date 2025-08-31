@@ -11,8 +11,6 @@ const MicAnimated = (props) => {
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
 
-  console.log(transcript)
-
   if (!browserSupportsSpeechRecognition) {
     return (
       <div className={`${props.micOpen ? "" : "hidden"} absolute z-15 p-3  flex items-center justify-center`}>

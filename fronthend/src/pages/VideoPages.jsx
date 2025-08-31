@@ -212,7 +212,7 @@ const VideoPages = (props) => {
 
   const handleVideoViewCounter = () => {
     dispatch(fetchViewCounter(targetVideo?._id));
-    dispatch(fetchVideosById(VideoId));
+    // dispatch(fetchVideosById(VideoId));
   }
 
   const handleSubcribeUser = () => {
@@ -226,7 +226,7 @@ const VideoPages = (props) => {
 
   const handleLikeToggleVideos = () => {
     dispatch(fetchLikeToggleVideo(VideoId));
-    dispatch(fetchVideosById(VideoId));
+    // dispatch(fetchVideosById(VideoId));
     setCurrentStatus((prev) => ({
       ...prev,
     likeStatus: !prev.likeStatus,
@@ -304,11 +304,83 @@ const VideoPages = (props) => {
       return formattedDateTime;
   };
 
-  // const getvideoInPlaylist = () => {
-  //   playlist?.video.map(video => video._id === VideoId);
-  // }
+  const handleOverAllEvent = (e) => {
+    const targetId = e.target.id;
+    const targetName = e.target.getAttribute('name');
+    const eventType = e.type;
+    const tagName = e.target.tagName;
 
-  // getvideoInPlaylist();
+
+    if ((targetName === "duration" || targetName === "title") && eventType === 'click' && targetId) {
+      Navigate(`/video/${targetId}`);
+      window.location.reload();
+      return;
+    }
+
+    if ((targetName === "avatar" || targetName === "username") && targetId && eventType === 'click') {
+      const username = e.target.getAttribute('data-username');
+      console.log(e.target)
+      Navigate(`/channel/${username}`)
+      return;
+    }
+    
+    if (targetName === "duration") {
+
+      const videoElements = document.getElementsByName('video');
+
+      const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
+
+      if (!targetedVideo) return;
+
+      if (eventType === 'mouseenter') {
+        setRecommendationStates((prev) => ({
+          ...prev,
+          [targetId]: { ...prev[targetId], mutedStatus: true },
+        }));
+        if (targetedVideo.hoverTimeout) {
+          clearTimeout(targetedVideo.hoverTimeout);
+        }
+
+        targetedVideo.hoverTimeout = setTimeout(() => {
+          targetedVideo.play().catch((error) => console.error(error));
+        }, 800);
+      }
+      else if (eventType === 'mouseleave') {
+        setRecommendationStates((prev) => ({
+          ...prev,
+          [targetId]: { ...prev[targetId], mutedStatus: false },
+        }));
+        if (targetedVideo.hoverTimeout) {
+          clearTimeout(targetedVideo.hoverTimeout);
+        }
+
+        targetedVideo.hoverTimeout = setTimeout(() => {
+          targetedVideo.pause();
+          targetedVideo.currentTime = 0;
+        }, 500);
+      }
+      return
+    }
+
+    if ((targetName === "volume" || tagName === 'svg' || tagName === 'path' || tagName === 'line' || tagName === 'BUTTON') && targetId && eventType === 'click') {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const videoElements = document.getElementsByName('video');
+
+      const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
+
+      const newMutedState = !targetedVideo.muted;
+      targetedVideo.muted = newMutedState;
+      
+      setRecommendationStates((prev) => ({
+        ...prev,
+        [targetId]: { ...prev[targetId], isMuted: newMutedState },
+      }));
+
+      return;
+    }
+  }
 
   return (
     <div className="relative h-full">
@@ -807,25 +879,31 @@ const VideoPages = (props) => {
             <div
               key={video._id}
               className="flex max-lg:flex-col max-lg:w-full h-fit"
-              onClick={() => Navigate(`/video/${video?._id}`)}
+              // onClick={() => Navigate(`/video/${video?._id}`)}
+              name="filter-container"
+              data-id={video._id}
+              onClick={handleOverAllEvent}
             >
               {/* video */}
               <div
                 className="relative w-[40%] max-lg:w-full  h-fit"
-                onMouseEnter={(prev) => {
-                  setRecommendationStates({
-                    ...prev,
-                    [video?._id]: { ...prev[video?._id], mutedStatus: true },
-                  });
-                  togglePlayRecommendation(video?._id);
-                }}
-                onMouseLeave={(prev) => {
-                  setRecommendationStates({
-                    ...prev,
-                    [video?._id]: { ...prev[video._id], mutedStatus: false },
-                  });
-                  togglePauseRecommendation(video._id);
-                }}
+                name="video-cover"
+                onMouseEnter={handleOverAllEvent}
+                onMouseLeave={handleOverAllEvent}
+                // onMouseEnter={(prev) => {
+                //   setRecommendationStates({
+                //     ...prev,
+                //     [video?._id]: { ...prev[video?._id], mutedStatus: true },
+                //   });
+                //   togglePlayRecommendation(video?._id);
+                // }}
+                // onMouseLeave={(prev) => {
+                //   setRecommendationStates({
+                //     ...prev,
+                //     [video?._id]: { ...prev[video._id], mutedStatus: false },
+                //   });
+                //   togglePauseRecommendation(video._id);
+                // }}
               >
                 <video
                   src={video?.videoFile}
@@ -834,43 +912,52 @@ const VideoPages = (props) => {
                       videoRecommendationRefs.current[video?._id] = el;
                     }
                   }}
+                  name="video"
+                  id={video._id}
                   muted={recommendationStates[video?._id]?.isMuted}
                   poster={video?.thumbnail}
                   onTimeUpdate={() => handleOnTimeUpdate(video?._id)}
                   preload="metadata"
                   className="bg-black/90 aspect-video max-md:rounded-none max-lg:w-full rounded-lg"
                 ></video>
-                <div className="absolute inset-0 p-2">
-                  <div className="flex justify-end">
+                <div name="control-container" className="absolute inset-0 p-1 max-lg:p-2">
+                  <div className="flex justify-end items-baseline">
                     <button
-                      ref={(el) => {
-                        if (el) {
-                          muteButtonRef.current[video?._id] = el;
-                        }
-                      }}
-                      onClick={(e) => toggleMuteRecommendation(e, video?._id)}
+                      // ref={(el) => {
+                      //   if (el) {
+                      //     muteButtonRef.current[video?._id] = el;
+                      //   }
+                      // }}
+                      name="volume"
+                      // onClick={(e) => toggleMuteRecommendation(e, video?._id)}
+                      onClick={handleOverAllEvent}
+                      id={video._id}
                       className={`${
                         recommendationStates[video?._id]?.mutedStatus
                           ? ""
                           : "hidden"
                       } p-2 rounded-full hover:bg-black30 active:bg-black/50 z-13`}
+                      // className="lg:p-1 p-1 rounded-full hover:bg-black/30 active:bg-black/50 z-13"
                     >
-                      {recommendationStates[video?._id]?.isMuted === true &&
-                      recommendationStates[video?._id]?.mutedStatus === true ? (
+                      {recommendationStates[video?._id]?.isMuted === true ? (
                         <VolumeX
-                          size={16}
+                            // size={16}
+                            id={video._id}
                           color="white"
+                          className="size-5 max-lg:size-7 max-sm:size-6"
                         />
                       ) : (
                         <Volume2
-                          size={16}
-                          color="white"
+                            // size={16}
+                            id={video._id}
+                            color="white"
+                            className="size-5 max-lg:size-7 max-sm:size-6"
                         />
                       )}
                     </button>
                   </div>
-                  <div className="absolute inset-0 flex items-end justify-end bottom-0 p-2 text-[10px]">
-                    <h1 className="text-white text-lg max-md:text-sm bg-black/30 font-semibold px-1 py-0.1 rounded-sm">
+                  <div name="duration" id={video._id} className="absolute inset-0 flex items-end justify-end bottom-0 max-lg:p-2 lg:p-1">
+                    <h1 className="bg-black/50 text-white  max-md:text-xs text-[10px] lg:px-1 lg:py-0.5 px-2 py-1 rounded font-medium">
                       {recommendationStates[video?._id]?.isPlaying === true
                         ? formatTime(
                             recommendationStates[video?._id]?.duration || 0
@@ -881,22 +968,26 @@ const VideoPages = (props) => {
                 </div>
               </div>
               <div className="w-[60%] max-lg:w-full flex justify-base flex-col max-md:py-0 py-1 pl-2 max-md:my-1">
-                {/* title */}
-                <div className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]">
-                  <h2>{video?.title}</h2>
+
+                {/* design for upto laptop */}
+                <div  className="line-clamp-2 max-lg:hidden w-full font-medium text-md max-md:text-[16px] ">
+                  <h2 name="title" id={video._id}>{video?.title}</h2>
                 </div>
-                <div className="flex">
-                  <div className="flex items-baseline ">
+                <div className="flex max-lg:hidden">
+                  <div className="flex items-baseline lg:hidden">
                     <img
                       src={video?.userInfo?.avatar}
                       alt=""
+                      name="avatar"
+                      id={video._id}
+                      data-username={video?.userInfo?.username}
                       className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
                     />
                   </div>
                   <div className="flex flex-col leading-tight">
                     {/* user name */}
-                    <div className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
-                      <h3>{video?.userInfo?.username}</h3>
+                    <div  className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
+                      <h3 name="username" data-username={video?.userInfo?.username} id={video._id}>{video?.userInfo?.username}</h3>
                     </div>
                     {/* view and month ago */}
                     <div className="text-[11px] font-normal  text-gray-500 max-md:text-[11px] space-x-1.5">
@@ -908,12 +999,49 @@ const VideoPages = (props) => {
                     </div>
                   </div>
                 </div>
+                {/* design for under laptop */}
+                <div className="flex lg:hidden">
+                  {/* image */}
+                  <div className="flex">
+                    <div className="flex items-baseline">
+                      <img
+                        src={video?.userInfo?.avatar}
+                        alt=""
+                        name="avatar"
+                        id={video._id}
+                        data-username={video?.userInfo?.username}
+                        className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                      />
+                    </div>
+                    {/* title username createdAt views */}
+                    <div>
+                      {/* title */}
+                      <div  className="line-clamp-2 w-full font-medium text-lg max-md:text-[16px]">
+                        <h2 name="title" id={video._id} >{video?.title}</h2>
+                      </div>
+                      <div className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs leading-tight flex">
+                        {/* username */}
+                        <div  className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
+                          <h3 name="username" data-username={video?.userInfo?.username} id={video._id}>{video?.userInfo?.username}</h3>
+                        </div>
+                        <span className="mx-1">•</span>
+                        {/* view */}
+                        <span>{video?.views} views</span>
+                        <span className="mx-1">•</span>
+                        {/* time ago */}
+                        <span>
+                          {formatTimeAgo(video?.createdAt) || "12 year ago"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-    </div>
+      </div>
   );
 };
 

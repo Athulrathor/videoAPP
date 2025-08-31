@@ -240,11 +240,12 @@ const getVideoByOwner = asyncHandler(async (req, res) => {
 
 const publishAVideo = asyncHandler(async (req, res) => {
   try {
-    const { title, description, isPublished = true } = req.body;
+    const { title, description, isPublished } = req.body;
 
     const videoFileLocalPath = req.files?.videoFile?.[0]?.path;
     const thumbnailFileLocalPath = req.files?.thumbnail?.[0]?.path;
 
+    console.log(isPublished,typeof(isPublished))
     console.log(videoFileLocalPath,thumbnailFileLocalPath)
 
     const videoOptions = {

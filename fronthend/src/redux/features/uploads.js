@@ -34,7 +34,7 @@ export const uploadVideo = createAsyncThunk(
             return response?.data?.data;
 
         } catch (error) {
-            console.log(error.message);
+            console.log(error);
             dispatch(setUploadProgress(0));
             return rejectWithValue(error?.response?.data?.message || error.message);
         }

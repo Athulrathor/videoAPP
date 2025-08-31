@@ -76,6 +76,7 @@ const VideoCard = ({ video, timeAgo, formatTime, muted, handleOverAllEvent }) =>
               ref={createrVideoRef}
               onTimeUpdate={handleOnTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
+              data-username={video?.userInfo?.username}
               muted={muted}
               className="object-contain w-full h-full aspect-video overflow-hidden"
             />
@@ -122,12 +123,11 @@ const VideoCard = ({ video, timeAgo, formatTime, muted, handleOverAllEvent }) =>
       </div>
 
       {/* Video Info */}
-      <div className="flex mt-3 mx-3 gap-3">
+      <div name="info" className="flex mt-3 mx-3 gap-3">
         {/* Channel Avatar */}
         <div
           id={video._id}
           name="avatar"
-          data-username={video?.userInfo?.username}
           className="flex-shrink-0"
         >
           <img
@@ -135,6 +135,7 @@ const VideoCard = ({ video, timeAgo, formatTime, muted, handleOverAllEvent }) =>
             alt={video?.userInfo?.username}
             loading="lazy"
             name="avatar"
+            onClick={handleOverAllEvent}
             id={video._id}
             className="w-9 h-9 rounded-full cursor-pointer"
           />
@@ -145,6 +146,7 @@ const VideoCard = ({ video, timeAgo, formatTime, muted, handleOverAllEvent }) =>
           <h3
             id={video._id}
             name="title"
+            onClick={handleOverAllEvent}
             className="max-sm:text-lg text-xl font-medium text-gray-900 line-clamp-2 leading-5 group-hover:text-gray-700"
           >
             {video.title}
@@ -152,7 +154,7 @@ const VideoCard = ({ video, timeAgo, formatTime, muted, handleOverAllEvent }) =>
 
           <div className="mt-1">
             <div className="text-sm text-gray-600 mt-0.5">
-              <span name="username" className="space-x-1">{video?.userInfo?.username}</span>
+              <span onClick={handleOverAllEvent} id={video._id} name="username" className="space-x-1">{video?.userInfo?.username}</span>
               <span className="mx-1">•</span>
               <span className="space-x-1">{video.views} views</span>
               <span className="mx-1">•</span>

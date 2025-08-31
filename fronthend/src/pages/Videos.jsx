@@ -45,14 +45,13 @@ const Videos = (props) => {
     const targetName = e.target.getAttribute('name');
     const eventType = e.type;
 
-    console.log(targetName)
+    console.log(targetId,e.target.tagName,eventType)
+
+
 
     if (eventType === 'click' && (
-      targetName?.includes('mute-button') ||
-      e.target.tagName === "path" ||
-      e.target.tagName === "line" ||
-      e.target.tagName === "svg" ||
-      e.target.closest('[name*="mute-button"]')
+      targetName?.includes('mute-button') || targetName?.includes('mute-button1') || targetName?.includes('mute-button2') || e.target.tagName ==='path' ||
+      e.target.tagName === 'line' || e.target.tagName === 'svg'
     )) {
       e.stopPropagation();
       e.preventDefault();
@@ -60,32 +59,28 @@ const Videos = (props) => {
       const videoElements = document.getElementsByName('video');
 
       const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
-      console.log(targetedVideo);
 
         const newMutedState = !targetedVideo.muted;
-        console.log("this is video container :  ", targetedVideo)
         targetedVideo.muted = newMutedState;
         setMuted(newMutedState);
       return;
     }
 
-    if (eventType === 'click' && targetId && (
-      targetName === "video" ||
-      targetName === "title" || targetName === "username"
-    )) {
+    if ((targetName === "title" || targetName === "video" || targetName === "control-container") && eventType === 'click') {
       navigate(`/video/${targetId}`);
       return;
     }
 
-    if (eventType === 'click' && (targetName === "avatar" || targetName === "title") && e.target.hasAttribute('data-username')) {
+    if ((targetName === "avatar" || targetName === "username") && eventType === 'click') {
       const videoElements = document.getElementsByName('video');
 
       const targetedVideo = Array.from(videoElements).find((video) => video.id === targetId);
-      const username = targetedVideo.getAttribute('data-username');
-      if (username) {
-        navigate(`/channel/${username}`);
-      }
-      return;
+      console.log("from avatar or username element :  ",targetId,targetedVideo)
+        const username = targetedVideo.getAttribute('data-username');
+        if (username) {
+          navigate(`/channel/${username}`);
+        }
+        return;
     }
 
     if (targetName === "progress" || targetName === "video" || targetName === "control-container" || targetName === "control-container1") {
