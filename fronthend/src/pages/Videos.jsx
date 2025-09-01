@@ -95,6 +95,18 @@ const Videos = (props) => {
           clearTimeout(targetedVideo.hoverTimeout);
         }
 
+        if (eventType === 'click') {
+          if (targetedVideo.hoverTimeout) {
+            clearTimeout(targetedVideo.hoverTimeout);
+          }
+
+          targetedVideo.hoverTimeout = setTimeout(() => {
+            targetedVideo.pause();
+            targetedVideo.currentTime = 0;
+          }, 500);
+          return
+        }
+
         targetedVideo.hoverTimeout = setTimeout(() => {
           targetedVideo.play().catch((error) => console.error(error));
         }, 800);

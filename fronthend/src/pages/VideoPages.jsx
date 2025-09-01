@@ -1,4 +1,4 @@
-import React, { lazy, useEffect, useMemo, useRef, useState } from "react";
+import React, { lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { ArrowDownToLine, EllipsisVertical, Maximize, Pause, Play, Plus, Settings, Share2, SkipForward, ThumbsDown, ThumbsUp, Video, Volume2, VolumeX } from "lucide-react";
@@ -8,10 +8,9 @@ import { fetchVideosById, fetchViewCounter } from "../redux/features/videos";
 import {  fetchLikeToggleVideo, isVideoLiked } from "../redux/features/likes";
 import { fetchSubcribeToggle, isSubcribed } from "../redux/features/subcribers";
 import Comments from "../components/Comments";
-
-const UploadVideo = lazy(() => import('../components/UploadVideo'));
-const UploadShort = lazy(() => import("../components/UploadShort"));
-const UploadLive = lazy(() => import('../components/UploadLive'));
+import UploadVideo from '../components/UploadVideo';
+import UploadShort from "../components/UploadShort";
+import UploadLive from '../components/UploadLive';
 
 const VideoPages = (props) => {
 
@@ -21,8 +20,8 @@ const VideoPages = (props) => {
   const { timeAgo } = props;
 
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setisMuted] = useState(false);
-  const [volume, setVolume] = useState(80);
+  const [isMuted, setisMuted] = useState(true);
+  const [volume, setVolume] = useState(100);
   const [currentVolumeBar, setCurrentVolumeBar] = useState(false);
 
   const [ToggleAddPlaylistBtn, setToggleAddPlaylistBtn] = useState(false);
@@ -233,27 +232,27 @@ const VideoPages = (props) => {
     }));
   }
 
-  const handleIsSubcribed = () => {
+  const handleIsSubcribed = useCallback(() => {
     dispatch(isSubcribed(targetVideo?.owner?._id));
     setCurrentStatus((prev) => ({
       ...prev,
       subcriberStatus: isSubcribedStatus,
     }));
     dispatch(fetchVideosById(VideoId));
-  }
+  },[dispatch,VideoId,targetVideo])
   
   useEffect(() => {
     handleIsSubcribed();
   }, []);
 
-  const handleIsVideoLiked = () => {
+  const handleIsVideoLiked = useCallback(() => {
     dispatch(isVideoLiked(VideoId));
     // dispatch(fetchVideosById(VideoId));
     setCurrentStatus((prev) => ({
       ...prev,
       likeStatus: videoLiked,
     }));
-  }
+  },[dispatch,VideoId])
   
   useEffect(() => {
     handleIsVideoLiked();
@@ -341,6 +340,22 @@ const VideoPages = (props) => {
           clearTimeout(targetedVideo.hoverTimeout);
         }
 
+        if (eventType === 'click') {
+          setRecommendationStates((prev) => ({
+            ...prev,
+            [targetId]: { ...prev[targetId], mutedStatus: false },
+          }));
+          if (targetedVideo.hoverTimeout) {
+            clearTimeout(targetedVideo.hoverTimeout);
+          }
+
+          targetedVideo.hoverTimeout = setTimeout(() => {
+            targetedVideo.pause();
+            targetedVideo.currentTime = 0;
+          }, 500);
+          return;
+        }
+
         targetedVideo.hoverTimeout = setTimeout(() => {
           targetedVideo.play().catch((error) => console.error(error));
         }, 800);
@@ -423,7 +438,7 @@ const VideoPages = (props) => {
                 muted={isMuted}
                 onTimeUpdate={handleOntimeCurrent}
                 volume={volume}
-                autoPlay={isAutoplayOn}
+                autoPlay
               ></video>
             </div>
             {/* controls */}
@@ -907,11 +922,11 @@ const VideoPages = (props) => {
               >
                 <video
                   src={video?.videoFile}
-                  ref={(el) => {
-                    if (el) {
-                      videoRecommendationRefs.current[video?._id] = el;
-                    }
-                  }}
+                  // ref={(el) => {
+                  //   if (el) {
+                  //     videoRecommendationRefs.current[video?._id] = el;
+                  //   }
+                  // }}
                   name="video"
                   id={video._id}
                   muted={recommendationStates[video?._id]?.isMuted}

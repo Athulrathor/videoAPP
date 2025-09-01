@@ -222,8 +222,12 @@ const ShortCard = (props) => {
         className="relative  max-sm:rounded-none max-sm:h-[calc(100vh_-_41px)] rounded-2xl h-[calc(100vh_-_75px)] max-sm:w-screen aspect-[9/16] overflow-hidden"
         ref={containerRef}
         key={short._id}
-        onClick={(e) => togglePlay(e)}
-        onDoubleClick={() => handleLikeToggle(short._id)}
+        // onClick={(e) => togglePlay(e)}
+        // onDoubleClick={() => handleLikeToggle(short._id)}
+        onClick={props.handleAllOverEvent}
+        onDoubleClick={props.handleAllOverEvent}
+        id={short._id}
+        name="short-container"
         style={{
           objectFit: "contain"
         }}
@@ -232,6 +236,7 @@ const ShortCard = (props) => {
           <video
             ref={shortRef}
             id={short._id}
+            name="short"
             src={short.shortFile}
             poster={short.thumbnail}
             className=" w-full h-full"
@@ -243,30 +248,36 @@ const ShortCard = (props) => {
         <div className={`${showComment ? "" : "hidden"} absolute bottom-0 left-0 right-0 h-1 z-1`}>
           <div
             className={`h-full bg-red-500`}
+            name="duration"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 flex flex-col justify-between max-sm:p-2 p-4">
+        <div name="body" id={short._id} className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 flex flex-col justify-between max-sm:p-2 p-4">
           {/* Top Controls */}
-          <div className="flex justify-between items-start">
-            <div className="flex items-center space-x-2 max-sm:space-x-1">
+          <div name="body" id={short._id} className="flex justify-between items-start">
+            <div name='body' id={short._id} className="flex items-center space-x-2 max-sm:space-x-1">
               <button
-                onClick={(e) => togglePlay(e)}
+                // onClick={(e) => togglePlay(e)}
+                onClick={props.handleAllOverEvent}
+                name='play' id={short._id}
                 className="p-4 max-sm:p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-200"
               >
-                {isPlaying ? <Pause className='size-[24px] max-sm:size-[16px]' /> : <Play size={24} className='max-sm:size-[16px]' />}
+                {props.isPlaying ? <Pause name='play' id={short._id} onClick={props.handleAllOverEvent} className='size-[24px] max-sm:size-[16px]' /> : <Play size={24} name='play' id={short._id} onClick={props.handleAllOverEvent} className='max-sm:size-[16px]' />}
               </button>
               <div
+                name='mute-container'
+                id={short._id}
                 className="flex items-center ml-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors cursor-pointer"
                 onMouseEnter={() => setHide(true)}
                 onMouseLeave={() => setHide(false)}
               >
                 <button
-                  onClick={(e) => toggleMute(e)}
+                  // onClick={(e) => toggleMute(e)}
+                  onClick={props.handleAllOverEvent} name='mute' id={short._id}
                   className="flex justify-center items-center p-2 "
                 >
-                  {isMuted ? <VolumeX size={20} className='max-sm:size-[16px]' /> : <Volume2 size={20} className='max-sm:size-[16px]' />}
+                  {props.isMuted ? <VolumeX size={20} onClick={props.handleAllOverEvent} name='mute' id={short._id} className='max-sm:size-[16px]' /> : <Volume2 size={20} onClick={props.handleAllOverEvent} name='mute' id={short._id} className='max-sm:size-[16px]' />}
                 </button>
                 <input
                   onClick={(e) => e.stopPropagation()}
@@ -285,7 +296,7 @@ const ShortCard = (props) => {
               </div>
             </div>
 
-            <div className="flex space-x-2">
+            <div name='body' id={short._id} className="flex space-x-2">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -295,7 +306,7 @@ const ShortCard = (props) => {
               >
                 <Settings size={20} className='max-sm:size-[16px]' />
               </button>
-              <button
+              {/* <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsFullscreen(!isFullscreen);
@@ -304,33 +315,42 @@ const ShortCard = (props) => {
                 className="p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
               >
                 <Maximize size={20} className='max-sm:size-[16px]' />
-              </button>
+              </button> */}
             </div>
           </div>
 
           {/* Center Play/Pause Button */}
-          <div className="flex items-end h-full justify-center">
+          <div name='play' id={short._id} className="flex items-end h-full justify-center">
             <button
-              onClick={(e) => togglePlay(e)}
+              onClick={props.handleAllOverEvent} name='play' id={short._id}
               className="p-4 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-200"
             >
-              {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+              {props.isPlaying ? <Pause onClick={props.handleAllOverEvent} name='play' id={short._id} size={24} /> : <Play onClick={props.handleAllOverEvent} name='play' id={short._id} size={24} />}
             </button>
           </div>
 
           {/* Bottom Info and Controls */}
-          <div className="flex justify-between  items-end">
-            <div className="w-full flex justify-between">
-              <div className='' onClick={(e) => e.stopPropagation()}>
-                <div className="flex text-white text-sm font-medium mb-1 items-center space-x-2">
+          <div name="body" id={short._id} className="flex justify-between  items-end">
+            <div name="body" id={short._id} className="w-full flex justify-between">
+              <div name="content" id={short._id} className='' onClick={(e) => e.stopPropagation()}>
+                <div name="body" id={short._id} className="flex text-white text-sm font-medium mb-1 items-center space-x-2">
                   <img
                     src={short.userInfo[0]?.avatar}
                     alt="#"
                     className="w-6 max-sm:w-8 aspect-square rounded-full"
+                    data-username={short?.userInfo[0]?.username}
+                    id={short._id}
+                    onClick={props.handleAllOverEvent}
+                    name="avatar"
                   />
-                  <span>{"@" + short.userInfo[0]?.username || "Unknown User"}</span>
+                  <span onClick={props.handleAllOverEvent} data-username={short?.userInfo[0]?.username} id={short._id} name="avatar">
+                    {"@" + short.userInfo[0]?.username || "Unknown User"}
+                  </span>
                   <button
-                    onClick={(e) => handleSubcribeToggle(e, short.owner)}
+                    // onClick={(e) => handleSubcribeToggle(e, short.owner)}
+                    onClick={props.handleAllOverEvent}
+                    name='subcribe'
+                    id={short._id}
                     className={`${isSubcribedStatus === true
                       ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
                       : "bg-red-400 hover:bg-red-500 active:bg-red-600"
@@ -339,7 +359,7 @@ const ShortCard = (props) => {
                     {isSubcribedStatus === true ? "Subcribed" : "Subcribe"}
                   </button>
                 </div>
-                <div onClick={() => setshowdesc(!showdesc)} className="text-white text-base opacity-90 mb-2">
+                <div onClick={() => setshowdesc(!showdesc)} className="text-white line-clamp-2 text-base opacity-90 mb-2">
                   <span>{short.title}</span>
                   <p className='line-clamp-1'>{"sdhfosdfhlsdhsifhlsdhfsldfhsdf"+short?.description}</p>
                 </div>
@@ -378,19 +398,22 @@ const ShortCard = (props) => {
             </div>
 
             {/* Side Controls */}
-            <div className="flex flex-col space-y-4">
-              <div className="flex flex-col items-center">
-                <button className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors">
-                  <Eye size={24} className='max-sm:size-[16px]' />
+            <div name="body" id={short._id} className="flex flex-col space-y-4">
+              <div name="body" id={short._id} className="flex flex-col items-center">
+                <button name="views" id={short._id} className="p-3 rounded-full bg-black/30 text-white transition-colors">
+                  <Eye size={24} name='eye' id={short._id} className='max-sm:size-[16px]' />
                 </button>
                 <span className="text-white text-xs mt-1">{short?.views}</span>
               </div>
-              <div className="flex flex-col items-center">
+              <div name="body" id={short._id} className="flex flex-col items-center">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleLikeToggle(short._id);
-                  }}
+                  // onClick={(e) => {
+                  //   e.stopPropagation();
+                  //   handleLikeToggle(short._id);
+                  // }}
+                  onClick={props.handleAllOverEvent}
+                  name='like'
+                  id={short._id}
                   className={`p-3 rounded-full transition-all ${
                     shortLiked === true
                     ? " text-white bg-black/30"
@@ -400,6 +423,9 @@ const ShortCard = (props) => {
                   <Heart
                     size={24}
                     className='max-sm:size-[16px]'
+                    name='heart'
+                    onClick={props.handleAllOverEvent}
+                    id={short._id}
                     fill={shortLiked === true ? "white" : "none"}
                   />
                 </button>
@@ -408,14 +434,19 @@ const ShortCard = (props) => {
                 </span>
               </div>
 
-              <div className="flex flex-col items-center">
+              <div name="body" id={short._id} className="flex flex-col items-center">
                 <button
-                  onClick={(e) => handleShortComment(e,short._id)
-                  }
+                  // onClick={(e) => handleShortComment(e, short._id)}
+                  onClick={props.handleAllOverEvent}
+                  name="comment"
+                  id={short._id}
                   className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
                 >
                   <MessageCircle
                     size={24}
+                    name='message'
+                    id={short._id}
+                    onClick={props.handleAllOverEvent}
                     className='max-sm:size-[16px]'
                     fill={showComment === false ? "white" : "transparent"}
                   />
@@ -425,34 +456,45 @@ const ShortCard = (props) => {
                 </span>
               </div>
 
-              <div className="flex flex-col items-center">
+              <div name="body" id={short._id} className="flex flex-col items-center">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
+                  // onClick={(e) => {
+                  //   e.stopPropagation();
+                  // }}
+                  onClick={props.handleAllOverEvent}
+                  name='share'
+                  id={short._id}
                   className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
                 >
-                  <Share size={24} className='max-sm:size-[16px]' />
+                  <Share name='shares' onClick={props.handleAllOverEvent}
+                    id={short._id} size={24} className='max-sm:size-[16px]' />
                 </button>
                 <span className="text-white text-xs mt-1">{"12"}</span>
               </div>
 
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
+                // onClick={(e) => {
+                //   e.stopPropagation();
+                // }}
+                name='download'
+                id={short._id}
+                onClick={props.handleAllOverEvent}
                 className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
               >
-                <Download size={24} className='max-sm:size-[16px]' />
+                <Download name='downloads' onClick={props.handleAllOverEvent}
+                  id={short._id} size={24} className='max-sm:size-[16px]' />
               </button>
 
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
+                // onClick={(e) => {
+                //   e.stopPropagation();
+                // }}
+                name='more'
+                id={short._id}
+                onClick={props.handleAllOverEvent}
                 className="p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
               >
-                <MoreHorizontal size={24} className='max-sm:size-[16px]' />
+                <MoreHorizontal onClick={props.handleAllOverEvent} size={24} className='max-sm:size-[16px]' />
               </button>
             </div>
           </div>

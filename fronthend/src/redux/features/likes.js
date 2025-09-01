@@ -114,7 +114,7 @@ export const fetchLikeToggleShort = createAsyncThunk('like/likeToggleShort', asy
         // Get current like state and toggle it
         const currentState = getState().likes;
         const wasLiked = currentState.shortLiked;
-
+        console.log("Liked A Short Successfully!")
         return {
             shortId: id,
             isLiked: !wasLiked,

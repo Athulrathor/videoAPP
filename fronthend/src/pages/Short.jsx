@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ShortCard from "../components/ShortCard";
 import ShortSkeletonLoading from "../components/LoadingScreen/ShortSkeletonLoading";
 import Comments from "../components/Comments";
+import { fetchLikeToggleShort, isShortLiked } from "../redux/features/likes";
+import { fetchShortComment } from "../redux/features/comment";
+import { useNavigate } from "react-router-dom";
+import { fetchSubcribeToggle } from "../redux/features/subcribers";
 
 const Short = (props) => {
+
+  const dispatch = useDispatch();
+  const Navigate = useNavigate();
 
   const [getShortId, setGetShortId] = useState(null);
   const [showComment, setShowComment] = useState(true);
@@ -13,8 +20,10 @@ const Short = (props) => {
   const [currentTime, setCurrentTime] = useState(0);
     const [isRetrying, setIsRetrying] = useState(false);
 
-  const { short,shortLoading,shortError } = useSelector((state) => state.shorts);
-  const { loggedIn } = useSelector((state) => state.user);
+  const { short, shortLoading, shortError } = useSelector((state) => state.shorts);
+  
+  const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
   
   useEffect(() => {
     setFunctionCalled(false);
@@ -36,8 +45,108 @@ const Short = (props) => {
     }, 2000);
   };
 
+  const handleLikeToggle = (ids) => {
+    dispatch(fetchLikeToggleShort(ids));
+    dispatch(isShortLiked(ids));
+  }
+
+   const handleShortComment = (ids) => {
+      setShowComment(!showComment)
+      dispatch(fetchShortComment(ids));
+  }
+  
+    const handleSubcribeToggle = (ids) => {
+      dispatch(fetchSubcribeToggle(ids))
+  }
+  
+  // const toggleMute = () => {
+  //   short.muted = !isMuted;
+  //   setIsMuted(!isMuted);
+  // };
+  
+
+  const handleAllOverEvent = (e) => {
+    const targetId = e.target.id;
+    const targetName = e.target.getAttribute("name");
+    const evenType = e.type;
+
+    console.log(targetId, targetName, evenType, e.target);
+    
+    if ((targetName === "body" || targetName === 'play') && evenType === 'click') {
+      const shorts = document.getElementsByName('short');
+
+      const targetedShort = Array.from(shorts).find((short) => short.id === targetId);
+      console.log(targetedShort, e.target.id)
+      if (isPlaying) {
+        targetedShort.pause();
+      } else {
+        targetedShort.play();
+      }
+      setIsPlaying(!isPlaying);
+      return
+    }
+
+    if (targetName === "body" && evenType === 'dblclick') {
+      handleLikeToggle(targetId);
+      return;
+    }
+
+    if ((targetName === "like" || targetName === "heart") && evenType === "click") {
+      handleLikeToggle(targetId);
+      return;
+    }
+
+    if ((targetName === 'comment' || targetName === 'messages')) {
+      handleShortComment(targetId);
+      return;
+    }
+
+    if (targetName === 'share' || targetName === "shares") {
+      console.log("nothing to do share bth");
+      return;
+    }
+
+    if (targetName === 'download' || targetName === "downloads") {
+      console.log("nothing to do download btn");
+      return;
+    }
+
+    if (targetName === "more") {
+      console.log("nothing to do more btn");
+      return;
+    }
+
+    if (targetName === "avatar" && evenType === 'click') {
+      const username = e.target.getAttribute('data-username');
+      Navigate(`/channel/${username}`);
+      return;
+    }
+
+    if (targetName === 'subcribe' && evenType === "click") {
+      handleSubcribeToggle(targetId);
+      return;
+    }
+
+    if (targetName === "mute") {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const shorts = document.getElementsByName('short');
+
+      const targetedShort = Array.from(shorts).find((short) => short.id === targetId);
+      if (evenType === 'click') {
+        const newMutedState = !targetedShort.muted;
+        targetedShort.muted = newMutedState;
+        setIsMuted(!isMuted);
+        return;
+      }
+
+    }
+
+  }
+
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)]">
           <div>
             {shortError && (
               <div className="text-center py-16 px-6">
@@ -80,35 +189,45 @@ const Short = (props) => {
               <ShortSkeletonLoading />{" "}
             </div>
           ) : (
-            <div className="">
+            <div className="h-full max-h-screen">
               <div
-                className={` items-center flex w-full ${showComment ? "justify-center" : "justify-evenly"}  snap-y h-[calc(100vh_-_65px)] max-md:h-[calc(100vh_-_42px)] p-2 max-sm:p-0 snap-mandatory max-sm:overflow-hidden scroll-smooth overflow-y-scroll`}
+                className={`items-center flex ${showComment ? "justify-center" : "justify-evenly"} snap-y h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] max-sm:p-0 snap-mandatory max-sm:overflow-hidden scroll-smooth overflow-x-hidden overflow-y-auto`}
               >
-                
-                {short?.map((shortVideo) => (
-                  <div
-                    key={shortVideo._id}
-                    className="py-1"
-                  >
-                    <ShortCard
-                      short={shortVideo}
-                      id={shortVideo._id}
-                      activeShort={setGetShortId}
-                      showComment={showComment}
-                      setShowComment={setShowComment}
-                      fetchViewCounter={props.fetchViewCounter}
-                      currentTime={currentTime}
-                      setCurrentTime={setCurrentTime}
-                    />
+                {/* Main video container with proper padding */}
+                <div className="h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] overflow-y-auto snap-y snap-mandatory  scrollBar scroll-smooth">
+                  <div className=" sm:pt-3 sm:pb-6 sm:space-y-3">
+                    {short?.map((shortVideo) => (
+                      <div
+                        key={shortVideo._id}
+                        className="snap-start"
+
+                      >
+                        <ShortCard
+                          short={shortVideo}
+                          id={shortVideo._id}
+                          activeShort={setGetShortId}
+                          showComment={showComment}
+                          setShowComment={setShowComment}
+                          fetchViewCounter={props.fetchViewCounter}
+                          currentTime={currentTime}
+                          setCurrentTime={setCurrentTime}
+                          handleAllOverEvent={handleAllOverEvent}
+                          isPlaying={isPlaying}
+                          isMuted={isMuted}
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* Comments panels remain the same */}
                 <div className={`${showComment ? "translate-x-[200%] absolute" : ""} ${window.innerWidth < 768 ? "hidden" : ""} z-22 bg-gray-100 shadow-2xl rounded-lg right-0 ml-2 transition-all w-96 duration-500 h-full`}>
                   <Comments whichContent={"shorts"} contentId={getShortId} toggle={{ showComment, setShowComment }} />
                 </div>
               </div>
-              {/* comments start hear */}
-              <div className={`${showComment ? "" : "max-md:-translate-y-[70%]"} ${window.innerWidth >= 768 ? "hidden" : ""} z-22 bg-gray-100 shadow-2xl max-md:rounded-t-2xl transition-all duration-500 h-[70%]  max-sm:mx-0`}>
-                <Comments whichContent={"shorts"} contentId={getShortId} toggle={{showComment,setShowComment}} />
+
+              <div className={`${showComment ? "" : "max-md:-translate-y-[70%]"} ${window.innerWidth >= 768 ? "hidden" : ""} z-22 bg-gray-100 shadow-2xl max-md:rounded-t-2xl transition-all duration-500 h-[70%] max-sm:mx-0`}>
+                <Comments whichContent={"shorts"} contentId={getShortId} toggle={{ showComment, setShowComment }} />
               </div>
             </div>
           )}
