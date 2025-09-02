@@ -23,7 +23,8 @@ const Short = (props) => {
   const { short, shortLoading, shortError } = useSelector((state) => state.shorts);
   
   const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
   
   useEffect(() => {
     setFunctionCalled(false);
@@ -143,6 +144,10 @@ const Short = (props) => {
 
     }
 
+    if (targetName === "setting" && evenType === 'click') {
+      setShowSettings(!showSettings);
+    }
+
   }
 
   return (
@@ -206,14 +211,16 @@ const Short = (props) => {
                           short={shortVideo}
                           id={shortVideo._id}
                           activeShort={setGetShortId}
-                          showComment={showComment}
-                          setShowComment={setShowComment}
+                          // showComment={showComment}
+                          // setShowComment={setShowComment}
+                          commentPart={{ showComment, setShowComment }}
                           fetchViewCounter={props.fetchViewCounter}
-                          currentTime={currentTime}
-                          setCurrentTime={setCurrentTime}
+                          currentTime={{ currentTime, setCurrentTime }}
+                          // setCurrentTime={setCurrentTime}
                           handleAllOverEvent={handleAllOverEvent}
-                          isPlaying={isPlaying}
-                          isMuted={isMuted}
+                          playing={{isPlaying,setIsPlaying}}
+                          muted={{isMuted,setIsMuted}}
+                          settingBtn={{showSettings,setShowSettings}}
                         />
                       </div>
                     ))}

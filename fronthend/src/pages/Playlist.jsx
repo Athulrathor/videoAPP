@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { addAVideoToPlaylist, createAPlayList, getUserPlayList } from '../redux/features/playList';
-import { Camera, Film, Heart, Music, Play, PlayIcon, Plus, Sparkles, Video, X } from 'lucide-react';
+import { Camera, Film, Heart, Music, Play, PlayCircle, PlayIcon, Plus, Sparkles, Video, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchVideoByOwner } from '../redux/features/videos';
 
-const Playlist = ({ formatTime, timeAgo }) => {
+const Playlist = ({ timeAgo }) => {
 
   const dispatch = useDispatch();
   const Navigate = useNavigate();
@@ -88,11 +88,30 @@ const Playlist = ({ formatTime, timeAgo }) => {
     },2000)
   }
 
+  const handleAllOverOne = (e) => {
+    const targetName = e.target.getAttribute('name');
+    const targetId = e.target.id;
+    const evenType = e.type;
+
+    console.log(targetName, targetId, evenType);
+
+    if ((targetName === "detailBox" || targetName === "title") && evenType === 'click') {
+      const idx = e.target.getAttribute('data-video');
+      Navigate(`/video/${idx}`);
+    }
+
+    if ((targetName === "avatar" || targetName === 'username') && evenType === 'click') {
+      const username = e.target.getAttribute('data-username');
+      Navigate(`/channel/${username}`);
+    }
+
+  }
+
   return (
     <div className='py-3 max-md:py-2 w-full h-full px-6 max-md:px-2 overflow-y-scroll'>
       <div className='flex items-center justify-between border-b-1 py-1 sticky'>
         <h1 className='text-2xl max-md:text-lg max-sm:text-sm font-bold stroke-2 mb-2'>User Playlists</h1>
-        <button onClick={() => setToggleCreatePlaylist(true)} className='mr-4 px-4 py-1 stroke-2 bg-blue-300 hover:bg-blue-200 hover:opacity-85 active:bg-blue-300 rounded-lg '>
+        <button onClick={() => setToggleCreatePlaylist(true)} className='cursor-pointer mr-4 px-4 py-1 stroke-2 bg-blue-300 hover:bg-blue-200 hover:opacity-85 active:bg-blue-300 rounded-lg '>
           Create
         </button>
       </div>
@@ -101,7 +120,7 @@ const Playlist = ({ formatTime, timeAgo }) => {
         <div className={`${toggleCreatePlaylist ? "" : "hidden"} md:mx-auto max-sm:mb-8 bg-gray-100 z-30 w-full max-w-6xl rounded-xl bg-ggray-100 p-8 max-sm:p-0  shadow-lg mt-1`}>
           {/* cancel button */}
           <div className='w-full flex items-center justify-end'>
-            <button onClick={() => setToggleCreatePlaylist(false)} className='p-2 hover:bg-gray-100 rounded-full active:opacity-85 active:bg-gray-200'>
+            <button onClick={() => setToggleCreatePlaylist(false)} className='p-2 cursor-pointer hover:bg-gray-100 rounded-full active:opacity-85 active:bg-gray-200'>
               <X />
             </button>
           </div>
@@ -124,7 +143,7 @@ const Playlist = ({ formatTime, timeAgo }) => {
               <span className="text-sm font-medium text-blue-600">Playlist Info</span>
               <span className="text-sm text-gray-500">Add Videos</span>
             </div>
-            <div className="h-2 w-full rounded-full bg-gray-200">
+            <div className="h-2 w-full rounded-full bg-gray-200 cursor-pointer">
               <div className={`h-2 ${ counter === 0 ? "w-0.5" : ""} ${counter === 1 ? 'w-1/2' : ""} ${counter === 2 ? "w-full bg-green-600" : ""} rounded-full bg-blue-600 transition-all duration-500`}></div>
             </div>
           </div>
@@ -340,72 +359,80 @@ const Playlist = ({ formatTime, timeAgo }) => {
                   >
                     <div className="relative aspect-video mt-4 ml-4">
                       {/* Stack Layers */}
-                      <div className="absolute -left-3 -top-3 h-full w-full rounded-lg overflow-hidden shadow-2x1 opacity-66">
+                      <div className="absolute -left-3 -top-3 h-full w-full rounded-lg overflow-hidden opacity-66">
                         <img
                           src={video?.video[0]?.thumbnail || video?.thumbnail}
-                          alt={video?.title}
+                          // alt={video?.title}
+                          name="image"
+                          id={video._id}
+                          onClick={handleAllOverOne}
                           className="h-full w-full object-cover"
                         />
                       </div>
-                      <div className="absolute -left-2 -top-2 h-full w-full overflow-hidden rounded-lg shadow-2x1 opacity-75">
+                      <div className="absolute -left-2 -top-2 h-full w-full overflow-hidden rounded-lg opacity-75">
                         <img
                           src={video?.video[0]?.thumbnail || video?.thumbnail}
-                          alt={video?.title}
+                          // alt={video?.title}
+                          name="image"
+                          id={video._id}
+                          onClick={handleAllOverOne}
                           className="h-full w-full object-cover"
                         />
                       </div>
-                      <div className="absolute -left-1 -top-1 h-full w-full rounded-lg overflow-hidden shadow-2x1">
-                        <img
-                          src={video?.video[1]?.thumbnail || video?.thumbnail}
-                          alt={video?.title}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
+                      <div className="absolute -left-1 -top-1 h-full w-full rounded-lg overflow-hidden">
+                        <div className='w-full h-full relative'>
+                          <img
+                            src={video?.video[1]?.thumbnail || video?.thumbnail}
+                            // alt={video?.title}
+                            name="image"
+                            id={video._id}
+                            onClick={handleAllOverOne}
+                            className="h-full w-full z-1 object-cover"
+                          />
 
-                      {/* Main Thumbnail */}
-                      <div className="relative overflow-hidden rounded-xl">
-                        {/* <img
-                          src={video?.video[0]?.thumbnail || video?.thumbnail}
-                          alt={video?.title}
-                          className="h-full w-full object-cover"
-                        /> */}
-
-                        {/* Playlist Badge */}
-                        <div className="absolute z-30 bottom-2 right-2 flex items-center gap-1 rounded bg-black/80 px-2 py-1 text-xs text-white">
-                          <span>📋</span>
-                          <span>Mix</span>
-                        </div>
-
-                        {/* Play Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                          <button className="flex h-15 w-15 items-center justify-center rounded-full bg-white/90 text-xl text-red-600">
-                            ▶
-                          </button>
+                          <div name="detailBox" id={video._id} data-video={video?.video[0]?._id} onClick={handleAllOverOne} className='absolute z-2 inset-0 cursor-pointer'> 
+                            <span name="length" id={video._id} onClick={handleAllOverOne} className=' absolute bottom-1 px-2 bg-black/40 rounded-2xl py-1 text-xs text-gray-50 right-1'>{(video?.video?.length === 0 ? "" : video?.video?.length) + " videos"}</span>
+                            <span name="privacy" id={video._id} onClick={handleAllOverOne} className='absolute bottom-1 left-1  px-2 bg-black/40 rounded-2xl py-1 text-xs text-gray-50 '>privacy</span>
+                            <span className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'>
+                              <button name='play' id={video._id} onClick={handleAllOverOne} className="cursor-pointer flex items-center justify-center rounded-full text-xl text-white bg-black/40 p-2">
+                                <PlayIcon />
+                              </button>
+                            </span>
+                            <span name="mix" id={video._id} onClick={handleAllOverOne} className='absolute top-1 right-1  px-2 bg-black/40 rounded-2xl py-1 text-xs text-gray-50 '>
+                              <span name="mix" id={video._id} onClick={handleAllOverOne} >📋</span>
+                              <span name="mix" id={video._id} onClick={handleAllOverOne}>Mix</span>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="max-md:w-[60%] max-w-96   flex-col flex py-1 pl-2">
                     {/* title */}
-                    <div className="line-clamp-2 w-full font-medium text-xl pb-2 max-md:text-lg">
-                      <h2>{video?.title}</h2>
+                    <div name="title" id={video._id} data-video={video?.video[0]?._id} onClick={handleAllOverOne} className="line-clamp-2 cursor-pointer w-full max-sm:leading-tight font-semibold text-xl pb-2 max-sm:pb-0 max-md:text-lg max-w-3xs">
+                      <h2 name="title" id={video._id} data-video={video?.video[0]?._id} onClick={handleAllOverOne}>{video?.title}</h2>
                     </div>
                     <div className="flex">
-                      <div className="flex items-baseline ">
+                      <div name="avatar" id={video._id} onClick={handleAllOverOne} data-username={video?.owner?.username} className="flex items-baseline cursor-pointer">
                         <img
                           src={video?.owner?.avatar}
                           alt=""
-                          className="w-6 mr-3 max-sm:w-6 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                          name="avatar"
+                          id={video._id}
+                          data-username={video?.owner?.username}
+                          onClick={handleAllOverOne}
+                          className="w-8 mr-3 max-sm:w-5 max-md:w-7 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
                         />
                       </div>
-                      <div className="flex flex-col leading-tight">
+                      <div className="flex flex-col cursor-pointer">
                         {/* user name */}
-                        <div className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
-                          <h3>{video?.owner?.fullname}</h3>
+                        <div name="username" id={video._id} data-username={video?.owner?.username} onClick={handleAllOverOne} className="mb-1 text-xs pt-0.5 font-normal text-gray-500 max-md:text-xs flex">
+                          <h3 name="username" id={video._id} data-username={video?.owner?.username} onClick={handleAllOverOne}>{video?.owner?.fullname}</h3>
                         </div>
                         {/* view and month ago */}
-                        <div className="text-[11px] font-normal  text-gray-500 max-md:text-[11px] space-x-1.5">
-                          <span>{video?.views} views</span>
+                        <div className="text-xs font-normal leading-1  text-gray-500 max-md:text-[11px] flex items-center">
+                          <span>{video?.views || 0} views</span>
+                          <span className="mx-1">•</span>
                           <span>
                             {timeAgo(video?.createdAt) || "12 year ago"}
                           </span>

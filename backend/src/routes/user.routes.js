@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {registerUser,loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetail, updateUserAvatar, updateUserCoverImage, getUserChannelProfile, getWatchHistory, deleteAccount, googleLogin} from "../controllers/user.controller.js";
+import {registerUser,loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetail, updateUserAvatar, updateUserCoverImage, getUserChannelProfile, getWatchHistory, deleteAccount, googleLogin, addConntentToHistory} from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
@@ -37,6 +37,8 @@ router.route("/cover-image").patch(verifyToken, upload.single("coverImage"), upd
 router.route("/channel/:username").get(verifyToken, getUserChannelProfile);
 
 router.route("/history").get(verifyToken, getWatchHistory);
+
+router.route("/add/history").post(verifyToken, addConntentToHistory);
 
 router.route("/delete-account/:userId").delete(verifyToken, deleteAccount);
 

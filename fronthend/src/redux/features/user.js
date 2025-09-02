@@ -126,6 +126,29 @@ export const AuthService = {
   },
 };
 
+export const getWatchHistory = createAsyncThunk('fetching/userWatchHistory', async (_, { rejectWithValue }) => {
+  try {
+    const history = await axiosInstance.get('users/history');
+    console.log("user History Fetched Successfully!");
+    return history?.data?.data?.watchHistory;
+  } catch (error) {
+    console.error(error);
+    return rejectWithValue(error.message);
+  }
+})
+
+export const addingToWatchHistory = createAsyncThunk('addingContent/userWatchHistory', async (videoId, { rejectWithValue }) => {
+  if (!videoId) return rejectWithValue("videoId is missing! \n Please Provide Id");
+  try {
+    const added = await axiosInstance.post('users/add/history',{videoId:videoId});
+    console.log("user History added Successfully!");
+    return added?.data?.data;
+  } catch (error) {
+    console.error(error);
+    return rejectWithValue(error.message);
+  }
+})
+
 export const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -134,6 +157,11 @@ export const userSlice = createSlice({
     error: null,
     token: "",
     loggedIn: false,
+
+    watchHistory:[],
+    watchHistoryLoading: false,
+    watchHistoryError:null,
+
     sideActive: "home",
     settingsActive: "Accounts",
 
@@ -286,13 +314,32 @@ export const userSlice = createSlice({
         state.updateCoverImageError = action.payload;
       })
     
-    // builder.addCase(currentUpdatedUser.fulfilled, (state, action) => {
-    //     state.user = action.payload;
-    //   })
+    builder.addCase(getWatchHistory.fulfilled, (state, action) => {
+      state.watchHistory = Array.isArray(action.payload) ? action.payload : [];
+      state.watchHistoryLoading = false;
+      state.watchHistoryError = null;
+    }).addCase(getWatchHistory.pending, (state) => {
+      state.watchHistoryLoading = true;
+      state.watchHistoryError = null;
+    }).addCase(getWatchHistory.rejected, (state, action) => {
+      state.watchHistoryError = action.payload;
+      state.watchHistoryLoading = false;
+      state.watchHistory = [];
+    })
+
+    builder.addCase(addingToWatchHistory.fulfilled, (state, action) => {
+      state.watchHistory = [...watchHistory,action.payload];
+      state.watchHistoryLoading = false;
+      state.watchHistoryError = null;
+    }).addCase(addingToWatchHistory.pending, (state) => {
+      state.watchHistoryLoading = true;
+      state.watchHistoryError = null;
+    }).addCase(addingToWatchHistory.rejected, (state, action) => {
+      state.watchHistoryError = action.payload;
+      state.watchHistoryLoading = false;
+    })
   },
 });
-
-
 
 export const { login, logOut, setLoading, setError, setSideActive,setSettingsActive,setUpdateAvatarProgress,setUpdateCoverImageProgress,setAuth } =
   userSlice.actions;

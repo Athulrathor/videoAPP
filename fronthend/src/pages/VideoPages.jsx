@@ -1,4 +1,4 @@
-import React, { lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { ArrowDownToLine, EllipsisVertical, Maximize, Pause, Play, Plus, Settings, Share2, SkipForward, ThumbsDown, ThumbsUp, Video, Volume2, VolumeX } from "lucide-react";
@@ -11,6 +11,7 @@ import Comments from "../components/Comments";
 import UploadVideo from '../components/UploadVideo';
 import UploadShort from "../components/UploadShort";
 import UploadLive from '../components/UploadLive';
+import { addingToWatchHistory } from "../redux/features/user";
 
 const VideoPages = (props) => {
 
@@ -67,8 +68,8 @@ const VideoPages = (props) => {
 
   useEffect(() => {
     dispatch(fetchVideosById(VideoId));
+    dispatch(addingToWatchHistory(VideoId));
   }, [dispatch, VideoId]);
-
 
   useEffect(() => {
     if (videos.length > 0 && targetVideo?._id) {

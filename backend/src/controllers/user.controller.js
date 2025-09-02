@@ -552,6 +552,42 @@ const getWatchHistory = asyncHandler(async (req, res) => {
   }
 });
 
+const addConntentToHistory = asyncHandler(async (req, res) => {
+  try {
+    
+    const { videoId } = req.body;
+
+    if (!videoId || !isValidObjectId(videoId)) throw new ApiError(400, "videoId not Found!");
+
+    const addedWatchHistory = await User.findOneAndUpdate(
+      {
+        _id: req.user._id,
+        watchHistory: { $ne: videoId }
+      },
+      {
+        $push: {
+          watchHistory: videoId
+        }
+      },
+      { new: true }
+    );
+
+    console.log(addedWatchHistory)
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          addedWatchHistory,
+          "Watch history Content Pushed successfully!"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(500, "Error in Pushing Content watch history!");
+  }
+});
+
 const deleteAccount = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -591,5 +627,6 @@ export {
   getUserChannelProfile,
   getWatchHistory,
   deleteAccount,
-  googleLogin
+  googleLogin,
+  addConntentToHistory
 };

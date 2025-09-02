@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { GoogleAuthWrapper } from "./components/GoogleAuthProvider";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import PlayListPage from "./pages/PlayListPage";
 
 function App() {
 
@@ -39,6 +40,10 @@ function App() {
           <Route
             path="/video/:VideoId"
             element={loggedIn ? <VideoPages /> : <Login />}
+          />
+          <Route
+            path="/playlist/:PlayListId"
+            element={loggedIn ? <PlayListPage /> : <Login />}
           />
           <Route
             path="/channel/:username"

@@ -1,6 +1,7 @@
 import React,{ lazy } from "react";
 import { useSelector } from "react-redux";
 import Channel from "../pages/Channel";
+import History from "../pages/History";
 
 const Videos = lazy(() => import('../pages/Videos'))
 const Short = lazy(() => import("../pages/Short"));

@@ -1,4 +1,4 @@
-import React,{ useEffect, useRef, useState} from 'react'
+import React,{ useCallback, useEffect, useRef, useState} from 'react'
 import {
   Play,
   Pause,
@@ -15,24 +15,18 @@ import {
   Eye,
 } from "lucide-react";
 import {
-  fetchSubcribeToggle,
   isSubcribed,
 } from "../redux/features/subcribers";
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchLikeToggleShort, isShortLiked } from '../redux/features/likes';
-import { fetchShortComment } from '../redux/features/comment';
+// import { isShortLiked } from '../redux/features/likes';
 
 const ShortCard = (props) => {
 
   const dispatch = useDispatch();
 
-  const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [hide, setHide] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
   const [volume, setVolume] = useState(1);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [quality, setQuality] = useState("Auto");
   const [showdesc, setshowdesc] = useState(false);
@@ -46,26 +40,26 @@ const ShortCard = (props) => {
   const {
     short,
     activeShort,
-    showComment,
-    setShowComment,
-    setCurrentTime,
+
     currentTime,
+    playing,
+    muted,
+    settingBtn,
+    commentPart
   } = props;
 
-  useEffect(() => {
-      dispatch(isShortLiked(short._id))
-  }, [short._id, dispatch])
+  const handleTimeUpdate = useCallback((e) => {
+    e.stopPropagation();
+    currentTime.setCurrentTime(shortRef.current?.currentTime || 0);
+  }, [currentTime]);
+
+  const handleLoadedMetadata = useCallback(() => {
+    setDuration(shortRef.current?.duration || 0);
+  }, [setDuration]);
 
   useEffect(() => {
     const short = shortRef.current;
     if (!short) return;
-
-    const handleTimeUpdate = (e) => {
-      e.stopPropagation();
-      setCurrentTime(short.currentTime); 
-    };
-
-    const handleLoadedMetadata = () => setDuration(short.duration);
 
     short.addEventListener("timeupdate", handleTimeUpdate);
     short.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -74,7 +68,7 @@ const ShortCard = (props) => {
       short.removeEventListener("timeupdate", handleTimeUpdate);
       short.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
-  }, []);
+  }, [handleTimeUpdate, handleLoadedMetadata]);
 
   useEffect(() => {
     const shorts = shortRef.current;
@@ -82,11 +76,11 @@ const ShortCard = (props) => {
       ([entry]) => {
         if (entry.isIntersecting) {
           shorts.play();
-          setIsPlaying(true);
+          playing.setIsPlaying(true);
           activeShort(short._id);
         } else {
           shorts.pause();
-          setIsPlaying(false);
+          playing.setIsPlaying(false);
         }
       },
       { threshold: 0.5 }
@@ -103,117 +97,29 @@ const ShortCard = (props) => {
     };
   }, []);
 
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    const handleKeyDown = (e) => {
-      const tag = event.target.tagName.toLowerCase();
-
-      if (tag === "input" || tag === "textarea" || tag === "select") return;
-
-      if (e.key === "Escape" && isFullscreen) {
-        exitFullscreen();
-      }
-      if (e.key === "f" || e.key === "F") {
-        toggleFullscreen();
-      }
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isFullscreen]);
-
-  const toggleFullscreen = async (e) => {
-    e.stopPropagation();
-    if (!containerRef.current) return;
-
-    try {
-      if (!document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
-      }
-    } catch (error) {
-      console.error("Error toggling fullscreen:", error);
-    }
-  };
-
-  const exitFullscreen = async (e) => {
-    e.stopPropagation();
-    if (document.fullscreenElement) {
-      try {
-        await document.exitFullscreen();
-      } catch (error) {
-        console.error("Error exiting fullscreen:", error);
-      }
-    }
-  };
-
-  const togglePlay = (e) => {
-    e.stopPropagation();
-    const short = shortRef.current;
-    if (isPlaying) {
-      short.pause();
-    } else {
-      short.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const toggleMute = (e) => {
-    e.stopPropagation();
-    const short = shortRef.current;
-    short.muted = !isMuted;
-    setIsMuted(!isMuted);
-  };
-
   const handleVolumeChange = (e) => {
     e.stopPropagation();
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
     shortRef.current.volume = newVolume;
-    setIsMuted(newVolume === 0);
+    muted.setIsMuted(newVolume === 0);
   };
 
   const handlePlaybackRateChange = (rate) => {
     setPlaybackRate(rate);
     shortRef.current.playbackRate = rate;
-    setShowSettings(false);
+    settingBtn.setShowSettings(false);
   };
 
   const handleQualityChange = (qual) => {
     setQuality(qual);
-    setShowSettings(false);
+    settingBtn.setShowSettings(false);
   };
 
-  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  const handleLikeToggle = (ids) => {
-    dispatch(fetchLikeToggleShort(ids));
-    dispatch(isShortLiked(ids));
-  }
-
-  const handleShortComment = (e,ids) => {
-    e.stopPropagation();
-    setShowComment(!showComment)
-    dispatch(fetchShortComment(ids));
-  }
-
-  const handleSubcribeToggle = (e, ids) => {
-    e.stopPropagation();
-
-    dispatch(fetchSubcribeToggle(ids))
-  }
+  const progressPercentage = duration > 0 ? (currentTime.currentTime / duration) * 100 : 0;
 
   useEffect(() => {
       dispatch(isSubcribed(short.owner));
-
   }, [dispatch,short]);
 
   return (
@@ -222,8 +128,6 @@ const ShortCard = (props) => {
         className="relative  max-sm:rounded-none max-sm:h-[calc(100vh_-_41px)] rounded-2xl h-[calc(100vh_-_75px)] max-sm:w-screen aspect-[9/16] overflow-hidden"
         ref={containerRef}
         key={short._id}
-        // onClick={(e) => togglePlay(e)}
-        // onDoubleClick={() => handleLikeToggle(short._id)}
         onClick={props.handleAllOverEvent}
         onDoubleClick={props.handleAllOverEvent}
         id={short._id}
@@ -240,12 +144,12 @@ const ShortCard = (props) => {
             src={short.shortFile}
             poster={short.thumbnail}
             className=" w-full h-full"
-            muted={isMuted}
+            muted={muted.isMuted}
             volume={volume}
             loop
           ></video>
         </div>
-        <div className={`${showComment ? "" : "hidden"} absolute bottom-0 left-0 right-0 h-1 z-1`}>
+        <div className={`${commentPart.showComment ? "" : "hidden"} absolute bottom-0 left-0 right-0 h-1 z-1`}>
           <div
             className={`h-full bg-red-500`}
             name="duration"
@@ -258,12 +162,11 @@ const ShortCard = (props) => {
           <div name="body" id={short._id} className="flex justify-between items-start">
             <div name='body' id={short._id} className="flex items-center space-x-2 max-sm:space-x-1">
               <button
-                // onClick={(e) => togglePlay(e)}
                 onClick={props.handleAllOverEvent}
                 name='play' id={short._id}
                 className="p-4 max-sm:p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-200"
               >
-                {props.isPlaying ? <Pause name='play' id={short._id} onClick={props.handleAllOverEvent} className='size-[24px] max-sm:size-[16px]' /> : <Play size={24} name='play' id={short._id} onClick={props.handleAllOverEvent} className='max-sm:size-[16px]' />}
+                {props.playing.isPlaying ? <Pause name='play' id={short._id} onClick={props.handleAllOverEvent} className='size-[24px] max-sm:size-[16px]' /> : <Play size={24} name='play' id={short._id} onClick={props.handleAllOverEvent} className='max-sm:size-[16px]' />}
               </button>
               <div
                 name='mute-container'
@@ -273,11 +176,10 @@ const ShortCard = (props) => {
                 onMouseLeave={() => setHide(false)}
               >
                 <button
-                  // onClick={(e) => toggleMute(e)}
                   onClick={props.handleAllOverEvent} name='mute' id={short._id}
                   className="flex justify-center items-center p-2 "
                 >
-                  {props.isMuted ? <VolumeX size={20} onClick={props.handleAllOverEvent} name='mute' id={short._id} className='max-sm:size-[16px]' /> : <Volume2 size={20} onClick={props.handleAllOverEvent} name='mute' id={short._id} className='max-sm:size-[16px]' />}
+                  {props.muted.isMuted ? <VolumeX size={20} onClick={props.handleAllOverEvent} name='mute' id={short._id} className='max-sm:size-[16px]' /> : <Volume2 size={20} onClick={props.handleAllOverEvent} name='mute' id={short._id} className='max-sm:size-[16px]' />}
                 </button>
                 <input
                   onClick={(e) => e.stopPropagation()}
@@ -298,24 +200,12 @@ const ShortCard = (props) => {
 
             <div name='body' id={short._id} className="flex space-x-2">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowSettings(!showSettings);
-                }}
+                name='setting' id={short._id}
+                onClick={props.handleAllOverEvent}
                 className="p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
               >
-                <Settings size={20} className='max-sm:size-[16px]' />
+                <Settings size={20} name='setting' id={short._id} onClick={props.handleAllOverEvent} className='max-sm:size-[16px]' />
               </button>
-              {/* <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsFullscreen(!isFullscreen);
-                  toggleFullscreen();
-                }}
-                className="p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
-              >
-                <Maximize size={20} className='max-sm:size-[16px]' />
-              </button> */}
             </div>
           </div>
 
@@ -325,7 +215,7 @@ const ShortCard = (props) => {
               onClick={props.handleAllOverEvent} name='play' id={short._id}
               className="p-4 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-200"
             >
-              {props.isPlaying ? <Pause onClick={props.handleAllOverEvent} name='play' id={short._id} size={24} /> : <Play onClick={props.handleAllOverEvent} name='play' id={short._id} size={24} />}
+              {props.playing.isPlaying ? <Pause onClick={props.handleAllOverEvent} name='play' id={short._id} size={24} /> : <Play onClick={props.handleAllOverEvent} name='play' id={short._id} size={24} />}
             </button>
           </div>
 
@@ -347,14 +237,13 @@ const ShortCard = (props) => {
                     {"@" + short.userInfo[0]?.username || "Unknown User"}
                   </span>
                   <button
-                    // onClick={(e) => handleSubcribeToggle(e, short.owner)}
                     onClick={props.handleAllOverEvent}
                     name='subcribe'
                     id={short._id}
                     className={`${isSubcribedStatus === true
                       ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
                       : "bg-red-400 hover:bg-red-500 active:bg-red-600"
-                      } text-lg px-2 py-0.5 ml-2  rounded-xl flex justify-center items-center font-medium`}
+                      } text-sm px-3 py-1 ml-2  rounded-2xl flex justify-center items-center font-medium`}
                   >
                     {isSubcribedStatus === true ? "Subcribed" : "Subcribe"}
                   </button>
@@ -389,12 +278,6 @@ const ShortCard = (props) => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center mr-2">
-                {/* <button className="text-lg px-3 py-1 bg-red-500 hover:bg-red-600 active:bg-red-700 rounded-3xl  flex justify-center items-center font-medium">
-                  Subcribe
-                </button> */}
-                
-              </div>
             </div>
 
             {/* Side Controls */}
@@ -407,10 +290,6 @@ const ShortCard = (props) => {
               </div>
               <div name="body" id={short._id} className="flex flex-col items-center">
                 <button
-                  // onClick={(e) => {
-                  //   e.stopPropagation();
-                  //   handleLikeToggle(short._id);
-                  // }}
                   onClick={props.handleAllOverEvent}
                   name='like'
                   id={short._id}
@@ -436,7 +315,6 @@ const ShortCard = (props) => {
 
               <div name="body" id={short._id} className="flex flex-col items-center">
                 <button
-                  // onClick={(e) => handleShortComment(e, short._id)}
                   onClick={props.handleAllOverEvent}
                   name="comment"
                   id={short._id}
@@ -448,7 +326,7 @@ const ShortCard = (props) => {
                     id={short._id}
                     onClick={props.handleAllOverEvent}
                     className='max-sm:size-[16px]'
-                    fill={showComment === false ? "white" : "transparent"}
+                    fill={commentPart.showComment === false ? "white" : "transparent"}
                   />
                 </button>
                 <span className="text-white text-xs mt-1">
@@ -458,9 +336,6 @@ const ShortCard = (props) => {
 
               <div name="body" id={short._id} className="flex flex-col items-center">
                 <button
-                  // onClick={(e) => {
-                  //   e.stopPropagation();
-                  // }}
                   onClick={props.handleAllOverEvent}
                   name='share'
                   id={short._id}
@@ -473,9 +348,6 @@ const ShortCard = (props) => {
               </div>
 
               <button
-                // onClick={(e) => {
-                //   e.stopPropagation();
-                // }}
                 name='download'
                 id={short._id}
                 onClick={props.handleAllOverEvent}
@@ -486,9 +358,6 @@ const ShortCard = (props) => {
               </button>
 
               <button
-                // onClick={(e) => {
-                //   e.stopPropagation();
-                // }}
                 name='more'
                 id={short._id}
                 onClick={props.handleAllOverEvent}
@@ -499,7 +368,7 @@ const ShortCard = (props) => {
             </div>
           </div>
         </div>
-        {showSettings && (
+        {props.settingBtn.showSettings && (
           <div className="absolute top-16 right-4 bg-black/80 backdrop-blur-sm rounded-lg p-2 text-white min-w-[60px]">
             <div className="mb-4">
               <h3 className="text-sm font-medium mb-2">Playback Speed</h3>
@@ -536,18 +405,6 @@ const ShortCard = (props) => {
                 ))}
               </div>
             </div>
-
-            {/* <div>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={showCaptions}
-                        onChange={(e) => setShowCaptions(e.target.checked)}
-                        className="rounded"
-                      />
-                      <span className="text-sm">Captions</span>
-                    </label>
-                  </div> */}
           </div>
         )}
       </div>

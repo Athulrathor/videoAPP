@@ -18,7 +18,7 @@ import { BsPlayBtnFill } from "react-icons/bs";
 import { BiSolidLike } from "react-icons/bi";
 import { BiLike } from "react-icons/bi";
 import { setSideActive } from "../redux/features/user";
-import { ChartNoAxesGanttIcon } from "lucide-react";
+import { ChartNoAxesGanttIcon, History, LucideHistory } from "lucide-react";
 import { fetchVideoByOwner } from "../redux/features/videos";
 import { userSubcribers } from "../redux/features/subcribers";
 
@@ -120,19 +120,19 @@ function SideMenu(props) {
             </h1>
           )}
           <div>
-            {/* <h1
+            <h1
               className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
                 sideActive === "history" ? "bg-gray-200" : ""
               }`}
               onClick={() => dispatch(setSideActive("history"))}
             >
               {sideActive === "history" ? (
-                <FaHistory className="text-xl fill-black stroke-3" />
+                <History className="text-xl fill-black stroke-3" />
               ) : (
-                <LuHistory className="text-xl" />
+                <LucideHistory className="text-xl" />
               )}
               {props.menuToggle?.showMenu === true ? "" : "History"}
-            </h1> */}
+            </h1>
             <h1
               className={`flex items-center gap-4 text-nowrap hover:bg-gray-100  cursor-pointer font-normal rounded-lg px-3 py-2 ${
                 sideActive === "Manage Videos" ? "bg-gray-200" : ""
