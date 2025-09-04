@@ -149,6 +149,68 @@ export const addingToWatchHistory = createAsyncThunk('addingContent/userWatchHis
   }
 })
 
+export const removingToWatchHistory = createAsyncThunk('removingContent/userWatchHistory', async (videoId, { rejectWithValue }) => {
+  if (!videoId) return rejectWithValue("videoId is missing! \n Please Provide Id");
+  try {
+    const added = await axiosInstance.post('users/remove/history', { videoId: videoId });
+    console.log("user History removed Successfully!", videoId);
+    return added?.data?.data;
+  } catch (error) {
+    console.error(error);
+    return rejectWithValue(error.message);
+  }
+})
+
+export const clearHistory = createAsyncThunk('clearingContent/userWatchHistory', async (_, { rejectWithValue }) => {
+  try {
+    const added = await axiosInstance.post('users/clear/history');
+    console.log("user History cleared Successfully!");
+    return added?.data?.data;
+  } catch (error) {
+    console.error(error);
+    return rejectWithValue(error.message);
+  }
+})
+
+export const verifyOtp = createAsyncThunk(
+  'auth/verifyOtp',
+  async (otp, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('users/verify-otp', { otp });
+
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const updatePassword = createAsyncThunk(
+  'auth/updatePassword',
+  async (newPassword, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('users/update-password', { newPassword });
+      console.log(response);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const verifyEmail = createAsyncThunk(
+  'user/verifyEmail',
+  async (to, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('users/forget-password', { to });
+      console.log(response);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -175,7 +237,15 @@ export const userSlice = createSlice({
     
     updateAccountStatus: "idle",
     updateAccountLoading: false,
-    updateAccountError:null
+    updateAccountError: null,
+    
+    otpLoading: false,
+    isOtpVerified: false,
+    otpError: null,
+
+    emailVerified: null,
+    emailVerificationLoading: false,
+    emailVerificationError:null
   },
   reducers: {
 
@@ -328,7 +398,7 @@ export const userSlice = createSlice({
     })
 
     builder.addCase(addingToWatchHistory.fulfilled, (state, action) => {
-      state.watchHistory = [...watchHistory,action.payload];
+      state.watchHistory = [...state.watchHistory, action.payload];
       state.watchHistoryLoading = false;
       state.watchHistoryError = null;
     }).addCase(addingToWatchHistory.pending, (state) => {
@@ -338,9 +408,61 @@ export const userSlice = createSlice({
       state.watchHistoryError = action.payload;
       state.watchHistoryLoading = false;
     })
+
+    builder.addCase(removingToWatchHistory.fulfilled, (state, action) => {
+      state.watchHistory = state.watchHistory.filter(video => video._id !== action.payload._id);
+      state.watchHistoryLoading = false;
+      state.watchHistoryError = null;
+    }).addCase(removingToWatchHistory.pending, (state) => {
+      state.watchHistoryLoading = true;
+      state.watchHistoryError = null;
+    }).addCase(removingToWatchHistory.rejected, (state, action) => {
+      state.watchHistoryError = action.payload;
+      state.watchHistoryLoading = false;
+    })
+
+    builder.addCase(clearHistory.fulfilled, (state) => {
+      state.watchHistory = [];
+      // state.watchHistoryLoading = false;
+      state.watchHistoryError = null;
+    }).addCase(clearHistory.pending, (state) => {
+      // state.watchHistoryLoading = true;
+      state.watchHistoryError = null;
+    }).addCase(clearHistory.rejected, (state, action) => {
+      state.watchHistoryError = action.payload;
+      // state.watchHistoryLoading = false;
+    })
+
+    builder.addCase(verifyEmail.pending, (state) => {
+        state.emailVerificationLoading = true;
+        state.emailVerificationError = null;
+      })
+      .addCase(verifyEmail.fulfilled, (state,action) => {
+        state.emailVerificationLoading = false;
+        state.emailVerified = action.payload;
+        state.emailVerificationError = null;
+      })
+      .addCase(verifyEmail.rejected, (state, action) => {
+        state.emailVerificationLoading = false;
+        state.emailVerificationError = action.payload;
+      })
+
+      // Password update cases
+    // builder.addCase(updatePassword.pending, (state) => {
+    //     state.otpLoading = true;
+    //     state.otpError = null;
+    //   })
+    //   .addCase(updatePassword.fulfilled, (state) => {
+    //     state.otpLoading = false;
+    //     state.otpError = null;
+    //   })
+    //   .addCase(updatePassword.rejected, (state, action) => {
+    //     state.otpLoading = false;
+    //     state.otpError = action.payload;
+    //   });
   },
 });
 
-export const { login, logOut, setLoading, setError, setSideActive,setSettingsActive,setUpdateAvatarProgress,setUpdateCoverImageProgress,setAuth } =
+export const { login, logOut, setLoading, setError, setSideActive, setSettingsActive, setUpdateAvatarProgress, setUpdateCoverImageProgress, setAuth } =
   userSlice.actions;
 export default userSlice.reducer;

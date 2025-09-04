@@ -9,10 +9,12 @@ import { AuthService, fetchLoginUser, setAuth, setSideActive } from "../redux/fe
 import { useGoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
 import { useEffect } from "react";
+import { generateOTP } from "../libs/otpGenerator.js";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [Otp, setOtp] = useState(0);
 
   const { loading, error, user, loggedIn } = useSelector(state => {
     console.log("📊 Current auth state:", state.user);
@@ -58,7 +60,7 @@ const Login = () => {
     onError: () => toast.error('Google login failed'),
     flow: 'implicit',
   });
-
+ 
   return (
     <>
       <div className="w-screen h-screen flex items-center  justify-center bg-transparent">
@@ -106,7 +108,8 @@ const Login = () => {
                   />
                   <div className="mt-4 flex items-center justify-between w-full">
                     <Link
-                      to="/forgot-password"
+                      to="/forget/password"
+                    
                       className="text-blue-500 hover:underline"
                     >
                       Forgot Password?

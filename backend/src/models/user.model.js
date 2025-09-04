@@ -36,6 +36,11 @@ const userSchema = new Schema({
             ref: "Video",
         }
     ],
+    isOtpVerified: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
     password: {
         type: String,
     },

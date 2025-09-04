@@ -8,6 +8,8 @@ import { Subcriptions } from "../models/subcriptions.model.js";
 import mongoose, { isValidObjectId } from "mongoose";
 import { Like } from "../models/like.model.js";
 import axios from "axios";
+import sendMail from "../utils/nodeMailer.js";
+import { generateOTP } from "../../../fronthend/src/libs/otpGenerator.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -108,8 +110,6 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
     if (user.through) return;
-
-    console.log(user,await user.isPasswordCorrect(password))
 
     const isPasswordValid = await user.isPasswordCorrect(password);
     if (!isPasswordValid) {
@@ -572,8 +572,6 @@ const addConntentToHistory = asyncHandler(async (req, res) => {
       { new: true }
     );
 
-    console.log(addedWatchHistory)
-
     return res
       .status(200)
       .json(
@@ -585,6 +583,63 @@ const addConntentToHistory = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     throw new ApiError(500, "Error in Pushing Content watch history!");
+  }
+});
+
+const removeConntentToHistory = asyncHandler(async (req, res) => {
+  try {
+
+    const { videoId } = req.body;
+
+    console.log(videoId)
+
+    if (!videoId || !isValidObjectId(videoId)) throw new ApiError(400, "videoId not Found!");
+
+    const removedWatchHistory = await User.findOneAndUpdate(
+      {
+        _id: req.user._id,
+      },
+      {
+        $pull: {
+          watchHistory: videoId
+        }
+      },
+      { new: true }
+    );
+
+    console.log(removeConntentToHistory);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          removedWatchHistory,
+          "Watch history Content pulled successfully!"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(500, "Error in Pushing Content watch history!");
+  }
+});
+
+const clearWatchHistory = asyncHandler(async (req, res) => {
+  try {
+    const clearedWatchHistory = await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { $set: { watchHistory: [] } },
+      { new: true }
+    );
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        clearedWatchHistory,
+        "Watch history cleared successfully!"
+      )
+    );
+  } catch (error) {
+    throw new ApiError(500, "Error in clearing watch history!");
   }
 });
 
@@ -614,6 +669,76 @@ const deleteAccount = asyncHandler(async (req, res) => {
   }
 })
 
+// const updatePassword = asyncHandler(async (req, res) => {
+//   try {
+//     const { newPassword } = req.body;
+//     if (!userId || !newPassword) {
+//       return res.status(400).json({ message: 'User ID and new password are required' });
+//     }
+
+//     const user = await User.findById(req.user._id);
+//     if (!user) {
+//       return res.status(403).json({ message: 'OTP verification required before password update' });
+//     }
+
+//     user.password = newPassword;
+
+//     await user.save();
+
+//     return res.status(200).json({ message: 'Password updated successfully' });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: 'Server error during password update' });
+//   }
+// })
+
+const generateMailRecoveryPassword = asyncHandler(async (req, res) => {
+  const { to } = req.body;
+
+  if (!to) return new ApiError(400, "Recipient email is required!");
+
+  try {
+
+    const user = await User.findOne({ email: to });
+
+    const otp = generateOTP(6);
+
+    if (!user) return new ApiError(404, "User not found with this email \n Please register now!");
+
+    sendMail(to, "Update password confirmation mail","this is the data", otp);
+
+    return res.status(200).json(new ApiResponse(200, otp, "Otp generated successfully!"));
+    
+  } catch (error) {
+    console.error(error);
+    return new ApiError(500, "Server error during sending recovery email");
+  }
+})
+
+const updatePassword = asyncHandler(async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    const user = await User.findById(req.user?._id);
+
+    // const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+    // if (!isPasswordCorrect) {
+    //   throw new ApiError(400, "Invalid password!");
+    // }
+
+    user.password = newPassword;
+
+    await user.save({ validateBeforeSave: false });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Password changed successfully!"));
+  } catch (error) {
+    throw new ApiError(500, "Error in updating password!");
+  }
+});
+
 export {
   registerUser,
   loginUser,
@@ -627,6 +752,11 @@ export {
   getUserChannelProfile,
   getWatchHistory,
   deleteAccount,
+
   googleLogin,
-  addConntentToHistory
+  addConntentToHistory,
+  removeConntentToHistory,
+  clearWatchHistory,
+  generateMailRecoveryPassword,
+  updatePassword
 };

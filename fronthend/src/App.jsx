@@ -12,6 +12,8 @@ import { GoogleAuthWrapper } from "./components/GoogleAuthProvider";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PlayListPage from "./pages/PlayListPage";
+import OtpVerification from "./components/OtpVerification.jsx";
+import ErrorPage from "./components/ErrorPage.jsx";
 
 function App() {
 
@@ -23,12 +25,17 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<Home />}
+            element={loggedIn ? <Home /> : <Login />}
           />
 
           <Route
             path="/login"
               element={<Login />}
+          />
+
+          <Route
+            path="forget/password"
+            element={<OtpVerification />}
           />
 
           <Route
@@ -53,22 +60,11 @@ function App() {
             path="/settings"
             element={loggedIn ? <Settings /> : <Login />}
           />
-          {/*<Route
-            path="/playlist"
-            element={<Playlist />}
-          />
+
           <Route
-            path="/post"
-            element={<Post />}
-          />
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
-          /> */}
-          {/* <Route
             path="*"
             element={<ErrorPage />}
-          /> */}
+          />
         </Routes>
         </Router>
       <ToastContainer

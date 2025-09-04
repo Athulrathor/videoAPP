@@ -239,8 +239,8 @@ const VideoPages = (props) => {
       ...prev,
       subcriberStatus: isSubcribedStatus,
     }));
-    dispatch(fetchVideosById(VideoId));
-  },[dispatch,VideoId,targetVideo])
+    // dispatch(fetchVideosById(VideoId));
+  },[dispatch,targetVideo])
   
   useEffect(() => {
     handleIsSubcribed();
@@ -313,7 +313,6 @@ const VideoPages = (props) => {
 
     if ((targetName === "duration" || targetName === "title") && eventType === 'click' && targetId) {
       Navigate(`/video/${targetId}`);
-      window.location.reload();
       return;
     }
 

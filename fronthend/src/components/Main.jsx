@@ -63,7 +63,8 @@ const Main = ({ setToggleVideoUploading, toggleVideoUploading, timeAgo, videoLoa
         ) : (
           ""
         )) ||
-        (sideActive === "history" ? <History /> : "") ||
+        (sideActive === "history" ? <History timeAgo={timeAgo}
+          formatTime={formatTime} /> : "") ||
         (sideActive === "playlists" ? <Playlist
           timeAgo={timeAgo}
           formatTime={formatTime} /> : "") ||

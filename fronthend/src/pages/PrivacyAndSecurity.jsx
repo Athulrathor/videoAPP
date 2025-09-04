@@ -1,5 +1,5 @@
 
-import React, { useCallback, useState,useRef,useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import {
   Shield,
   Key,
@@ -231,16 +231,9 @@ const PrivacyAndSecurity = () => {
     setIsComplete(false);
     setIsVerifying(false);
     inputRefs.current[0]?.focus();
-    // Simulate resend action
     alert('New OTP sent to your device!');
   };
 
-  const simulateAutoFill = () => {
-    const randomOtp = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10).toString());
-    setOtp(randomOtp);
-    inputRefs.current[5]?.focus();
-  };
-  
 
   const handlePasswordChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -255,7 +248,7 @@ const PrivacyAndSecurity = () => {
         [name]: ''
       }));
     }
-  },[errors]);
+  }, [errors]);
 
   // const handlePasswordChange = useCallback((e) => {
   //   const { name, value } = e.target;
@@ -447,7 +440,7 @@ const PrivacyAndSecurity = () => {
 
             {!isEditing ? (
               <div className="text-base">
-                <button
+                <div
                   onClick={handleStartEdit}
                   className=" text-white rounded-lg border-2 hover:border-blue-700 transition-colors flex items-center"
                 >
@@ -457,7 +450,7 @@ const PrivacyAndSecurity = () => {
                       type={showPassword.currentPassword ? 'text' : 'password'}
                       name="currentPassword"
                       value={"dskfjheufcsdn"}
-                      // onChange={handlePasswordChange}
+                      onChange={handlePasswordChange}
                       className={`w-full px-3 py-2 pr-10 text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'
                         }`}
                       placeholder="Enter current password"
@@ -474,7 +467,7 @@ const PrivacyAndSecurity = () => {
                       )}
                     </button>
                   </div>
-                </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -507,277 +500,277 @@ const PrivacyAndSecurity = () => {
                   </div>
                   {errors.currentPassword && (
                     <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
-                    )}
-                    
-                    <div>
-                      <div className="w-full max-w-md">
-                        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-                          {/* Header */}
-                          <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                              </svg>
-                            </div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Identity</h2>
-                            <p className="text-gray-600">Enter the 6-digit code sent to your device</p>
-                          </div>
+                  )}
 
-                          {/* OTP Input Fields */}
-                          <div className="mb-8">
-                            <div className="flex justify-center gap-3 mb-4">
-                              {otp.map((digit, index) => (
-                                <input
-                                  key={index}
-                                  ref={el => inputRefs.current[index] = el}
-                                  type="text"
-                                  inputMode="numeric"
-                                  maxLength="1"
-                                  value={digit}
-                                  onChange={(e) => handleChange(index, e.target.value)}
-                                  onKeyDown={(e) => handleKeyDown(index, e)}
-                                  onPaste={index === 0 ? handlePaste : undefined}
-                                  className={`
-                    w-12 h-12 text-center text-xl font-semibold rounded-lg border-2 
+                  <div>
+                    <div className="w-full mx-auto max-w-[320px_-_16px] mt-2">
+                      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-sm:p-2">
+                        {/* Header */}
+                        {/* <div className="text-center mb-8">
+                          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                          </div>
+                          <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Identity</h2>
+                          <p className="text-gray-600">Enter the 6-digit code sent to your device</p>
+                        </div> */}
+                          
+                        {/* OTP Input Fields */}
+                        <div className="mb-8 max-sm:my-4">
+                          <div className="flex justify-center gap-3 max-sm:gap-1 mb-4 max-sm:mb-2">
+                            {otp.map((digit, index) => (
+                              <input
+                                key={index}
+                                ref={el => inputRefs.current[index] = el}
+                                type="text"
+                                inputMode="numeric"
+                                maxLength="1"
+                                value={digit}
+                                onChange={(e) => handleChange(index, e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(index, e)}
+                                onPaste={index === 0 ? handlePaste : undefined}
+                                className={`
+                    w-12 h-12 max-sm:w-9 max-sm:h-9 text-center text-xl max-sm:text-sm font-semibold rounded-lg border-2 
                     transition-all duration-200 outline-none
                     ${digit
-                                      ? 'border-blue-500 bg-blue-50 text-blue-900'
-                                      : 'border-gray-300 bg-white text-gray-900'
-                                    }
+                                    ? 'border-blue-500 bg-blue-50 text-blue-900'
+                                    : 'border-gray-300 bg-white text-gray-900'
+                                  }
                     ${isComplete && !isVerifying
-                                      ? 'border-green-500 bg-green-50'
-                                      : ''
-                                    }
+                                    ? 'border-green-500 bg-green-50'
+                                    : ''
+                                  }
                     hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200
                   `}
-                                />
-                              ))}
-                            </div>
-
-                            {/* Status Indicator */}
-                            <div className="text-center h-6">
-                              {isVerifying && (
-                                <div className="flex items-center justify-center gap-2 text-blue-600">
-                                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                  <span className="text-sm font-medium">Verifying...</span>
-                                </div>
-                              )}
-                              {isComplete && !isVerifying && (
-                                <div className="flex items-center justify-center gap-2 text-green-600">
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  <span className="text-sm font-medium">Ready to verify</span>
-                                </div>
-                              )}
-                            </div>
+                              />
+                            ))}
                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="space-y-4">
-                            <button
-                              onClick={handleVerify}
-                              disabled={!isComplete || isVerifying}
-                              className={`
-                w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200
-                ${isComplete && !isVerifying
-                                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white transform hover:scale-105 shadow-lg'
-                                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                }
-              `}
-                            >
-                              {isVerifying ? 'Verifying...' : 'Verify OTP'}
-                            </button>
-
-                            <div className="flex gap-3">
-                              <button
-                                onClick={handleClear}
-                                className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                              >
-                                Clear
-                              </button>
-                              <button
-                                onClick={handleResend}
-                                className="flex-1 py-2 px-4 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors duration-200"
-                              >
-                                Resend OTP
-                              </button>
-                            </div>
-
-                            {/* Demo Button */}
-                            <button
-                              onClick={simulateAutoFill}
-                              className="w-full py-2 px-4 text-sm text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors duration-200"
-                            >
-                              🎯 Simulate Auto-Fill (Demo)
-                            </button>
-                          </div>
-
-                          {/* Help Text */}
-                          <div className="mt-6 text-center">
-                            <p className="text-xs text-gray-500">
-                              Didn't receive the code? Check your spam folder or try again
-                            </p>
+                          {/* Status Indicator */}
+                          <div className="text-center h-6">
+                            {isVerifying && (
+                              <div className="flex items-center justify-center gap-2 text-blue-600">
+                                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                <span className="text-sm font-medium">Verifying...</span>
+                              </div>
+                            )}
+                            {isComplete && !isVerifying && (
+                              <div className="flex items-center justify-center gap-2 text-green-600">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span className="text-sm font-medium">Ready to verify</span>
+                              </div>
+                            )}
                           </div>
                         </div>
+
+                        {/* Action Buttons */}
+                        <div className="space-y-4">
+                          <button
+                            onClick={handleVerify}
+                            disabled={!isComplete || isVerifying}
+                            className={`
+                w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200
+                ${isComplete && !isVerifying
+                                ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white transform hover:scale-105 shadow-lg'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              }
+              `}
+                          >
+                            {isVerifying ? 'Verifying...' : 'Verify OTP'}
+                          </button>
+
+                          <div className="flex gap-3">
+                            <button
+                              onClick={handleClear}
+                              className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                            >
+                              Clear
+                            </button>
+                            <button
+                              onClick={handleResend}
+                              className="flex-1 py-2 px-4 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors duration-200"
+                            >
+                              Resend OTP
+                            </button>
+                          </div>
+
+                          {/* Demo Button */}
+                          {/* <button
+                            onClick={simulateAutoFill}
+                            className="w-full py-2 px-4 text-sm text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors duration-200"
+                          >
+                            🎯 Simulate Auto-Fill (Demo)
+                          </button> */}
+                        </div>
+
+                        {/* Help Text */}
+                        {/* <div className="mt-6 text-center">
+                          <p className="text-xs text-gray-500">
+                            Didn't receive the code? Check your spam folder or try again
+                          </p>
+                        </div> */}
                       </div>
                     </div>
+                  </div>
 
 
 
 
                 </div>
                 <div className='hidden'>
-                {/* New Password */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword.newPassword ? 'text' : 'password'}
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.newPassword ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                      placeholder="Enter new password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => togglePasswordVisibility('newPassword')}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors"
-                    >
-                      {showPassword.newPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
+                  {/* New Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      New Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword.newPassword ? 'text' : 'password'}
+                        name="newPassword"
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordChange}
+                        className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.newPassword ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                        placeholder="Enter new password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => togglePasswordVisibility('newPassword')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors"
+                      >
+                        {showPassword.newPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
 
-                  {/* Password Strength Indicator */}
-                  {passwordData.newPassword && (
-                    <div className="mt-2">
-                      <div className="flex space-x-1 mb-1">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                          <div
-                            key={level}
-                            className={`h-2 flex-1 rounded ${level <= passwordStrength.strength
+                    {/* Password Strength Indicator */}
+                    {passwordData.newPassword && (
+                      <div className="mt-2">
+                        <div className="flex space-x-1 mb-1">
+                          {[1, 2, 3, 4, 5].map((level) => (
+                            <div
+                              key={level}
+                              className={`h-2 flex-1 rounded ${level <= passwordStrength.strength
                                 ? passwordStrength.color
                                 : 'bg-gray-200'
-                              }`}
-                          />
-                        ))}
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          Password strength: <span className="font-medium">{passwordStrength.label}</span>
+                        </p>
                       </div>
-                      <p className="text-xs text-gray-600">
-                        Password strength: <span className="font-medium">{passwordStrength.label}</span>
-                      </p>
+                    )}
+
+                    {errors.newPassword && (
+                      <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>
+                    )}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm New Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword.confirmPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        value={passwordData.confirmPassword}
+                        onChange={handlePasswordChange}
+                        className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                        placeholder="Confirm new password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => togglePasswordVisibility('confirmPassword')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors"
+                      >
+                        {showPassword.confirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                    )}
+                  </div>
+
+
+
+                  {/* Password Requirements */}
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Password Requirements:</h4>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      <li className={passwordData.newPassword.length >= 8 ? 'text-green-600' : ''}>
+                        • At least 8 characters long
+                      </li>
+                      <li className={/[A-Z]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
+                        • One uppercase letter
+                      </li>
+                      <li className={/[a-z]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
+                        • One lowercase letter
+                      </li>
+                      <li className={/\d/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
+                        • One number
+                      </li>
+                      <li className={/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
+                        • One special character
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Submit Error */}
+                  {errors.submit && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-600">{errors.submit}</p>
                     </div>
                   )}
 
-                  {errors.newPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>
-                  )}
-                </div>
 
-                {/* Confirm Password */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirm New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword.confirmPassword ? 'text' : 'password'}
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                      placeholder="Confirm new password"
-                    />
+                  {/* Action Buttons */}
+                  <div className="flex space-x-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => togglePasswordVisibility('confirmPassword')}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors"
+                      onClick={handleCancel}
+                      className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
                     >
-                      {showPassword.confirmPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                      <X className="mr-2 h-4 w-4" />
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Updating...
+                        </>
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save Password
+                        </>
                       )}
                     </button>
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-                  )}
-                  </div>
-              
-                
-
-                {/* Password Requirements */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Password Requirements:</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li className={passwordData.newPassword.length >= 8 ? 'text-green-600' : ''}>
-                      • At least 8 characters long
-                    </li>
-                    <li className={/[A-Z]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
-                      • One uppercase letter
-                    </li>
-                    <li className={/[a-z]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
-                      • One lowercase letter
-                    </li>
-                    <li className={/\d/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
-                      • One number
-                    </li>
-                    <li className={/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
-                      • One special character
-                    </li>
-                  </ul>
                 </div>
-
-                {/* Submit Error */}
-                {errors.submit && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-sm text-red-600">{errors.submit}</p>
-                  </div>
-                    )}
-                    
-
-                {/* Action Buttons */}
-                <div className="flex space-x-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Updating...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save Password
-                      </>
-                    )}
-                  </button>
-                    </div>
-                  </div>
               </form>
             )}
           </div>
-          
+
           {/* 2FA Section */}
           <div className="bg-gray-50 rounded-lg p-6 mb-4 max-sm:px-3 max-sm:py-3 max-sm:mb-2 max-[400px]:px-1.5">
             <h2 className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold text-gray-900 mb-6 flex items-center">
@@ -822,42 +815,42 @@ const PrivacyAndSecurity = () => {
               {activeDevices.map((device) => (
                 <div key={device.id} className="p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
                   <div className="flex items-center justify-between">
-                                       <div className="flex items-center space-x-3 max-sm:space-x-1">
-                                         <div className="p-2 bg-gray-100 rounded-lg">
-                                           {device.name.includes('iPhone') ? (
-                                            <Smartphone className="h-5 w-5 max-sm:w-4 text-gray-600" />
-                                          ) : (
-                                            <Monitor className="h-5 w-5 max-sm:w-4 text-gray-600" />
-                                          )}
-                                        </div>
-                                        <div>
-                                          <div className="flex items-center space-x-2 xa-msm:space-x-1">
-                                            <h3 className="font-medium max-sm:text-sm text-gray-900">{device.name}</h3>
-                                            {device.current && (
-                                              <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                                                Current
-                                              </span>
-                                            )}
-                                          </div>
-                                          <div className="flex items-center text-sm max-sm:text-[10px] text-gray-600 space-x-4 max-sm:space-x-1.5">
-                                            <span className="flex items-center">
-                                              <MapPin className="h-3 w-3 mr-1 max-sm:w-2" />
-                                              {device.location}
-                                            </span>
-                                            <span>Last active: {device.lastActive}</span>
-                                            <span >{device.browser}</span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      {!device.current && (
-                                        <button
-                                          onClick={() => handleDeviceLogout(device.id)}
-                                          className="px-3 py-1 max-sm:px-1.5 max-sm:py-0.5 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors max-sm:text-xs"
-                                        >
-                                          Sign Out
-                                        </button>
-                                      )}
-                                    </div>
+                    <div className="flex items-center space-x-3 max-sm:space-x-1">
+                      <div className="p-2 bg-gray-100 rounded-lg">
+                        {device.name.includes('iPhone') ? (
+                          <Smartphone className="h-5 w-5 max-sm:w-4 text-gray-600" />
+                        ) : (
+                          <Monitor className="h-5 w-5 max-sm:w-4 text-gray-600" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-2 xa-msm:space-x-1">
+                          <h3 className="font-medium max-sm:text-sm text-gray-900">{device.name}</h3>
+                          {device.current && (
+                            <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center text-sm max-sm:text-[10px] text-gray-600 space-x-4 max-sm:space-x-1.5">
+                          <span className="flex items-center">
+                            <MapPin className="h-3 w-3 mr-1 max-sm:w-2" />
+                            {device.location}
+                          </span>
+                          <span>Last active: {device.lastActive}</span>
+                          <span >{device.browser}</span>
+                        </div>
+                      </div>
+                    </div>
+                    {!device.current && (
+                      <button
+                        onClick={() => handleDeviceLogout(device.id)}
+                        className="px-3 py-1 max-sm:px-1.5 max-sm:py-0.5 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors max-sm:text-xs"
+                      >
+                        Sign Out
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -913,27 +906,27 @@ const PrivacyAndSecurity = () => {
               {watchHistory.map((item) => (
                 <div key={item.id} className="p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
                   <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                     <h3 className="font-medium text-gray-900 max-sm:text-sm">{item.title}</h3>
-                                    <div className="flex items-center text-sm max-sm:text-xs text-gray-600 space-x-4 max-sm:space-x-2 mt-1">
-                                      <span>Duration: {item.duration}</span>
-                                       <span>Watched: {item.watchedAt}</span>
-                                       <span>Progress: {item.progress}%</span>
-                                     </div>
-                                     <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-                                      <div
-                                        className="bg-blue-600 h-2 rounded-full"
-                                        style={{ width: `${item.progress}%` }}
-                                      ></div>
-                                    </div>
-                                  </div>
-                                  <button
-                                    onClick={() => handleDeleteWatchHistory(item.id)}
-                                    className="ml-4 max-sm:ml-0 p-2 text-gray-400 hover:text-red-600 transition-colors"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </button>
-                                </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 max-sm:text-sm">{item.title}</h3>
+                      <div className="flex items-center text-sm max-sm:text-xs text-gray-600 space-x-4 max-sm:space-x-2 mt-1">
+                        <span>Duration: {item.duration}</span>
+                        <span>Watched: {item.watchedAt}</span>
+                        <span>Progress: {item.progress}%</span>
+                      </div>
+                      <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full"
+                          style={{ width: `${item.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteWatchHistory(item.id)}
+                      className="ml-4 max-sm:ml-0 p-2 text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
