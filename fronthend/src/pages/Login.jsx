@@ -1,29 +1,19 @@
 import React, { useState } from "react";
 import videoLogo from "../assets/favicon.png";
 import TextField from "@mui/material/TextField";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, redirect, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import google from "../assets/google.svg";
 import facebook from "../assets/facebook.svg";
 import { AuthService, fetchLoginUser, setAuth, setSideActive } from "../redux/features/user.js";
 import { useGoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
-import { useEffect } from "react";
-import { generateOTP } from "../libs/otpGenerator.js";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [Otp, setOtp] = useState(0);
 
-  const { loading, error, user, loggedIn } = useSelector(state => {
-    console.log("📊 Current auth state:", state.user);
-    return state.user;
-  });
-  
-  useEffect(() => {
-    console.log("📈 Loading state changed:", loading);
-  }, [loading]);
+  const { loading, error, user, loggedIn } = useSelector(state => state.user);
 
   const dispatch = useDispatch();
   const Navigate = useNavigate();
@@ -32,7 +22,9 @@ const Login = () => {
     event.preventDefault();
 
     try {
-      await dispatch(fetchLoginUser({email: email,password: password}));
+      const logged = await dispatch(fetchLoginUser({ email: email, password: password }));
+      
+        // if (!user.isOtpVerified)
 
         Navigate("/");
         dispatch(setSideActive("home"));
@@ -48,7 +40,8 @@ const Login = () => {
     onSuccess: async ({ access_token }) => {
       const result = await AuthService.loginWithGoogle(access_token);
       if (result.user && result.accessToken) {
-        dispatch(setAuth({ loggedIn: true, user: result.user[0], token: result?.accessToken }));
+
+        dispatch(setAuth({ loggedIn: true, user: result.user, token: result?.accessToken }));
         console.log(result.accessToken,typeof(result.accessToken))
         toast.success('Google login successful');
         Navigate('/',{replace:true});
@@ -64,8 +57,8 @@ const Login = () => {
   return (
     <>
       <div className="w-screen h-screen flex items-center  justify-center bg-transparent">
-        <div className="border-2 border-gray-200 rounded-2xl min-w-sm w-2xl max-sm:border-0 max-sm:shadow-none bg-white shadow-lg p-4">
-          <div className="flex justify-between max-sm:block max-sm:flex-col  max-sm:py-2.5 max-sm:items-center my-6 mx-4">
+        <div className={`${loading ? "bg-black/20 opacity-90" : ""} border-2 border-gray-200 rounded-2xl min-w-sm w-2xl max-sm:border-0 max-sm:shadow-none bg-white shadow-lg p-4`}>
+          <div className={`flex justify-between max-sm:block max-sm:flex-col max-sm:py-2.5 max-sm:items-center my-6 mx-4`}>
             <div className="flex flex-col max-sm:items-center">
               <div className="flex items-center font-bold text-2xl mt-4">
                 <img
@@ -106,6 +99,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+
                   <div className="mt-4 flex items-center justify-between w-full">
                     <Link
                       to="/forget/password"
@@ -115,6 +109,7 @@ const Login = () => {
                       Forgot Password?
                     </Link>
                   </div>
+                  
                 </div>
 
                 <button

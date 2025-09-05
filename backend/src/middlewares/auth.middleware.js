@@ -23,8 +23,6 @@ export const verifyToken = asyncHandler(async (req, res, next) => {
       "-password -refreshToken"
     );
 
-    // console.log(user)
-
     if (!user) {
       throw new ApiError(401, "Invalid access token!");
     }

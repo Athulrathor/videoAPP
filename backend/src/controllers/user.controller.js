@@ -157,18 +157,22 @@ const googleLogin = asyncHandler(async (req, res) => {
     const { data } = await axios.get(
       `https://www.googleapis.com/oauth2/v3/userinfo?alt=json&access_token=${googleAccessToken}`
     );
+
     if (!data.email) {
       return res.status(400).json({ message: 'Email not provided' });
     }
 
-    let user = await User.find({ email: data.email });
+    let user = await User.findOne({ email: data.email });
+
+    console.log(user)
 
     if (!user) {
       user = await User.create({
         fullname: data.name || 'Google User',
         email: data.email,
         avatar: data.picture || '',
-        through:true
+        through: true,
+        isOtpVerified: data.email_verified ?? false,
       });
     }
 
@@ -325,6 +329,7 @@ const updateAccountDetail = asyncHandler(async (req, res) => {
       { new: true }
     ).select("-password -refreshToken");
 
+    console.log(req.user._id)
     return res
       .status(200)
       .json(
@@ -668,29 +673,6 @@ const deleteAccount = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error in deleting user account!");
   }
 })
-
-// const updatePassword = asyncHandler(async (req, res) => {
-//   try {
-//     const { newPassword } = req.body;
-//     if (!userId || !newPassword) {
-//       return res.status(400).json({ message: 'User ID and new password are required' });
-//     }
-
-//     const user = await User.findById(req.user._id);
-//     if (!user) {
-//       return res.status(403).json({ message: 'OTP verification required before password update' });
-//     }
-
-//     user.password = newPassword;
-
-//     await user.save();
-
-//     return res.status(200).json({ message: 'Password updated successfully' });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ message: 'Server error during password update' });
-//   }
-// })
 
 const generateMailRecoveryPassword = asyncHandler(async (req, res) => {
   const { to } = req.body;

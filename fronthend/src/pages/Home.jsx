@@ -5,11 +5,12 @@ import Main from "../components/Main";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchVideos } from "../redux/features/videos";
 import { fetchShort } from "../redux/features/shorts";
-import { axiosInstance } from "../libs/axios";
 
-const UploadVideo = lazy(() => import('../components/UploadVideo'));
-const UploadShort = lazy(() => import("../components/UploadShort"));
-const UploadLive = lazy(() => import('../components/UploadLive'));
+import UploadVideo from '../components/UploadVideo';
+import UploadShort from "../components/UploadShort";
+import UploadLive from '../components/UploadLive';
+
+import UserName from "../components/CheckHasUsername";
 
 function Home() {
   const [showMenu, setShowMenu] = useState(false);
@@ -18,6 +19,8 @@ function Home() {
   const [toggleVideoUploading, setToggleVideoUploading] = useState(true);
   const [toggleShortUploading, setToggleShortUploading] = useState(true);
   const [toggleLiveUploading, setToggleLiveUploading] = useState(true);
+
+  const [userNamePopUp, setUserNamePopUp] = useState(true);
 
   const dispatch = useDispatch();
 
@@ -68,28 +71,10 @@ function Home() {
     }
   }
 
-
-
-    const fetchViewCounter = async (getShortId) => {
-      if (!getShortId) return "id not found";
-      try {
-        await axiosInstance.get(`short/view-counter/${getShortId}`);
-        dispatch(fetchShort(shortParams));
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
   useEffect(() => {
-
-      // const time = setInterval(() => {
         if (loggedIn === true && sideActive === "home") {
           dispatch(fetchVideos(videoParams));
         }
-      // }, 350);
-      
-
-      // return () => clearInterval(time);
   }, [dispatch,videoParams,loggedIn,sideActive]);
 
   useEffect(() => {
@@ -120,6 +105,8 @@ function Home() {
         videoQueries={{ videoParams, setVideoParams }}
         shortQueries={{shortParams,setShortParams}}
       />
+      {/* pop up if user not has username */}
+      <UserName />
       <div className={`w-screen h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] flex`}>
         <div className=" h-full">
           <SideMenu
@@ -134,7 +121,6 @@ function Home() {
           <Main
             showMenu={showMenu}
             timeAgo={timeAgo}
-            fetchViewCounter={fetchViewCounter}
             setToggleVideoUploading={setToggleVideoUploading}
             toggleVideoUploading={toggleVideoUploading}
           />

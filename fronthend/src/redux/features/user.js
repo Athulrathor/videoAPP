@@ -3,6 +3,30 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../libs/axios";
 import { googleLogout } from "@react-oauth/google";
 
+export const fetchRegisterUser = createAsyncThunk("register/userFetching", async (data, { rejectWithValue }) => {
+
+  if (!data) return rejectWithValue("User crendencial not found!");
+
+  try {
+
+    const formData = new FormData();
+    formData.append("fullname", data.fullname);
+    formData.append("email", data.email);
+    formData.append("username", data.username);
+    formData.append("password", data.password);
+    
+    if (data.avatar) formData.append("avatar", data.avatar);
+    if (data.coverImage) formData.append("coverImage", data.coverImage);
+    
+    const register = await axiosInstance.post("/users/register", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    console.log("User registered successfully!",register);
+  } catch (error) {
+    console.log(error)
+    return rejectWithValue(error.response?.data?.message || error.message);
+  }
+})
 
 export const fetchLoginUser = createAsyncThunk("login/userFetching", async ({ email, password }, { rejectWithValue }) => {
 
@@ -42,7 +66,7 @@ export const updateAvatar = createAsyncThunk('changeAvatar/userAvatar', async (n
   data.append('avatar', newAvatar);
 
   try {
-    await axiosInstance.patch('users/avatar', data, {
+    const avatar = await axiosInstance.patch('users/avatar', data, {
       headers: {
         "Content-Type": "multipart/form-data"
       },
@@ -54,6 +78,7 @@ export const updateAvatar = createAsyncThunk('changeAvatar/userAvatar', async (n
       }
     });
     console.log("Avatar image change Successfull!");
+    return avatar?.data?.data?.avatar;
   } catch (error) {
     console.error(error);
     return rejectWithValue(error.message);
@@ -69,7 +94,7 @@ export const updateCoverImage = createAsyncThunk('changeCoverImage/userCoverImag
     const data = new FormData();
     data.append('coverImage', newCoverImage);
 
-    await axiosInstance.patch('users/cover-image',data , {
+    const coverImage = await axiosInstance.patch('users/cover-image',data , {
       headers: {
         "Content-Type": "multipart/form-data"
       },
@@ -81,6 +106,7 @@ export const updateCoverImage = createAsyncThunk('changeCoverImage/userCoverImag
       }
     });
     console.log("Cover image change Successfull!");
+    return coverImage?.data?.data?.coverImage;
   } catch (error) {
     console.error(error);
     return rejectWithValue(error.message);
@@ -90,8 +116,9 @@ export const updateCoverImage = createAsyncThunk('changeCoverImage/userCoverImag
 export const updateAccountDetails = createAsyncThunk('changeAccount/userAccountDetails', async ({username,email,fullname}, { rejectWithValue }) => {
 
   try {
-    await axiosInstance.patch('users/update-account-detail', {username:username,email:email,fullname:fullname});
+    const response = await axiosInstance.patch('users/update-account-detail', {username:username,email:email,fullname:fullname});
     console.log("User Account details change Successfull!");
+    return response?.data?.data;
   } catch (error) {
     console.error(error);
     return rejectWithValue(error.message);
@@ -172,26 +199,11 @@ export const clearHistory = createAsyncThunk('clearingContent/userWatchHistory',
   }
 })
 
-export const verifyOtp = createAsyncThunk(
-  'auth/verifyOtp',
-  async (otp, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.post('users/verify-otp', { otp });
-
-      return response.data.data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || error.message);
-    }
-  }
-);
-
 export const updatePassword = createAsyncThunk(
   'auth/updatePassword',
   async (newPassword, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('users/update-password', { newPassword });
-      console.log(response);
-      return response.data.data;
+      await axiosInstance.post('users/update-password', { newPassword });
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -203,7 +215,6 @@ export const verifyEmail = createAsyncThunk(
   async (to, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('users/forget-password', { to });
-      console.log(response);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -219,6 +230,10 @@ export const userSlice = createSlice({
     error: null,
     token: "",
     loggedIn: false,
+
+    registering: false,
+    registerError: null,
+    registerSuccess:false,
 
     watchHistory:[],
     watchHistoryLoading: false,
@@ -278,23 +293,37 @@ export const userSlice = createSlice({
 
   },
   extraReducers: (builder) => {
+
+    builder
+      .addCase(fetchRegisterUser.pending, (state) => {
+        state.registering = true;
+        state.registerError = null;
+      })
+      .addCase(fetchRegisterUser.fulfilled, (state) => {
+        state.registering = false;
+        state.registerError = null;
+        state.registerSuccess = true;
+      })
+      .addCase(fetchRegisterUser.rejected, (state, action) => {
+        state.registering = false;
+        state.registerError = action.payload || "Registration failed";
+        state.registerSuccess = false;
+      });
+
     builder
       .addCase(fetchLoginUser.pending, (state) => {
-        console.log("📋 Setting loading to true");
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchLoginUser.fulfilled, (state, action) => {
-        console.log("✅ Login fulfilled", action.payload);
-        state.loading = false; // ← Make sure this is here!
+        state.loading = false;
         state.user = action.payload?.user || {};
         state.loggedIn = true;
         state.token = action.payload?.accessToken || null;
         state.error = null;
       })
       .addCase(fetchLoginUser.rejected, (state, action) => {
-        console.log("❌ Login rejected", action.payload);
-        state.loading = false; // ← Make sure this is here!
+        state.loading = false;
         state.loggedIn = false;
         state.token = null;
         state.error = action.payload || "Login failed";
@@ -329,8 +358,6 @@ export const userSlice = createSlice({
         if (action.payload) {
           state.user = {
             ...state.user,
-            avatar: action.payload?.avatar,
-            coverImage: action.payload?.coverImage,
             fullname: action.payload?.fullname,
             username: action.payload?.username,
             email: action.payload?.email
@@ -349,13 +376,11 @@ export const userSlice = createSlice({
         state.updateAvatarProgress = 0;
         state.updateAvatarError = null;
       })
-      .addCase(updateAvatar.fulfilled, (state,action) => {
+      .addCase(updateAvatar.fulfilled, (state, action) => {
+        state.user.avatar = action.payload;
         state.updateAvatarStatus = "success";
         state.updateAvatarProgress = 100;
         state.updateAvatarError = null;
-        if (action.payload?.avatar) {
-          state.user.avatar = action.payload.avatar;
-        }
       })
       .addCase(updateAvatar.rejected, (state,action) => {
         state.updateAvatarStatus = "failed";
@@ -370,7 +395,7 @@ export const userSlice = createSlice({
         state.updateCoverImageError = null;
       })
       .addCase(updateCoverImage.fulfilled, (state,action) => {
-        state.updateCoverImageProgress = action.payload;
+        state.user.coverImage = action.payload;
         state.updateCoverImageProgress = 100;
         state.updateCoverImageStatus = "success";
         if (action.payload?.coverImage) {
@@ -423,14 +448,14 @@ export const userSlice = createSlice({
 
     builder.addCase(clearHistory.fulfilled, (state) => {
       state.watchHistory = [];
-      // state.watchHistoryLoading = false;
+      state.watchHistoryLoading = false;
       state.watchHistoryError = null;
     }).addCase(clearHistory.pending, (state) => {
-      // state.watchHistoryLoading = true;
+      state.watchHistoryLoading = true;
       state.watchHistoryError = null;
     }).addCase(clearHistory.rejected, (state, action) => {
       state.watchHistoryError = action.payload;
-      // state.watchHistoryLoading = false;
+      state.watchHistoryLoading = false;
     })
 
     builder.addCase(verifyEmail.pending, (state) => {
@@ -447,22 +472,21 @@ export const userSlice = createSlice({
         state.emailVerificationError = action.payload;
       })
 
-      // Password update cases
-    // builder.addCase(updatePassword.pending, (state) => {
-    //     state.otpLoading = true;
-    //     state.otpError = null;
-    //   })
-    //   .addCase(updatePassword.fulfilled, (state) => {
-    //     state.otpLoading = false;
-    //     state.otpError = null;
-    //   })
-    //   .addCase(updatePassword.rejected, (state, action) => {
-    //     state.otpLoading = false;
-    //     state.otpError = action.payload;
-    //   });
+    builder.addCase(updatePassword.pending, (state) => {
+        state.otpLoading = true;
+        state.otpError = null;
+      })
+      .addCase(updatePassword.fulfilled, (state) => {
+        state.otpLoading = false;
+        state.otpError = null;
+      })
+      .addCase(updatePassword.rejected, (state, action) => {
+        state.otpLoading = false;
+        state.otpError = action.payload;
+      });
   },
 });
 
-export const { login, logOut, setLoading, setError, setSideActive, setSettingsActive, setUpdateAvatarProgress, setUpdateCoverImageProgress, setAuth } =
+export const { logOut,setSideActive, setSettingsActive, setUpdateAvatarProgress, setUpdateCoverImageProgress, setAuth } =
   userSlice.actions;
 export default userSlice.reducer;
