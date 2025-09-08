@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {registerUser,loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetail, updateUserAvatar, updateUserCoverImage, getUserChannelProfile, getWatchHistory, deleteAccount, googleLogin, addConntentToHistory, removeConntentToHistory, clearWatchHistory, generateMailRecoveryPassword, updatePassword} from "../controllers/user.controller.js";
+import {registerUser,loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetail, updateUserAvatar, updateUserCoverImage, getUserChannelProfile, getWatchHistory, deleteAccount, googleLogin, addConntentToHistory, removeConntentToHistory, clearWatchHistory, generateMailRecoveryPassword, updatePassword, generateMailVerify} from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
@@ -47,6 +47,8 @@ router.route("/clear/history").post(verifyToken, clearWatchHistory);
 router.route("/delete-account/:userId").delete(verifyToken, deleteAccount);
 
 router.route("/forget-password").post(generateMailRecoveryPassword);
+
+router.route("/verify-email").post(generateMailVerify);
 
 router.route("/update-password").post(updatePassword);
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import SettingSideBar from "../components/SettingSideBar";
 import SettingMain from "../components/SettingMain";
 import Header from "../components/Header";
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 
 const Settings = () => {
@@ -13,15 +13,17 @@ const Settings = () => {
     if (window.innerWidth <= 768) setShowMenu(false);
   }, []);
 
-  const { user, loggedIn } = useSelector((state) => state.user);
+  const { loggedIn } = useSelector((state) => state.user);
 
   return (
     <div >
       {loggedIn ? (<div>
         <Header menuToggle={{ showMenu: showMenu, setShowMenu: setShowMenu }} />
-        <div className='flex h-[calc(100vh-65px)]'>
+        <div className='flex h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] overflow-hidden'>
           <SettingSideBar showMenu={showMenu} setShowMenu={setShowMenu} />
-          <SettingMain />
+          <div className='w-full'>
+            <SettingMain />
+          </div>
         </div>
       </div>) : (
         <div>Please log in to access settings.</div>

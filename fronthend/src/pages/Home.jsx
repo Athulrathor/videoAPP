@@ -1,4 +1,4 @@
-import React,{ useState, useEffect, lazy } from "react";
+import React,{ useState, useEffect } from "react";
 import Header from "../components/Header";
 import SideMenu from "../components/SideMenu";
 import Main from "../components/Main";
@@ -19,8 +19,6 @@ function Home() {
   const [toggleVideoUploading, setToggleVideoUploading] = useState(true);
   const [toggleShortUploading, setToggleShortUploading] = useState(true);
   const [toggleLiveUploading, setToggleLiveUploading] = useState(true);
-
-  const [userNamePopUp, setUserNamePopUp] = useState(true);
 
   const dispatch = useDispatch();
 

@@ -222,6 +222,19 @@ export const verifyEmail = createAsyncThunk(
   }
 );
 
+export const verifyEmailVerification = createAsyncThunk(
+  'emailValidCheck/verifyEmail',
+  async (email, { rejectWithValue }) => {
+    console.log(email)
+    try {
+      const response = await axiosInstance.post('users/verify-email', {email});
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -468,6 +481,20 @@ export const userSlice = createSlice({
         state.emailVerificationError = null;
       })
       .addCase(verifyEmail.rejected, (state, action) => {
+        state.emailVerificationLoading = false;
+        state.emailVerificationError = action.payload;
+      })
+    
+    builder.addCase(verifyEmailVerification.pending, (state) => {
+      state.emailVerificationLoading = true;
+      state.emailVerificationError = null;
+    })
+      .addCase(verifyEmailVerification.fulfilled, (state, action) => {
+        state.emailVerificationLoading = false;
+        state.emailVerified = action.payload;
+        state.emailVerificationError = null;
+      })
+      .addCase(verifyEmailVerification.rejected, (state, action) => {
         state.emailVerificationLoading = false;
         state.emailVerificationError = action.payload;
       })

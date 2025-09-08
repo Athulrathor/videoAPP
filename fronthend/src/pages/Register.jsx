@@ -4,8 +4,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchRegisterUser, verifyEmail } from '../redux/features/user';
+import { fetchRegisterUser, verifyEmailVerification } from '../redux/features/user';
 import { useNavigate } from 'react-router-dom';
+import favicon from '../assets/favicon.png';
 
 const Register = () => {
 
@@ -26,6 +27,8 @@ const Register = () => {
     avatar: null,
     coverImage: null,
   });
+
+  const [emailStatus, setEmailStatus] = useState(false);
 
   const [previews, setPreviews] = useState({
     avatar: null,
@@ -125,12 +128,12 @@ const Register = () => {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size should be less than 5MB');
+      toast.info('File size should be less than 5MB');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.info('Please select an image file');
       return;
     }
 
@@ -188,6 +191,14 @@ const Register = () => {
     }
   };
 
+  useEffect(() => {
+    if (currentStep === 4) {
+      dispatch(verifyEmailVerification(formData.email));
+      console.log("email send");
+      setResendTimer(60);
+    }
+  },[dispatch,currentStep,formData])
+
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -240,13 +251,13 @@ const Register = () => {
     }
 
     try {
-      await dispatch(verifyEmail({ email: formData.email })).unwrap();
+      await dispatch(fetchRegisterUser(formData)).unwrap();
       await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success("Registration successfull! Please verify your email!");
       setCurrentStep(4);
       setResendTimer(60);
       setCanResend(false);
-
-      toast.success("Registration successfull! Please verify your email!");
+      Navigate('/login', { replace: true });
     } catch (error) {
       console.error('Registration failed:', error);
       toast.error("Registration failed. Please try again!");
@@ -262,10 +273,9 @@ const Register = () => {
 
     try {
       if (emailVerified === otpString) {
-        dispatch(fetchRegisterUser(formData)).unwrap();
         toast.success('Email verified and Registration Completed!');
+        setEmailStatus(true);
         await new Promise(resolve => setTimeout(resolve, 1500));
-        Navigate('/login', {replace: true});
         return;
       } else {
         toast.error('Invalid OTP. Please try again!');
@@ -278,6 +288,7 @@ const Register = () => {
 
   const handleResendOTP = async () => {
     try {
+      await dispatch(verifyEmailVerification(formData.email)).unwrap()
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.info('New OTP sent to your email');
       setResendTimer(60);
@@ -297,15 +308,13 @@ const Register = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 overflow-y-scroll h-screen">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 scrollBar overflow-y-scroll h-screen">
+      <div className="container max-w-4xl mx-auto max-sm:px-2 px-4">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl flex items-center justify-center mr-3">
-              <Play className="w-7 h-7 text-white" fill="currentColor" />
-            </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <img src={favicon} alt="" className='w-12 h-12 max-sm:mr-1 mr-3'/>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-950 bg-clip-text text-transparent">
               VidTube
             </h1>
           </div>
@@ -314,8 +323,8 @@ const Register = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <div className="flex justify-between items-center mb-6">
+        <div className="max-w-4xl mx-auto mb-12 max-sm:mb-6">
+          <div className="flex justify-between items-center max-sm:mb-4 mb-6">
             {stepInfo.map((step, index) => {
               const stepNumber = index + 1;
               const isActive = stepNumber === currentStep;
@@ -324,20 +333,20 @@ const Register = () => {
 
               return (
                 <div key={stepNumber} className="flex flex-col items-center flex-1">
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center font-semibold transition-all duration-300 mb-3 ${isCompleted
+                  <div className={`w-16 h-16 max-sm:w-8 max-sm:h-8 rounded-full flex items-center justify-center font-semibold transition-all duration-300 max-sm:mb-1.5 mb-3 ${isCompleted
                     ? 'bg-green-500 text-white shadow-lg'
                     : isActive
                       ? 'bg-indigo-600 text-white shadow-lg transform scale-110'
                       : 'bg-gray-200 text-gray-500'
-                    }`}>
+                    } ${emailStatus && currentStep === 4 ? 'bg-green-500 text-white shadow-lg' : ""} `}>
                     {isCompleted ? (
-                      <Check className="w-7 h-7" />
+                      <Check className="w-7 h-7 max-sm:w-5 max-sm:h-5" />
                     ) : (
-                      <IconComponent className="w-7 h-7" />
+                        <IconComponent className="w-7 h-7 max-sm:w-5 max-sm:h-5" />
                     )}
                   </div>
                   <div className="text-center">
-                    <h3 className={`font-semibold text-sm mb-1 ${isActive ? 'text-indigo-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
+                    <h3 className={`font-semibold text-sm max-sm:text-xs max-sm:mb-0.5 mb-1 ${isActive ? 'text-indigo-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
                       }`}>
                       {step.title}
                     </h3>
@@ -348,7 +357,7 @@ const Register = () => {
             })}
           </div>
 
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+          <div className="w-full bg-gray-200 rounded-full h-2 max-sm:mb-2 mb-4">
             <div
               className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${(currentStep / totalSteps) * 100}%` }}
@@ -358,12 +367,12 @@ const Register = () => {
 
         {/* Form Container */}
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 transition-all duration-300 hover:shadow-3xl">
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl max-sm:rounded-lg shadow-2xl border border-white/20 p-8 max-sm:px-2 transition-all duration-300 hover:shadow-3xl">
 
             {/* Step 1: Personal Information */}
             {currentStep === 1 && (
-              <div className="space-y-6 animate-in slide-in-from-right duration-500">
-                <div className="text-center mb-8">
+              <div className="space-y-6 max-sm:space-y-4 animate-in slide-in-from-right duration-500">
+                <div className="hidden text-center mb-8">
                   <div className="mx-auto w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
                     <User className="w-10 h-10 text-white" />
                   </div>
@@ -433,8 +442,8 @@ const Register = () => {
 
             {/* Step 2: Account Details */}
             {currentStep === 2 && (
-              <div className="space-y-6 animate-in slide-in-from-right duration-500">
-                <div className="text-center mb-8">
+              <div className="space-y-6 max-sm:space-y-4 animate-in slide-in-from-right duration-500">
+                <div className="hidden text-center mb-8">
                   <div className="mx-auto w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
                     <Shield className="w-10 h-10 text-white" />
                   </div>
@@ -568,8 +577,8 @@ const Register = () => {
 
             {/* Step 3: Profile Setup */}
             {currentStep === 3 && (
-              <div className="space-y-8 animate-in slide-in-from-right duration-500">
-                <div className="text-center mb-8">
+              <div className="space-y-8 max-sm:space-y-4 animate-in slide-in-from-right duration-500">
+                <div className="hidden text-center mb-8">
                   <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
                     <Camera className="w-10 h-10 text-white" />
                   </div>
@@ -583,7 +592,7 @@ const Register = () => {
                     Profile Picture
                   </label>
                   <div className="relative inline-block group">
-                    <div className="w-40 h-40 rounded-full border-4 border-gradient-to-r from-purple-500 to-indigo-600 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover:scale-105">
+                    <div className="w-40 h-40 rounded-full border-4 border-gradient-to-r from-purple-500 to-indigo-600 overflow-hidden bg-gradient-to-br flex items-center justify-center shadow-xl transition-transform duration-300 group-hover:scale-105">
                       {previews.avatar ? (
                         <img
                           src={previews.avatar}
@@ -654,8 +663,8 @@ const Register = () => {
 
             {/* Step 4: Email Verification */}
             {currentStep === 4 && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
+              <div className="space-y-6 max-sm:space-y-3">
+                <div className="hidden text-center mb-8">
                   <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
                     <Mail className="w-8 h-8 text-white" />
                   </div>
@@ -669,7 +678,7 @@ const Register = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
                     Enter Verification Code
                   </label>
-                  <div className="flex gap-3 justify-center mb-6">
+                  <div className="flex gap-3 max-sm:gap-1.5 justify-center max-sm:mb-4 mb-6">
                     {otp.map((digit, index) => (
                       <input
                         key={index}
@@ -680,7 +689,7 @@ const Register = () => {
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className="w-12 h-12 max-sm:w-10 max-sm:h-10 text-center text-xl font-bold border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                       />
                     ))}
                   </div>
@@ -688,10 +697,10 @@ const Register = () => {
                   {/* Verify Button */}
                   <button
                     onClick={handleVerifyOTP}
-                    disabled={emailVerificationLoading || otp.join('').length !== 6}
+                    disabled={emailStatus && currentStep === 4 || otp.join('').length !== 6}
                     className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {emailVerificationLoading ? (
+                    {emailVerificationLoading && otp.length === 6 ? (
                       <>
                         <Loader className="w-5 h-5 animate-spin" />
                         <span>Verifying...</span>
@@ -733,14 +742,14 @@ const Register = () => {
             {/* Navigation Buttons - Add this section if missing */}
             <div className="relative flex justify-between pt-8 mt-8 border-t border-gray-200">
 
-              <div onClick={() => Navigate('/login',{replace: true})} className='absolute -translate-y-8 text-sm hover:text-blue-600 active:opacity-70  text-gray-600 flex items-center my-1 w-full'>
+              <div onClick={() => Navigate('/login', { replace: true })} className={`${currentStep < 3 ? "" : "hidden"} cursor-pointer absolute -translate-y-8 text-sm hover:text-blue-600 active:opacity-70  text-gray-600 flex items-center my-1 w-full`}>
                 <p>Already have an account?</p>
               </div>
 
               {currentStep > 1 ? (
                 <button
                   onClick={prevStep}
-                  className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-gray-800 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                  className="flex items-center cursor-pointer gap-2 px-6 py-3 text-gray-600 hover:text-gray-800 font-medium rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   <span>Previous</span>
@@ -752,7 +761,7 @@ const Register = () => {
               {currentStep < totalSteps ? (
                 <button
                   onClick={nextStep}
-                  className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="flex items-center cursor-pointer gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   <span>Next</span>
                   <ArrowRight className="w-5 h-5" />
@@ -760,10 +769,11 @@ const Register = () => {
               ) : (
                 <button
                   onClick={handleSubmit}
-                  className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                  disabled={!emailVerified}
+                  className="flex items-center cursor-pointer disabled:bg-gray-600 disabled:opacity-40 gap-2 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   <Check className="w-5 h-5" />
-                  <span>Create Account</span>
+                  <span>Finish</span>
                 </button>
               )}
             </div>

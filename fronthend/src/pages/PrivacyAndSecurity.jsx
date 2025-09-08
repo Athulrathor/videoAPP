@@ -1,8 +1,7 @@
 
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Shield,
-  Key,
   Smartphone,
   Monitor,
   Eye,
@@ -12,17 +11,17 @@ import {
   Play,
   MapPin,
   Clock,
-  Settings,
   AlertTriangle,
-  Check,
   X,
-  MoreVertical,
   Save,
   Lock
 } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 const PrivacyAndSecurity = () => {
-  // const [currentSection, setCurrentSection] = useState('password');
+
+ const { user, loggedIn,watchHistory } = useSelector((state) => state.user);
+
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
@@ -31,18 +30,15 @@ const PrivacyAndSecurity = () => {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [watchHistoryPaused, setWatchHistoryPaused] = useState(false);
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '12345678fghfgh',
+    currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
-
-  const [getUserPassword, setGetUserPassword] = useState("");
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Mock data for active devices
   const [activeDevices] = useState([
     {
       id: 1,
@@ -70,37 +66,7 @@ const PrivacyAndSecurity = () => {
     }
   ]);
 
-  // Mock data for watch history
-  const [watchHistory] = useState([
-    {
-      id: 1,
-      title: 'Introduction to React Hooks',
-      duration: '45:30',
-      watchedAt: '2024-08-01 14:30',
-      progress: 100
-    },
-    {
-      id: 2,
-      title: 'Advanced JavaScript Concepts',
-      duration: '1:20:15',
-      watchedAt: '2024-08-01 10:15',
-      progress: 75
-    },
-    {
-      id: 3,
-      title: 'CSS Grid Layout Tutorial',
-      duration: '32:45',
-      watchedAt: '2024-07-31 16:45',
-      progress: 45
-    },
-    {
-      id: 4,
-      title: 'Node.js Backend Development',
-      duration: '2:15:30',
-      watchedAt: '2024-07-30 20:00',
-      progress: 30
-    }
-  ]);
+  const [history] = useState(watchHistory);
 
   const validatePassword = useCallback((password) => {
     const minLength = 8;
@@ -133,107 +99,6 @@ const PrivacyAndSecurity = () => {
   //     [field]: !prev[field]
   //   }));
   // };
-
-
-
-
-  // otp section 
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [isComplete, setIsComplete] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const inputRefs = useRef([]);
-
-  useEffect(() => {
-    // Focus first input on mount
-    if (inputRefs.current[0]) {
-      inputRefs.current[0].focus();
-    }
-  }, []);
-
-  useEffect(() => {
-    // Check if OTP is complete
-    const complete = otp.every(digit => digit !== '');
-    setIsComplete(complete);
-
-    if (complete) {
-      // Simulate verification process
-      setIsVerifying(true);
-      setTimeout(() => {
-        setIsVerifying(false);
-        console.log('OTP Verified:', otp.join(''));
-      }, 1500);
-    }
-  }, [otp]);
-
-  const handleChange = (index, value) => {
-    // Only allow numeric input
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value.slice(-1); // Only take the last character
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      // Focus previous input on backspace if current is empty
-      inputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowLeft' && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    } else if (e.key === 'Enter' && isComplete) {
-      handleVerify();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-
-    if (pastedData) {
-      const newOtp = [...otp];
-      for (let i = 0; i < 6; i++) {
-        newOtp[i] = pastedData[i] || '';
-      }
-      setOtp(newOtp);
-
-      // Focus the last filled input or first empty one
-      const lastFilledIndex = Math.min(pastedData.length - 1, 5);
-      inputRefs.current[lastFilledIndex]?.focus();
-    }
-  };
-
-  const handleVerify = () => {
-    if (isComplete) {
-      setIsVerifying(true);
-      setTimeout(() => {
-        setIsVerifying(false);
-        alert(`OTP Verified: ${otp.join('')}`);
-      }, 1500);
-    }
-  };
-
-  const handleClear = () => {
-    setOtp(['', '', '', '', '', '']);
-    setIsComplete(false);
-    setIsVerifying(false);
-    inputRefs.current[0]?.focus();
-  };
-
-  const handleResend = () => {
-    setOtp(['', '', '', '', '', '']);
-    setIsComplete(false);
-    setIsVerifying(false);
-    inputRefs.current[0]?.focus();
-    alert('New OTP sent to your device!');
-  };
-
 
   const handlePasswordChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -355,10 +220,6 @@ const PrivacyAndSecurity = () => {
     });
   }, []);
 
-  const handleStartEdit = useCallback(() => {
-    setIsEditing(true);
-  }, []);
-
   const getPasswordStrength = useCallback((password) => {
     if (!password) return { strength: 0, label: '', color: '' };
 
@@ -410,9 +271,10 @@ const PrivacyAndSecurity = () => {
   // ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto pl-4 pt-3 scrollBar max-md:p-0 bg-white overflow-y-auto h-[calc(100vh-65px)] max-md:h-[calc(100vh-53px)] max-xl:max-w-2xl max-md:max-w-full max-md:w-full sm:px-3 sm:pt-2 max-[400px]:pl-2">
+    <div className='flex w-full pl-4 pt-3 scrollBar max-md:p-0 bg-white overflow-y-auto h-[calc(100vh-57px)] max-md:h-[calc(100vh-41px)] max-md:max-w-full sm:px-3 sm:pt-2 max-[400px]:pl-2'>
+    <div className="flex-col max-w-3xl mx-auto">
       {/* Header */}
-      <div className="mb-8 max-md:pt-4 max-md:pl-4 max-md:mb-4 max-sm:mb-2 max-[400px]:pl-2">
+      <div className="mb-8 md:hidden max-md:pt-4 max-md:pl-4 max-md:mb-4 max-sm:mb-2 max-[400px]:pl-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2 max-md:text-[18px] max-sm:text-lg max-[400px]:text-base">
           Privacy & Security
         </h1>
@@ -441,32 +303,28 @@ const PrivacyAndSecurity = () => {
             {!isEditing ? (
               <div className="text-base">
                 <div
-                  onClick={handleStartEdit}
-                  className=" text-white rounded-lg border-2 hover:border-blue-700 transition-colors flex items-center"
+                  className=" text-white transition-colors flex items-center"
                 >
                   {/* <Key className="mr-2 h-4 w-4" /> */}
-                  <div className="relative">
+                  <div className="relative w-fit">
                     <input
-                      type={showPassword.currentPassword ? 'text' : 'password'}
-                      name="currentPassword"
-                      value={"dskfjheufcsdn"}
+                      type={'password'}
+                      name="currentPasswordCover"
+                      value={"password!password!password"}
+                      disabled
                       onChange={handlePasswordChange}
-                      className={`w-full px-3 py-2 pr-10 text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full px-3 py-2 pr-10 text-black border border-gray-300 rounded-lg ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'
                         }`}
                       placeholder="Enter current password"
                     />
-                    <button
-                      type="button"
-                      // onClick={() => togglePasswordVisibility('currentPassword')}
-                      className="absolute inset-y-0 right-0 pr-3 text-black flex items-center hover:text-blue-600 transition-colors"
-                    >
-                      {showPassword.currentPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
                   </div>
+                  <button
+                      type="button"
+                    onClick={() => setIsEditing(true)}
+                    className=" ml-2 border px-3 py-2 border-gray-300 rounded-lg hover:bg-gray-400 text-black flex items-center hover:text-blue-600 transition-colors"
+                    >
+                      Change
+                    </button>
                 </div>
               </div>
             ) : (
@@ -476,20 +334,20 @@ const PrivacyAndSecurity = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Current Password
                   </label>
-                  <div className="relative">
+                      <div className={`w-fit relative flex justify-end items-center border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent  ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'
+                        }`}>
                     <input
                       type={showPassword.currentPassword ? 'text' : 'password'}
                       name="currentPassword"
                       value={passwordData.currentPassword}
                       onChange={handlePasswordChange}
-                      className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                      className={`w-fit px-3 py-2 pr-1 outline-none focus:ring-0 focus:outline-none`}
                       placeholder="Enter current password"
                     />
                     <button
                       type="button"
                       onClick={() => togglePasswordVisibility('currentPassword')}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors"
+                          className=" h-full aspect-square pr-3 flex items-center hover:text-blue-600 transition-colors"
                     >
                       {!showPassword.currentPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -501,123 +359,6 @@ const PrivacyAndSecurity = () => {
                   {errors.currentPassword && (
                     <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
                   )}
-
-                  <div>
-                    <div className="w-full mx-auto max-w-[320px_-_16px] mt-2">
-                      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-sm:p-2">
-                        {/* Header */}
-                        {/* <div className="text-center mb-8">
-                          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                          </div>
-                          <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Identity</h2>
-                          <p className="text-gray-600">Enter the 6-digit code sent to your device</p>
-                        </div> */}
-                          
-                        {/* OTP Input Fields */}
-                        <div className="mb-8 max-sm:my-4">
-                          <div className="flex justify-center gap-3 max-sm:gap-1 mb-4 max-sm:mb-2">
-                            {otp.map((digit, index) => (
-                              <input
-                                key={index}
-                                ref={el => inputRefs.current[index] = el}
-                                type="text"
-                                inputMode="numeric"
-                                maxLength="1"
-                                value={digit}
-                                onChange={(e) => handleChange(index, e.target.value)}
-                                onKeyDown={(e) => handleKeyDown(index, e)}
-                                onPaste={index === 0 ? handlePaste : undefined}
-                                className={`
-                    w-12 h-12 max-sm:w-9 max-sm:h-9 text-center text-xl max-sm:text-sm font-semibold rounded-lg border-2 
-                    transition-all duration-200 outline-none
-                    ${digit
-                                    ? 'border-blue-500 bg-blue-50 text-blue-900'
-                                    : 'border-gray-300 bg-white text-gray-900'
-                                  }
-                    ${isComplete && !isVerifying
-                                    ? 'border-green-500 bg-green-50'
-                                    : ''
-                                  }
-                    hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200
-                  `}
-                              />
-                            ))}
-                          </div>
-
-                          {/* Status Indicator */}
-                          <div className="text-center h-6">
-                            {isVerifying && (
-                              <div className="flex items-center justify-center gap-2 text-blue-600">
-                                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                <span className="text-sm font-medium">Verifying...</span>
-                              </div>
-                            )}
-                            {isComplete && !isVerifying && (
-                              <div className="flex items-center justify-center gap-2 text-green-600">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span className="text-sm font-medium">Ready to verify</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="space-y-4">
-                          <button
-                            onClick={handleVerify}
-                            disabled={!isComplete || isVerifying}
-                            className={`
-                w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200
-                ${isComplete && !isVerifying
-                                ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white transform hover:scale-105 shadow-lg'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              }
-              `}
-                          >
-                            {isVerifying ? 'Verifying...' : 'Verify OTP'}
-                          </button>
-
-                          <div className="flex gap-3">
-                            <button
-                              onClick={handleClear}
-                              className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                            >
-                              Clear
-                            </button>
-                            <button
-                              onClick={handleResend}
-                              className="flex-1 py-2 px-4 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors duration-200"
-                            >
-                              Resend OTP
-                            </button>
-                          </div>
-
-                          {/* Demo Button */}
-                          {/* <button
-                            onClick={simulateAutoFill}
-                            className="w-full py-2 px-4 text-sm text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors duration-200"
-                          >
-                            🎯 Simulate Auto-Fill (Demo)
-                          </button> */}
-                        </div>
-
-                        {/* Help Text */}
-                        {/* <div className="mt-6 text-center">
-                          <p className="text-xs text-gray-500">
-                            Didn't receive the code? Check your spam folder or try again
-                          </p>
-                        </div> */}
-                      </div>
-                    </div>
-                  </div>
-
-
-
 
                 </div>
                 <div className='hidden'>
@@ -772,13 +513,13 @@ const PrivacyAndSecurity = () => {
           </div>
 
           {/* 2FA Section */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-4 max-sm:px-3 max-sm:py-3 max-sm:mb-2 max-[400px]:px-1.5">
+          {/* <div className="bg-gray-50 rounded-lg p-6 mb-4 max-sm:px-3 max-sm:py-3 max-sm:mb-2 max-[400px]:px-1.5">
             <h2 className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold text-gray-900 mb-6 flex items-center">
               <Shield className="mr-2 h-5 w-5 max-sm:w-4 max-[400px]:h-3 max-[400px]:w-3" />
               Two-Factor Authentication
             </h2>
             <div className="space-y-6 max-sm:space-y-3">
-              {/* SMS Auth Row */}
+
               <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
                 <div>
                   <h3 className="font-medium text-gray-900 text-base max-[400px]:text-xs">SMS Authentication</h3>
@@ -795,7 +536,6 @@ const PrivacyAndSecurity = () => {
                   />
                 </button>
               </div>
-              {/* ...other 2FA sections... */}
               <div className="p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
                 <h3 className="font-medium text-gray-900 mb-2 text-base max-[400px]:text-xs">Authenticator App</h3>
                 <p className="text-sm text-gray-600 mb-3 max-[400px]:text-xs">Use an authenticator app for more secure 2FA</p>
@@ -804,7 +544,8 @@ const PrivacyAndSecurity = () => {
                 </button>
               </div>
             </div>
-          </div>
+            </div> */}
+            
           {/* Active Devices */}
           <div className="bg-gray-50 rounded-lg p-6 mb-4 max-md:rounded-none max-sm:px-3 max-sm:py-3 max-sm:mb-2">
             <h2 className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold text-gray-900 mb-6 flex items-center">
@@ -903,7 +644,7 @@ const PrivacyAndSecurity = () => {
               </div>
             </div>
             <div className="space-y-4 max-sm:space-y-2">
-              {watchHistory.map((item) => (
+              {history.map((item) => (
                 <div key={item.id} className="p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -948,6 +689,7 @@ const PrivacyAndSecurity = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

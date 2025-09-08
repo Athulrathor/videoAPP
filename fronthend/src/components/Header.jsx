@@ -382,7 +382,7 @@ const Header = (props) => {
           {/* Profile */}
           <div>
             <Tooltip
-              title={!user?.fullname ? "Profile" : user?.fullname}
+              title={!user?.username ? "Profile" : user?.username}
               arrow placement="bottom"
             >
               <button
@@ -398,16 +398,16 @@ const Header = (props) => {
                     className="w-7 h-7 max-md:h-6 max-md:w-6 rounded-full object-cover"
                   />
                 )}
-                <span className="max-md:hidden max-xl:inline-block truncate text-sm">
-                  {user?.fullname || "Profile"}
-                </span>
+                {/* <span className="max-md:hidden max-xl:inline-block truncate text-sm">
+                  {user?.username || "Profile"}
+                </span> */}
               </button>
             </Tooltip>
             <ul className={`${openDropMenu ? "" : "hidden"} cursor-pointer z-18 w-fit h-fit p-1 translate-y-2 text-lg max-md:text-sm absolute py-2 max-md:py-1 right-px shadow-2xs backdrop-blur-3xl bg-white`}>
-              <li onClick={() => {  setOpenDropMenu(false) }} className="px-1 active:bg-gray-300 hover:bg-gray-200 ">Profile</li>
-              <li onClick={() => { Navigate(`/channel/${user?.username.replace(' ','')}`); setOpenDropMenu(false)}} className="px-1  active:bg-gray-300 hover:bg-gray-200">View channel</li>
-              <li onClick={() => { Navigate("/settings"); setOpenDropMenu(false) }} className="px-1  active:bg-gray-300 hover:bg-gray-200">Settings</li>
-              <li onClick={logoutUser} className="px-1  active:bg-gray-300 hover:bg-gray-200">Logout</li>
+              <li onClick={() => {  setOpenDropMenu(false) }} className="px-2 active:bg-gray-300 hover:bg-gray-200 rounded-lg">Profile</li>
+              <li onClick={() => { Navigate(`/channel/${user?.username.replace(' ', '')}`); setOpenDropMenu(false) }} className="px-2 rounded-lg  active:bg-gray-300 hover:bg-gray-200">View channel</li>
+              <li onClick={() => { Navigate("/settings"); setOpenDropMenu(false) }} className="px-2  active:bg-gray-300 rounded-lg hover:bg-gray-200">Settings</li>
+              <li onClick={logoutUser} className="px-2  active:bg-gray-300 hover:bg-gray-200 rounded-lg">Logout</li>
             </ul>
           </div>
         </div>

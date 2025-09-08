@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import videoLogo from "../assets/favicon.png";
 import TextField from "@mui/material/TextField";
-import { Link, redirect, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import google from "../assets/google.svg";
 import facebook from "../assets/facebook.svg";
@@ -13,7 +13,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { loading, error, user, loggedIn } = useSelector(state => state.user);
+  const { loading } = useSelector(state => state.user);
 
   const dispatch = useDispatch();
   const Navigate = useNavigate();
@@ -22,10 +22,7 @@ const Login = () => {
     event.preventDefault();
 
     try {
-      const logged = await dispatch(fetchLoginUser({ email: email, password: password }));
-      
-        // if (!user.isOtpVerified)
-
+      await dispatch(fetchLoginUser({ email: email, password: password }));
         Navigate("/");
         dispatch(setSideActive("home"));
 
@@ -114,7 +111,7 @@ const Login = () => {
 
                 <button
                   type="submit"
-                  className={`w-2xs outline-2 disabled:opacity-80 disabled:grayscale-25 mt-6 py-2 text-2xl font-bold rounded-xs outline-[#e62d27] hover:bg-[#e62d27] hover:text-white active:outline-black black:active:outline-white  active:bg-[#e62d27] active:text-white transition duration-200 ease-in-out`}
+                  className={`w-2xs outline-2 cursor-pointer disabled:opacity-80 disabled:grayscale-25 mt-6 py-2 text-2xl font-bold rounded-xs outline-[#e62d27] hover:bg-[#e62d27] hover:text-white active:outline-black black:active:outline-white  active:bg-[#e62d27] active:text-white transition duration-200 ease-in-out`}
                   // disabled={loading}
                 >
                   {loading ? <h2>Loading</h2> : "Login"}

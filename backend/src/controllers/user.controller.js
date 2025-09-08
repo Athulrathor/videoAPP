@@ -74,7 +74,8 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImage: coverImageUploadedToCloudinary.url,
     email,
     password,
-    through:false,
+    through: false,
+    isOtpVerified:false,
   });
 
   const createdUser = await User.findById(newUser._id).select(
@@ -172,7 +173,7 @@ const googleLogin = asyncHandler(async (req, res) => {
         email: data.email,
         avatar: data.picture || '',
         through: true,
-        isOtpVerified: data.email_verified ?? false,
+        isOtpVerified: data.email_verified,
       });
     }
 
@@ -697,6 +698,26 @@ const generateMailRecoveryPassword = asyncHandler(async (req, res) => {
   }
 })
 
+const generateMailVerify = asyncHandler(async (req, res) => {
+  console.log(req.body)
+  const { email } = req.body;
+
+  if (!email) return new ApiError(400, "Recipient email is required!");
+
+  try {
+
+    const otp = generateOTP(6);
+
+    sendMail(email, "Otp confirmation mail", "this is the data", otp);
+
+    return res.status(200).json(new ApiResponse(200, otp, "Otp generated successfully!"));
+
+  } catch (error) {
+    console.error(error);
+    return new ApiError(500, "Server error during sending recovery email");
+  }
+})
+
 const updatePassword = asyncHandler(async (req, res) => {
   try {
     const { newPassword } = req.body;
@@ -740,5 +761,6 @@ export {
   removeConntentToHistory,
   clearWatchHistory,
   generateMailRecoveryPassword,
+  generateMailVerify,
   updatePassword
 };
