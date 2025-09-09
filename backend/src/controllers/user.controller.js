@@ -10,6 +10,7 @@ import { Like } from "../models/like.model.js";
 import axios from "axios";
 import sendMail from "../utils/nodeMailer.js";
 import { generateOTP } from "../../../fronthend/src/libs/otpGenerator.js";
+import {UserSession} from "../models/userSession.model.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -95,20 +96,48 @@ const loginUser = asyncHandler(async (req, res) => {
 
   try {
 
-    const { email, username, password } = req.body;
+    const { email, password } = req.body;
 
-      if (!username && !email) {
+      if (!email) {
         throw new ApiError(400, "Username or email is required!");
     }
     
   const user = await User.findOne({
-    // $or: [{ email }, { username }],
     email:email
   });
 
   if (!user) {
     throw new ApiError(400, "User is not found!");
-  }
+    }
+    
+    const existingSession = await UserSession.findOne({
+      userId: user._id,
+      deviceId: req.deviceInfo.deviceId,
+      isActive: true
+    });
+
+    if (existingSession) {
+      // Update existing session
+      existingSession.lastActivity = new Date();
+      existingSession.loginDate = new Date(); // Update to current login
+      existingSession.location = req.deviceInfo.location;
+      await existingSession.save();
+    } else {
+      // Create new session
+      const newSession = new UserSession({
+        userId: user._id,
+        deviceId: req.deviceInfo.deviceId,
+        deviceName: req.deviceInfo.deviceName,
+        platform: req.deviceInfo.platform,
+        browser: req.deviceInfo.browser,
+        os: req.deviceInfo.os,
+        ipAddress: req.deviceInfo.ipAddress,
+        userAgent: req.deviceInfo.userAgent,
+        location: req.deviceInfo.location,
+        isActive: true
+      });
+      await newSession.save();
+    }
 
     if (user.through) return;
 
@@ -137,7 +166,7 @@ const loginUser = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        { user: loggedUser, accessToken, refreshToken },
+        { user: loggedUser, accessToken, refreshToken, deviceInfo: req.deviceInfo },
         "User loggedin successfully!"
       )
     );
@@ -165,8 +194,6 @@ const googleLogin = asyncHandler(async (req, res) => {
 
     let user = await User.findOne({ email: data.email });
 
-    console.log(user)
-
     if (!user) {
       user = await User.create({
         fullname: data.name || 'Google User',
@@ -175,6 +202,35 @@ const googleLogin = asyncHandler(async (req, res) => {
         through: true,
         isOtpVerified: data.email_verified,
       });
+    }
+
+    const existingSession = await UserSession.findOne({
+      userId: user._id,
+      deviceId: req.deviceInfo.deviceId,
+      isActive: true
+    });
+
+    if (existingSession) {
+      // Update existing session
+      existingSession.lastActivity = new Date();
+      existingSession.loginDate = new Date(); // Update to current login
+      existingSession.location = req.deviceInfo.location;
+      await existingSession.save();
+    } else {
+      // Create new session
+      const newSession = new UserSession({
+        userId: user._id,
+        deviceId: req.deviceInfo.deviceId,
+        deviceName: req.deviceInfo.deviceName,
+        platform: req.deviceInfo.platform,
+        browser: req.deviceInfo.browser,
+        os: req.deviceInfo.os,
+        ipAddress: req.deviceInfo.ipAddress,
+        userAgent: req.deviceInfo.userAgent,
+        location: req.deviceInfo.location,
+        isActive: true
+      });
+      await newSession.save();
     }
 
     const options = {
@@ -502,54 +558,55 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
 const getWatchHistory = asyncHandler(async (req, res) => {
   try {
-    const user = await User.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(req.user._id),
-        },
-      },
-      {
-        $lookup: {
-          from: "videos",
-          localField: "watchHistory",
-          foreignField: "_id",
-          as: "watchHistory",
-          pipeline: [
-            {
-              $lookup: {
-                from: "users",
-                localField: "owner",
-                foreignField: "_id",
-                as: "owner",
-                pipeline: [
-                  {
-                    $project: {
-                      fullname: 1,
-                      username: 1,
-                      avatar: 1,
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              $addFields: {
-                owner: {
-                  $first: "$owner",
-                },
-              },
-            },
-          ],
-        },
-      },
-    ]);
+    // const user = await User.aggregate([
+    //   {
+    //     $match: {
+    //       _id: new mongoose.Types.ObjectId(req.user._id),
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "videos",
+    //       localField: "watchHistory",
+    //       foreignField: "_id",
+    //       as: "watchHistory",
+    //       pipeline: [
+    //         {
+    //           $lookup: {
+    //             from: "users",
+    //             localField: "owner",
+    //             foreignField: "_id",
+    //             as: "owner",
+    //             pipeline: [
+    //               {
+    //                 $project: {
+    //                   fullname: 1,
+    //                   username: 1,
+    //                   avatar: 1,
+    //                 },
+    //               },
+    //             ],
+    //           },
+    //         },
+    //         {
+    //           $addFields: {
+    //             owner: {
+    //               $first: "$owner",
+    //             },
+    //           },
+    //         },
+    //       ],
+    //     },
+    //   },
+    // ]);
 
+    const user = await User.findById(req.user._id).populate({ path: 'watchHistory',populate:{path:'owner',select:'avatar username fullname createdAt'} })
     return res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          { watchHistory: user[0].watchHistory },
+          { watchHistory: user.watchHistory },
           "Watch history fetched successfully!"
         )
       );
@@ -742,6 +799,84 @@ const updatePassword = asyncHandler(async (req, res) => {
   }
 });
 
+const activeSession = asyncHandler(async (req, res) => {
+  try {
+    const sessions = await UserSession.find({
+      userId: req.user._id,
+      isActive: true
+    }).sort({ lastActivity: -1 });
+
+    res.json({
+      activeSessions: sessions,
+      totalActive: sessions.length
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching sessions', error: error.message });
+  }
+});
+
+const loginHistory = asyncHandler(async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const sessions = await UserSession.find({
+      userId: req.user._id
+    })
+      .sort({ loginDate: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await UserSession.countDocuments({ userId: req.user.userId });
+
+    res.json({
+      loginHistory: sessions,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalSessions: total
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching login history', error: error.message });
+  }
+});
+
+const logoutDevice = asyncHandler(async (req, res) => {
+  try {
+    const { deviceId } = req.params;
+
+    await UserSession.findOneAndUpdate(
+      {
+        userId: req.user._id,
+        deviceId,
+        isActive: true
+      },
+      {
+        isActive: false,
+        logoutDate: new Date()
+      }
+    );
+
+    res.json({ message: 'Device logged out successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error logging out device', error: error.message });
+  }
+});
+
+const verifypassword = asyncHandler(async (req, res) => {
+  const { currentPassword } = req.body;
+
+  try {
+    const check = await User.findById(req.user._id);
+
+    if (!check) ApiError(400, "No user Account!");
+
+    const result = await check.isPasswordCorrect(currentPassword);
+
+    res.json(ApiResponse(200, result, "check successfully fetched!"));
+  } catch (error) {
+    res.status(500).json({ message: 'Error verifying password', error: error.message });
+  }
+})
+
 export {
   registerUser,
   loginUser,
@@ -762,5 +897,11 @@ export {
   clearWatchHistory,
   generateMailRecoveryPassword,
   generateMailVerify,
-  updatePassword
+  updatePassword,
+
+  activeSession,
+  loginHistory,
+  logoutDevice,
+
+  verifypassword
 };

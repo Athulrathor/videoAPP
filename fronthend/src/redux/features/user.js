@@ -149,6 +149,7 @@ export const currentUpdatedUser = createAsyncThunk('current/userDetails', async 
 export const AuthService = {
   loginWithGoogle: async (googleAccessToken) => {
     const response = await axiosInstance.post('users/google', { googleAccessToken });
+    console.log(response);
     return response.data;
   },
 };
@@ -157,6 +158,7 @@ export const getWatchHistory = createAsyncThunk('fetching/userWatchHistory', asy
   try {
     const history = await axiosInstance.get('users/history');
     console.log("user History Fetched Successfully!");
+    console.log(history?.data?.data?.watchHistory)
     return history?.data?.data?.watchHistory;
   } catch (error) {
     console.error(error);
@@ -169,7 +171,7 @@ export const addingToWatchHistory = createAsyncThunk('addingContent/userWatchHis
   try {
     const added = await axiosInstance.post('users/add/history',{videoId:videoId});
     console.log("user History added Successfully!");
-    return added?.data?.data;
+    return videoId;
   } catch (error) {
     console.error(error);
     return rejectWithValue(error.message);
@@ -179,9 +181,9 @@ export const addingToWatchHistory = createAsyncThunk('addingContent/userWatchHis
 export const removingToWatchHistory = createAsyncThunk('removingContent/userWatchHistory', async (videoId, { rejectWithValue }) => {
   if (!videoId) return rejectWithValue("videoId is missing! \n Please Provide Id");
   try {
-    const added = await axiosInstance.post('users/remove/history', { videoId: videoId });
+    await axiosInstance.post('users/remove/history', { videoId: videoId });
     console.log("user History removed Successfully!", videoId);
-    return added?.data?.data;
+    return videoId;
   } catch (error) {
     console.error(error);
     return rejectWithValue(error.message);
@@ -190,9 +192,8 @@ export const removingToWatchHistory = createAsyncThunk('removingContent/userWatc
 
 export const clearHistory = createAsyncThunk('clearingContent/userWatchHistory', async (_, { rejectWithValue }) => {
   try {
-    const added = await axiosInstance.post('users/clear/history');
+    await axiosInstance.post('users/clear/history');
     console.log("user History cleared Successfully!");
-    return added?.data?.data;
   } catch (error) {
     console.error(error);
     return rejectWithValue(error.message);
@@ -225,7 +226,6 @@ export const verifyEmail = createAsyncThunk(
 export const verifyEmailVerification = createAsyncThunk(
   'emailValidCheck/verifyEmail',
   async (email, { rejectWithValue }) => {
-    console.log(email)
     try {
       const response = await axiosInstance.post('users/verify-email', {email});
       return response.data.data;
@@ -234,6 +234,58 @@ export const verifyEmailVerification = createAsyncThunk(
     }
   }
 );
+
+export const activeSessions = createAsyncThunk(
+  'user/activeSessions',
+  async (_, { rejectWithValue }) => {
+    try {
+      const activeUser = await axiosInstance.get("users/active-sessions");
+      console.log(activeUser?.data.activeSessions);
+      return activeUser?.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const loginHistory = createAsyncThunk(
+  'user/loginHistory',
+  async ({page,limit}, { rejectWithValue }) => {
+    try {
+      const loginHistorys = await axiosInstance.get(`users/login-history`, { page: page, limit: limit });
+      return loginHistorys?.data?.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const logoutDevice = createAsyncThunk(
+  'user/logoutDevice',
+  async (deviceId, { rejectWithValue }) => {
+    try {
+      const logoutDevice = await axiosInstance.post(`users/logout-device/${deviceId}`);
+      return logoutDevice?.data?.message;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const verifyPassword = createAsyncThunk('verify/password', async (currentPassword, { rejectWithValue }) => {
+  if (!currentPassword) return rejectWithValue('Current password is missing!');
+
+  try {
+    
+    const response = await axiosInstance.get('user/password-check', currentPassword);
+    console.log(response);
+    return response?.data?.data;
+
+  } catch (error) {
+    console.error(error);
+    return rejectWithValue(error.message);
+  }
+})
 
 export const userSlice = createSlice({
   name: "user",
@@ -244,13 +296,17 @@ export const userSlice = createSlice({
     token: "",
     loggedIn: false,
 
+    deviceId: null,
+
     registering: false,
     registerError: null,
     registerSuccess:false,
 
     watchHistory:[],
     watchHistoryLoading: false,
-    watchHistoryError:null,
+    watchHistoryError: null,
+    
+    watchHistoryPaused: false,
 
     sideActive: "home",
     settingsActive: "Accounts",
@@ -273,7 +329,11 @@ export const userSlice = createSlice({
 
     emailVerified: null,
     emailVerificationLoading: false,
-    emailVerificationError:null
+    emailVerificationError: null,
+
+    activeSession: [],
+    loginHistory: [],
+    logoutDeviceMessage:null,
   },
   reducers: {
 
@@ -302,7 +362,11 @@ export const userSlice = createSlice({
 
     setUpdateCoverImageProgress: (state, action) => {
       state.updateCoverImageProgress = action.payload;
-    }
+    },
+
+    setWatchHistoryPaused: (state) => {
+      state.watchHistoryPaused = !state.watchHistoryPaused;
+    },
 
   },
   extraReducers: (builder) => {
@@ -331,6 +395,7 @@ export const userSlice = createSlice({
       .addCase(fetchLoginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload?.user || {};
+        state.deviceId = action.payload?.deviceInfo?.deviceId || null;
         state.loggedIn = true;
         state.token = action.payload?.accessToken || null;
         state.error = null;
@@ -448,7 +513,7 @@ export const userSlice = createSlice({
     })
 
     builder.addCase(removingToWatchHistory.fulfilled, (state, action) => {
-      state.watchHistory = state.watchHistory.filter(video => video._id !== action.payload._id);
+      state.watchHistory = state.watchHistory.filter(video => video._id !== action.payload);
       state.watchHistoryLoading = false;
       state.watchHistoryError = null;
     }).addCase(removingToWatchHistory.pending, (state) => {
@@ -511,9 +576,39 @@ export const userSlice = createSlice({
         state.otpLoading = false;
         state.otpError = action.payload;
       });
+    
+    builder.addCase(activeSessions.pending, (state) => {
+      state.activeSession = [];
+    })
+      .addCase(activeSessions.fulfilled, (state,action) => {
+        state.activeSession = action.payload?.activeSessions || [];
+      })
+      .addCase(activeSessions.rejected, (state) => {
+        state.activeSession = [];
+      });
+    
+    builder.addCase(loginHistory.pending, (state) => {
+      state.loginHistory = [];
+    })
+      .addCase(loginHistory.fulfilled, (state, action) => {
+        state.loginHistory = action.payload || [];
+      })
+      .addCase(loginHistory.rejected, (state) => {
+        state.loginHistory = [];
+      });
+    
+    builder.addCase(logoutDevice.pending, (state) => {
+      state.logoutDeviceMessage = null;
+    })
+      .addCase(logoutDevice.fulfilled, (state, action) => {
+        state.logoutDeviceMessage = action.payload;
+      })
+      .addCase(logoutDevice.rejected, (state) => {
+        state.logoutDeviceMessage = null;
+      });
   },
 });
 
-export const { logOut,setSideActive, setSettingsActive, setUpdateAvatarProgress, setUpdateCoverImageProgress, setAuth } =
+export const { logOut, setSideActive, setSettingsActive, setUpdateAvatarProgress, setUpdateCoverImageProgress, setAuth, setWatchHistoryPaused } =
   userSlice.actions;
 export default userSlice.reducer;

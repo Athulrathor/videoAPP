@@ -32,6 +32,7 @@ export const verifyToken = asyncHandler(async (req, res, next) => {
     next();
 
   } catch (error) {
+    console.log(error)
     throw new ApiError(401, error?.message || "Invalid access token!");
   }
 });

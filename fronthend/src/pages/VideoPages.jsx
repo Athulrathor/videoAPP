@@ -60,7 +60,8 @@ const VideoPages = (props) => {
   const { videos, targetVideo } = useSelector((state) => state.videos);
   const {  videoLiked } = useSelector(state => state.likes);
   const { isSubcribedStatus } = useSelector(state => state.subscriber);
-  const { playlist } = useSelector(state => state.Playlists)
+  const { playlist } = useSelector(state => state.Playlists);
+  const { watchHistoryPaused } = useSelector(state => state.user);
   
   const filteredVideos = useMemo(() => 
     videos.filter(video => video?._id !== targetVideo?._id)
@@ -68,8 +69,10 @@ const VideoPages = (props) => {
 
   useEffect(() => {
     dispatch(fetchVideosById(VideoId));
-    dispatch(addingToWatchHistory(VideoId));
-  }, [dispatch, VideoId]);
+    if (!watchHistoryPaused) {
+      dispatch(addingToWatchHistory(VideoId));
+    }
+  }, [dispatch, VideoId, watchHistoryPaused]);
 
   useEffect(() => {
     if (videos.length > 0 && targetVideo?._id) {

@@ -35,17 +35,17 @@ const NotificationSettings = () => {
     promotions: false
   });
 
-  const [pushSettings, setPushSettings] = useState({
-    comments: true,
-    likes: true,
-    followers: true,
-    subscriptions: false,
-    recommendations: false
-  });
+  // const [pushSettings, setPushSettings] = useState({
+  //   comments: true,
+  //   likes: true,
+  //   followers: true,
+  //   subscriptions: false,
+  //   recommendations: false
+  // });
 
   const [globalSettings, setGlobalSettings] = useState({
     emailEnabled: true,
-    pushEnabled: true,
+    // pushEnabled: true,
     frequency: 'instant', // instant, daily, weekly
     quietHours: {
       enabled: false,
@@ -54,44 +54,44 @@ const NotificationSettings = () => {
     }
   });
 
-  const [emailFrequency, setEmailFrequency] = useState({
-    recommendations: 'weekly',
-    comments: 'instant',
-    subscriptions: 'daily',
-    newsletter: 'weekly'
-  });
+  // const [emailFrequency, setEmailFrequency] = useState({
+  //   recommendations: 'weekly',
+  //   comments: 'instant',
+  //   subscriptions: 'daily',
+  //   newsletter: 'weekly'
+  // });
 
   // Mock data for recent notifications/emails
-  const [recentNotifications] = useState([
-    {
-      id: 1,
-      type: 'comment',
-      title: 'New comment on "React Tutorial"',
-      time: '2 hours ago',
-      read: false
-    },
-    {
-      id: 2,
-      type: 'recommendation',
-      title: 'Weekly Recommendations',
-      time: '1 day ago',
-      read: true
-    },
-    {
-      id: 3,
-      type: 'subscription',
-      title: 'TechChannel posted a new video',
-      time: '2 days ago',
-      read: true
-    },
-    {
-      id: 4,
-      type: 'like',
-      title: 'Someone liked your comment',
-      time: '3 days ago',
-      read: false
-    }
-  ]);
+  // const [recentNotifications] = useState([
+  //   {
+  //     id: 1,
+  //     type: 'comment',
+  //     title: 'New comment on "React Tutorial"',
+  //     time: '2 hours ago',
+  //     read: false
+  //   },
+  //   {
+  //     id: 2,
+  //     type: 'recommendation',
+  //     title: 'Weekly Recommendations',
+  //     time: '1 day ago',
+  //     read: true
+  //   },
+  //   {
+  //     id: 3,
+  //     type: 'subscription',
+  //     title: 'TechChannel posted a new video',
+  //     time: '2 days ago',
+  //     read: true
+  //   },
+  //   {
+  //     id: 4,
+  //     type: 'like',
+  //     title: 'Someone liked your comment',
+  //     time: '3 days ago',
+  //     read: false
+  //   }
+  // ]);
 
   const handleEmailToggle = (setting) => {
     setEmailSettings(prev => ({
@@ -100,12 +100,12 @@ const NotificationSettings = () => {
     }));
   };
 
-  const handlePushToggle = (setting) => {
-    setPushSettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting]
-    }));
-  };
+  // const handlePushToggle = (setting) => {
+  //   setPushSettings(prev => ({
+  //     ...prev,
+  //     [setting]: !prev[setting]
+  //   }));
+  // };
 
   const handleGlobalToggle = (setting) => {
     setGlobalSettings(prev => ({
@@ -114,12 +114,12 @@ const NotificationSettings = () => {
     }));
   };
 
-  const handleFrequencyChange = (type, frequency) => {
-    setEmailFrequency(prev => ({
-      ...prev,
-      [type]: frequency
-    }));
-  };
+  // const handleFrequencyChange = (type, frequency) => {
+  //   setEmailFrequency(prev => ({
+  //     ...prev,
+  //     [type]: frequency
+  //   }));
+  // };
 
   const handleQuietHoursToggle = () => {
     setGlobalSettings(prev => ({
@@ -232,19 +232,19 @@ const NotificationSettings = () => {
     }
   ];
 
-  const pushCategories = [
-    { id: 'comments', title: 'Comments', icon: MessageSquare },
-    { id: 'likes', title: 'Likes', icon: Heart },
-    { id: 'followers', title: 'New Followers', icon: UserPlus },
-    { id: 'subscriptions', title: 'Subscriptions', icon: Bell },
-    { id: 'recommendations', title: 'Recommendations', icon: TrendingUp }
-  ];
+  // const pushCategories = [
+  //   { id: 'comments', title: 'Comments', icon: MessageSquare },
+  //   { id: 'likes', title: 'Likes', icon: Heart },
+  //   { id: 'followers', title: 'New Followers', icon: UserPlus },
+  //   { id: 'subscriptions', title: 'Subscriptions', icon: Bell },
+  //   { id: 'recommendations', title: 'Recommendations', icon: TrendingUp }
+  // ];
 
-  const frequencyOptions = [
-    { value: 'instant', label: 'Instant' },
-    { value: 'daily', label: 'Daily Digest' },
-    { value: 'weekly', label: 'Weekly Summary' }
-  ];
+  // const frequencyOptions = [
+  //   { value: 'instant', label: 'Instant' },
+  //   { value: 'daily', label: 'Daily Digest' },
+  //   { value: 'weekly', label: 'Weekly Summary' }
+  // ];
 
   return (
     <div className="max-sm:w-full px-2 max-sm:p-0 sm:px-4 py-2 sm:py-4 bg-white overflow-y-scroll scrollBar max-md:h-[calc(100vh-53px)] h-[calc(100vh-65px)]">
@@ -287,7 +287,7 @@ const NotificationSettings = () => {
           </div>
 
           {/* Master Push Toggle */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 bg-white border border-gray-200 rounded-lg">
+          <div className="hidden flex-col sm:flex-row items-start sm:items-center justify-between p-2 bg-white border border-gray-200 rounded-lg">
             <div className="mb-3 sm:mb-0 sm:flex-1 min-w-0">
               <h3 className="font-medium text-gray-900 truncate">Push Notifications</h3>
               <p className="text-sm text-gray-600 truncate">Master control for push notifications</p>
@@ -377,7 +377,7 @@ const NotificationSettings = () => {
       </div>
 
       {/* Email Notification Categories */}
-      <div className="bg-gray-50 rounded-lg max-sm:p-2 sm:p-6 mb-8">
+      <div className={`${!globalSettings.emailEnabled ? "hidden" : ""} bg-gray-50 rounded-lg max-sm:p-2 sm:p-6 mb-8`}>
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center">
           <Mail className="mr-2 h-5 w-5 flex-shrink-0" />
           Email Notifications
@@ -401,11 +401,9 @@ const NotificationSettings = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0 min-w-max">
-                    {category.hasFrequency && isEnabled && (
+                  <div className=" items-center space-x-2 sm:space-x-4 flex-shrink-0 min-w-max">
+                    {/* { isEnabled && (
                       <select
-                        value={emailFrequency[category.id] || 'instant'}
-                        onChange={(e) => handleFrequencyChange(category.id, e.target.value)}
                         className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         aria-label={`Frequency for ${category.title}`}
                       >
@@ -415,13 +413,13 @@ const NotificationSettings = () => {
                           </option>
                         ))}
                       </select>
-                    )}
+                    )} */}
 
                     <button
                       onClick={() => handleEmailToggle(category.id)}
-                      disabled={!globalSettings.emailEnabled}
+                      // disabled={!globalSettings.emailEnabled}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isEnabled ? 'bg-blue-600' : 'bg-gray-200'
-                        } ${!globalSettings.emailEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        } /`}
                       aria-label={`Toggle email notifications for ${category.title}`}
                     >
                       <span
@@ -438,19 +436,19 @@ const NotificationSettings = () => {
       </div>
 
       {/* Push Notification Categories */}
-      <div className="bg-gray-50 rounded-lg max-sm:p-2 sm:p-6 mb-8">
+      <div className="bg-gray-50 hidden rounded-lg max-sm:p-2 sm:p-6 mb-8">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center">
           <Bell className="mr-2 h-5 w-5 flex-shrink-0" />
           Push Notifications
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {pushCategories.map((category) => {
+        <div className="hidden grid-cols-1 md:grid-cols-2 gap-4">
+          {/* {pushCategories.map((category) => {
             const Icon = category.icon;
             const isEnabled = pushSettings[category.id] && globalSettings.pushEnabled;
 
             return (
-              <div key={category.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-4 bg-white border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
+              <div key={category.id} className="hidden flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-4 bg-white border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
                 <div className="flex items-center space-x-3 max-sm:space-x-1 flex-1 min-w-0">
                   <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
                     <Icon className="h-4 w-4 text-gray-600" />
@@ -458,7 +456,7 @@ const NotificationSettings = () => {
                   <span className="font-medium text-gray-900 truncate">{category.title}</span>
                 </div>
                 <button
-                  onClick={() => handlePushToggle(category.id)}
+                  // onClick={() => handlePushToggle(category.id)}
                   disabled={!globalSettings.pushEnabled}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${isEnabled ? 'bg-blue-600' : 'bg-gray-200'
                     } ${!globalSettings.pushEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -471,7 +469,7 @@ const NotificationSettings = () => {
                 </button>
               </div>
             );
-          })}
+          })} */}
         </div>
       </div>
 
@@ -488,8 +486,8 @@ const NotificationSettings = () => {
           </button>
         </div>
 
-        <div className="space-y-3 w-full">
-          {recentNotifications.map((notification) => (
+        <div className="hidden space-y-3 w-full">
+          {/* {recentNotifications.map((notification) => (
             <div
               key={notification.id}
               className="flex items-center justify-between p-3 max-sm:p-2 bg-white border border-gray-200 rounded-lg"
@@ -511,7 +509,7 @@ const NotificationSettings = () => {
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
-          ))}
+          ))} */}
         </div>
 
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm">

@@ -9,6 +9,8 @@ const corsOption = {
 
 const app = express();
 
+app.set('trust proxy', true);
+
 app.use(express.json());
 app.use(
   express.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 })
