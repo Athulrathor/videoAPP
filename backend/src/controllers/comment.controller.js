@@ -3,6 +3,7 @@ import { Comment } from "../models/comments.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import sendMail from "../utils/nodeMailer.js";
 
 const getVideoComments = asyncHandler(async (req, res) => {
   //TODO: get all comments for a video
@@ -565,7 +566,20 @@ const deleteCommentShort = asyncHandler(async (req, res) => {
     console.log(error.message);
     throw new ApiError(500, "Error in deleting short comment!");
   }
-});
+})
+
+// const sendCommentMail = asyncHandler(async (res, req) => {
+//   // content,commentedBy,commentedOn,createdAt
+//   const { email } = req.body;
+  
+//   try {
+    
+//     if (!email) throw new ApiError(401, "Comment details missing!");
+
+//   } catch (error) {
+    
+//   }
+// })
 
 export {
   getVideoComments,

@@ -15,6 +15,20 @@ const Settings = () => {
 
   const { loggedIn } = useSelector((state) => state.user);
 
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    theme: 'light',
+    fontSize: 'medium',
+    fontFamily: 'inter',
+    layoutDensity: 'comfortable',
+    accentColor: 'blue',
+    animationsEnabled: true,
+    highContrast: false,
+    reducedMotion: false,
+    backgroundType: 'default',
+    customBackground: '',
+    sidebarStyle:'default'
+  });
+
   return (
     <div >
       {loggedIn ? (<div>
@@ -22,7 +36,7 @@ const Settings = () => {
         <div className='flex h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] overflow-hidden'>
           <SettingSideBar showMenu={showMenu} setShowMenu={setShowMenu} />
           <div className='w-full'>
-            <SettingMain />
+            <SettingMain appearance={{ appearanceSettings, setAppearanceSettings }} />
           </div>
         </div>
       </div>) : (

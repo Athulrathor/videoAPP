@@ -20,7 +20,7 @@ function App() {
   const { loggedIn } = useSelector((state) => state.user);
 
   return (
-    <>
+    <div className={`--font-${"mono"} --font-size-${"small"} dark`}>
       <Router>
         <Routes>
           <Route
@@ -78,7 +78,7 @@ function App() {
         draggable
         pauseOnHover
       />
-    </>
+    </div>
   );
 }
 

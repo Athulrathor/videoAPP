@@ -15,13 +15,14 @@ import {
   RotateCcw,
   Check,
   Settings,
-  Maximize,
   Grid,
   Sidebar,
   Square
 } from 'lucide-react';
 
-const Appearance = () => {
+const Appearance = ({ appearance }) => {
+  const { setAppearanceSettings } = appearance;
+
   const [currentTheme, setCurrentTheme] = useState('light');
   const [backgroundType, setBackgroundType] = useState('default');
   const [customBackground, setCustomBackground] = useState('');
@@ -33,6 +34,20 @@ const Appearance = () => {
   const [highContrast, setHighContrast] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [sidebarStyle, setSidebarStyle] = useState('default');
+
+  // setAppearanceSettings({
+  //   theme: currentTheme,
+  //   fontSize: fontSize,
+  //   fontFamily: fontFamily,
+  //   layoutDensity: layoutDensity,
+  //   accentColor: accentColor,
+  //   animationsEnabled: animationsEnabled,
+  //   highContrast: highContrast,
+  //   reducedMotion: reducedMotion,
+  //   backgroundType: backgroundType,
+  //   customBackground: customBackground,
+  //   sidebarStyle: sidebarStyle
+  // })
 
   const themeOptions = [
     {
@@ -167,36 +182,36 @@ const Appearance = () => {
     setSidebarStyle('default');
   };
 
-  const exportSettings = () => {
-    const settings = {
-      theme: currentTheme,
-      background: backgroundType,
-      customBackground,
-      fontSize,
-      fontFamily,
-      layoutDensity,
-      accentColor,
-      animationsEnabled,
-      highContrast,
-      reducedMotion,
-      sidebarStyle
-    };
+  // const exportSettings = () => {
+  //   const settings = {
+  //     theme: currentTheme,
+  //     background: backgroundType,
+  //     customBackground,
+  //     fontSize,
+  //     fontFamily,
+  //     layoutDensity,
+  //     accentColor,
+  //     animationsEnabled,
+  //     highContrast,
+  //     reducedMotion,
+  //     sidebarStyle
+  //   };
 
-    const dataStr = JSON.stringify(settings, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'appearance-settings.json';
-    link.click();
-  };
+  //   const dataStr = JSON.stringify(settings, null, 2);
+  //   const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  //   const url = URL.createObjectURL(dataBlob);
+  //   const link = document.createElement('a');
+  //   link.href = url;
+  //   link.download = 'appearance-settings.json';
+  //   link.click();
+  // };
 
   const getPreviewBackground = () => {
     if (backgroundType === 'custom' && customBackground) {
       return { backgroundImage: `url(${customBackground})`, backgroundSize: 'cover' };
     }
 
-    const option = backgroundOptions.find(opt => opt.id === backgroundType);
+    // const option = backgroundOptions.find(opt => opt.id === backgroundType);
     return {};
   };
 
@@ -244,13 +259,13 @@ const Appearance = () => {
               <RotateCcw className="mr-2 h-4 w-4 max-sm:w-3" />
               Reset to Defaults
             </button>
-            <button
+            {/* <button
               onClick={exportSettings}
               className="flex items-center max-sm:px-2 max-sm:text-sm max-sm:py-1 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
             >
               <Download className="mr-2 h-4 w-4 max-sm:w-3" />
               Export Settings
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -269,8 +284,8 @@ const Appearance = () => {
                   <div
                     key={theme.id}
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${currentTheme === theme.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
                       }`}
                     onClick={() => setCurrentTheme(theme.id)}
                   >
@@ -304,8 +319,8 @@ const Appearance = () => {
                 <div
                   key={bg.id}
                   className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${backgroundType === bg.id
-                      ? 'border-blue-500'
-                      : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500'
+                    : 'border-gray-200 hover:border-gray-300'
                     }`}
                   onClick={() => setBackgroundType(bg.id)}
                 >
@@ -351,8 +366,8 @@ const Appearance = () => {
                       key={size.id}
                       onClick={() => setFontSize(size.id)}
                       className={`p-3 border rounded-lg text-left transition-colors ${fontSize === size.id
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300'
                         }`}
                     >
                       <div className={`font-medium ${size.sample}`}>{size.name}</div>
@@ -371,8 +386,8 @@ const Appearance = () => {
                       key={font.id}
                       onClick={() => setFontFamily(font.id)}
                       className={`w-full p-3 border rounded-lg text-left transition-colors ${fontFamily === font.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
                         }`}
                     >
                       <div className={`font-medium ${font.class}`}>{font.name}</div>
@@ -401,8 +416,8 @@ const Appearance = () => {
                       key={layout.id}
                       onClick={() => setLayoutDensity(layout.id)}
                       className={`w-full p-3 border rounded-lg text-left transition-colors ${layoutDensity === layout.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
                         }`}
                     >
                       <div className="font-medium">{layout.name}</div>
@@ -423,8 +438,8 @@ const Appearance = () => {
                         key={style.id}
                         onClick={() => setSidebarStyle(style.id)}
                         className={`w-full p-3 border rounded-lg text-left transition-colors flex items-center space-x-3 ${sidebarStyle === style.id
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <Icon className="h-5 w-5 text-gray-600" />
@@ -453,8 +468,8 @@ const Appearance = () => {
                   key={color.id}
                   onClick={() => setAccentColor(color.id)}
                   className={`p-2 max-sm:p-1  border-2 rounded-lg transition-all ${accentColor === color.id
-                      ? 'border-gray-400 shadow-md'
-                      : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-gray-400 shadow-md'
+                    : 'border-gray-200 hover:border-gray-300'
                     }`}
                 >
                   <div className={`w-full h-8 rounded ${color.color} mb-2`}></div>

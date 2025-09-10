@@ -3,7 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import geoip from 'geoip-lite';
 
-const detector = new DeviceDetector();
+const detector = new DeviceDetector({
+    clientIndexes: true,
+    deviceIndexes: true,
+    osIndexes: true,
+    deviceAliasCode: true,
+    deviceTrusted: true,
+    deviceInfo: true,  // Enable this for device specs
+    maxUserAgentSize: 500,
+});
 
 export const detectDevice = asyncHandler(async (req, res, next) => { 
     const userAgent = req.headers['user-agent'];
@@ -23,7 +31,7 @@ export const detectDevice = asyncHandler(async (req, res, next) => {
     // Get location from IP
     const geo = geoip.lookup(ipAddress);
 
-    console.log("geo : ",geo,"ipAddress : ",ipAddress)
+    console.log(geoip.lookup('10.243.168.240'));
 
     let deviceId = req.cookies.deviceId || req.headers['x-device-id'];
     if (!deviceId) {

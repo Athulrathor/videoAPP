@@ -8,31 +8,27 @@ import {
   UserPlus,
   Bookmark,
   TrendingUp,
-  Calendar,
   Volume2,
   VolumeX,
   Settings,
-  Check,
-  X,
   Clock,
   Filter,
-  Trash2,
   Edit
 } from 'lucide-react';
 
 
 const NotificationSettings = () => {
   const [emailSettings, setEmailSettings] = useState({
-    recommendations: true,
+    // recommendations: true,
     comments: true,
     subscriptions: true,
     likes: false,
-    followers: true,
-    bookmarks: false,
+    // followers: true,
+    // bookmarks: false,
     trending: true,
     newsletter: true,
-    security: true,
-    promotions: false
+    // security: true,
+    // promotions: false
   });
 
   // const [pushSettings, setPushSettings] = useState({
@@ -45,53 +41,13 @@ const NotificationSettings = () => {
 
   const [globalSettings, setGlobalSettings] = useState({
     emailEnabled: true,
-    // pushEnabled: true,
-    frequency: 'instant', // instant, daily, weekly
+ // instant, daily, weekly
     quietHours: {
       enabled: false,
       start: '22:00',
       end: '08:00'
     }
   });
-
-  // const [emailFrequency, setEmailFrequency] = useState({
-  //   recommendations: 'weekly',
-  //   comments: 'instant',
-  //   subscriptions: 'daily',
-  //   newsletter: 'weekly'
-  // });
-
-  // Mock data for recent notifications/emails
-  // const [recentNotifications] = useState([
-  //   {
-  //     id: 1,
-  //     type: 'comment',
-  //     title: 'New comment on "React Tutorial"',
-  //     time: '2 hours ago',
-  //     read: false
-  //   },
-  //   {
-  //     id: 2,
-  //     type: 'recommendation',
-  //     title: 'Weekly Recommendations',
-  //     time: '1 day ago',
-  //     read: true
-  //   },
-  //   {
-  //     id: 3,
-  //     type: 'subscription',
-  //     title: 'TechChannel posted a new video',
-  //     time: '2 days ago',
-  //     read: true
-  //   },
-  //   {
-  //     id: 4,
-  //     type: 'like',
-  //     title: 'Someone liked your comment',
-  //     time: '3 days ago',
-  //     read: false
-  //   }
-  // ]);
 
   const handleEmailToggle = (setting) => {
     setEmailSettings(prev => ({
@@ -100,26 +56,12 @@ const NotificationSettings = () => {
     }));
   };
 
-  // const handlePushToggle = (setting) => {
-  //   setPushSettings(prev => ({
-  //     ...prev,
-  //     [setting]: !prev[setting]
-  //   }));
-  // };
-
   const handleGlobalToggle = (setting) => {
     setGlobalSettings(prev => ({
       ...prev,
       [setting]: !prev[setting]
     }));
   };
-
-  // const handleFrequencyChange = (type, frequency) => {
-  //   setEmailFrequency(prev => ({
-  //     ...prev,
-  //     [type]: frequency
-  //   }));
-  // };
 
   const handleQuietHoursToggle = () => {
     setGlobalSettings(prev => ({
@@ -160,13 +102,13 @@ const NotificationSettings = () => {
   };
 
   const emailCategories = [
-    {
-      id: 'recommendations',
-      title: 'Recommendation Emails',
-      description: 'Get personalized content based on your interests',
-      icon: TrendingUp,
-      hasFrequency: true
-    },
+    // {
+    //   id: 'recommendations',
+    //   title: 'Recommendation Emails',
+    //   description: 'Get personalized content based on your interests',
+    //   icon: TrendingUp,
+    //   hasFrequency: true
+    // },
     {
       id: 'comments',
       title: 'Comment Notifications',
@@ -188,20 +130,20 @@ const NotificationSettings = () => {
       icon: Heart,
       hasFrequency: false
     },
-    {
-      id: 'followers',
-      title: 'New Followers',
-      description: 'When someone starts following you',
-      icon: UserPlus,
-      hasFrequency: false
-    },
-    {
-      id: 'bookmarks',
-      title: 'Bookmark Reminders',
-      description: 'Reminders about your saved content',
-      icon: Bookmark,
-      hasFrequency: false
-    },
+    // {
+    //   id: 'followers',
+    //   title: 'New Followers',
+    //   description: 'When someone starts following you',
+    //   icon: UserPlus,
+    //   hasFrequency: false
+    // },
+    // {
+    //   id: 'bookmarks',
+    //   title: 'Bookmark Reminders',
+    //   description: 'Reminders about your saved content',
+    //   icon: Bookmark,
+    //   hasFrequency: false
+    // },
     {
       id: 'trending',
       title: 'Trending Content',
@@ -216,35 +158,21 @@ const NotificationSettings = () => {
       icon: Mail,
       hasFrequency: true
     },
-    {
-      id: 'security',
-      title: 'Security Alerts',
-      description: 'security updates and login notifications',
-      icon: Settings,
-      hasFrequency: false
-    },
-    {
-      id: 'promotions',
-      title: 'Promotions',
-      description: 'offers, discounts, and promotional content',
-      icon: TrendingUp,
-      hasFrequency: false
-    }
+    // {
+    //   id: 'security',
+    //   title: 'Security Alerts',
+    //   description: 'security updates and login notifications',
+    //   icon: Settings,
+    //   hasFrequency: false
+    // },
+    // {
+    //   id: 'promotions',
+    //   title: 'Promotions',
+    //   description: 'offers, discounts, and promotional content',
+    //   icon: TrendingUp,
+    //   hasFrequency: false
+    // }
   ];
-
-  // const pushCategories = [
-  //   { id: 'comments', title: 'Comments', icon: MessageSquare },
-  //   { id: 'likes', title: 'Likes', icon: Heart },
-  //   { id: 'followers', title: 'New Followers', icon: UserPlus },
-  //   { id: 'subscriptions', title: 'Subscriptions', icon: Bell },
-  //   { id: 'recommendations', title: 'Recommendations', icon: TrendingUp }
-  // ];
-
-  // const frequencyOptions = [
-  //   { value: 'instant', label: 'Instant' },
-  //   { value: 'daily', label: 'Daily Digest' },
-  //   { value: 'weekly', label: 'Weekly Summary' }
-  // ];
 
   return (
     <div className="max-sm:w-full px-2 max-sm:p-0 sm:px-4 py-2 sm:py-4 bg-white overflow-y-scroll scrollBar max-md:h-[calc(100vh-53px)] h-[calc(100vh-65px)]">

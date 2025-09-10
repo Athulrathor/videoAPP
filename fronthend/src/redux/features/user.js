@@ -149,7 +149,6 @@ export const currentUpdatedUser = createAsyncThunk('current/userDetails', async 
 export const AuthService = {
   loginWithGoogle: async (googleAccessToken) => {
     const response = await axiosInstance.post('users/google', { googleAccessToken });
-    console.log(response);
     return response.data;
   },
 };
@@ -158,7 +157,6 @@ export const getWatchHistory = createAsyncThunk('fetching/userWatchHistory', asy
   try {
     const history = await axiosInstance.get('users/history');
     console.log("user History Fetched Successfully!");
-    console.log(history?.data?.data?.watchHistory)
     return history?.data?.data?.watchHistory;
   } catch (error) {
     console.error(error);
@@ -169,7 +167,7 @@ export const getWatchHistory = createAsyncThunk('fetching/userWatchHistory', asy
 export const addingToWatchHistory = createAsyncThunk('addingContent/userWatchHistory', async (videoId, { rejectWithValue }) => {
   if (!videoId) return rejectWithValue("videoId is missing! \n Please Provide Id");
   try {
-    const added = await axiosInstance.post('users/add/history',{videoId:videoId});
+    await axiosInstance.post('users/add/history',{videoId:videoId});
     console.log("user History added Successfully!");
     return videoId;
   } catch (error) {
@@ -202,11 +200,12 @@ export const clearHistory = createAsyncThunk('clearingContent/userWatchHistory',
 
 export const updatePassword = createAsyncThunk(
   'auth/updatePassword',
-  async (newPassword, { rejectWithValue }) => {
+  async ({newPassword,UserId}, { rejectWithValue }) => {
     try {
-      await axiosInstance.post('users/update-password', { newPassword });
+      await axiosInstance.post('users/update-password', { newPassword,UserId });
+      return true;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message || false);
     }
   }
 );
@@ -240,7 +239,6 @@ export const activeSessions = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const activeUser = await axiosInstance.get("users/active-sessions");
-      console.log(activeUser?.data.activeSessions);
       return activeUser?.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -274,11 +272,12 @@ export const logoutDevice = createAsyncThunk(
 
 export const verifyPassword = createAsyncThunk('verify/password', async (currentPassword, { rejectWithValue }) => {
   if (!currentPassword) return rejectWithValue('Current password is missing!');
-
+  console.log(currentPassword)
   try {
     
-    const response = await axiosInstance.get('user/password-check', currentPassword);
-    console.log(response);
+    const response = await axiosInstance.get('users/password-check', {
+      params: {currentPassword}
+    });
     return response?.data?.data;
 
   } catch (error) {

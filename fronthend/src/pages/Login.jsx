@@ -25,11 +25,12 @@ const Login = () => {
       await dispatch(fetchLoginUser({ email: email, password: password }));
         Navigate("/");
         dispatch(setSideActive("home"));
-
+      toast.success('Google login successful');
         setEmail("");
         setPassword("");
     } catch (error) {
       console.error("Unexpected error:", error);
+      toast.error('Google login failed');
     }
   };
 

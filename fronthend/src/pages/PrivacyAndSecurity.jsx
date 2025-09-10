@@ -19,13 +19,15 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearHistory, getWatchHistory, removingToWatchHistory, setWatchHistoryPaused, verifyPassword } from '../redux/features/user';
+import { activeSessions, clearHistory, getWatchHistory, removingToWatchHistory, setWatchHistoryPaused, updatePassword, verifyPassword } from '../redux/features/user';
+import { toast } from 'react-toastify';
+import { Tooltip } from '@mui/material';
 
 const PrivacyAndSecurity = () => {
 
   const dispatch = useDispatch();
 
-  const { watchHistory, activeSession, watchHistoryPaused } = useSelector((state) => state.user);
+  const {user, watchHistory, activeSession } = useSelector((state) => state.user);
 
   const [showPassword, setShowPassword] = useState({
     current: false,
@@ -43,16 +45,20 @@ const PrivacyAndSecurity = () => {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [toggleNew, setToggleNew] = useState(false);
 
   const [step, SetStep] = useState(1);
 
-  const [activeDevices] = useState([...activeSession]);
+  // const [activeDevices] = useState();
+
+  const activeDevices = activeSession;
 
   useEffect(() => {
     dispatch(getWatchHistory());
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(activeSessions())
+  },[dispatch])
 
   const validatePassword = useCallback((password) => {
     const minLength = 8;
@@ -79,6 +85,14 @@ const PrivacyAndSecurity = () => {
     return null;
   }, []);
 
+  const handleNext = () => {
+    SetStep(prev => prev + 1);
+  }
+
+  // const handlePrev = () => {
+  //   SetStep(prev => prev - 1);
+  // }
+
   const handlePasswordChange = useCallback((e) => {
     const { name, value } = e.target;
     setPasswordData(prev => ({
@@ -101,8 +115,6 @@ const PrivacyAndSecurity = () => {
     }));
   }, []);
 
-  const handleNext = () => {}
-
   const handleWatchHistoryPauseBtn = async () => {
     setWatchHistoryPause(!watchHistoryPause);
 
@@ -113,10 +125,16 @@ const PrivacyAndSecurity = () => {
     }
   }
 
-  const handleValidatePassword = async () => {
+  const handleValidatePassword = async (e) => {
+    e.preventDefault();
     await new Promise(resolve => setTimeout(resolve, 2000));
-    await dispatch(verifyPassword(passwordData.currentPassword));
-    setToggleNew(true);
+    const response = await dispatch(verifyPassword(passwordData.currentPassword));
+    if (response.payload) {
+      handleNext();
+    } else {
+      toast.error('Invalid Password!');
+    }
+    // setToggleNew(true);
   }
 
   const validateForm = useCallback(() => {
@@ -148,7 +166,7 @@ const PrivacyAndSecurity = () => {
     return newErrors;
   }, [passwordData, validatePassword]);
 
-  const handleSubmit = useCallback(async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formErrors = validateForm();
@@ -161,7 +179,8 @@ const PrivacyAndSecurity = () => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-
+      const response = await dispatch(updatePassword({newPassword:passwordData.newPassword,UserId:user._id}));
+      if (response.payload !== true) return toast.error("Password update failed!");
       console.log('Password updated successfully');
 
       // Reset form
@@ -170,15 +189,16 @@ const PrivacyAndSecurity = () => {
         newPassword: '',
         confirmPassword: ''
       });
-      setIsEditing(false);
-      alert('Password updated successfully!');
+      // setIsEditing(false);
+      SetStep(1);
+      toast.success('Password updated successfully!');
     } catch (error) {
       console.error('Error updating password:', error);
       setErrors({ submit: 'Failed to update password. Please try again.' });
     } finally {
       setIsLoading(false);
     }
-  }, [passwordData, validateForm]);
+  };
 
   const handleCancel = useCallback(() => {
     setPasswordData({
@@ -187,7 +207,8 @@ const PrivacyAndSecurity = () => {
       confirmPassword: ''
     });
     setErrors({});
-    setIsEditing(false);
+    // setIsEditing(false);
+    SetStep(1);
     setShowPassword({
       currentPassword: false,
       newPassword: false,
@@ -308,7 +329,8 @@ const PrivacyAndSecurity = () => {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setIsEditing(true)}
+                      // onClick={() => setIsEditing(true)}
+                      onClick={handleNext}
                       className=" ml-2 border px-3 py-2 border-gray-300 rounded-lg hover:bg-gray-400 text-black flex items-center hover:text-blue-600 transition-colors"
                     >
                       Change
@@ -317,9 +339,9 @@ const PrivacyAndSecurity = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form className="space-y-4">
                 {/* Current Password */}
-                {step === 2 && (
+                {step === 3 && (
                   <div>
                     <div className=''>
                       {/* New Password */}
@@ -450,8 +472,8 @@ const PrivacyAndSecurity = () => {
                           Cancel
                         </button>
                         <button
-                          type="submit"
                           disabled={isLoading}
+                          onClick={handleSubmit}
                           className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                         >
                           {isLoading ? (
@@ -470,7 +492,7 @@ const PrivacyAndSecurity = () => {
                     </div>
                   </div>
                 )}
-                {step === 3 && (
+                {step === 2 && (
                   <div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -499,7 +521,7 @@ const PrivacyAndSecurity = () => {
                             )}
                           </button>
                         </div>
-                        <button onClick={handleValidatePassword} className='flex justify-center hover:bg-gray-50 active:bg-gray-100 active:opacity-60 items-center p-2 aspect-square'>
+                        <button onClick={(e) => handleValidatePassword(e)} className='flex justify-center hover:bg-gray-50 active:bg-gray-100 active:opacity-60 items-center p-2 aspect-square'>
                           <ChevronRight />
                         </button>
                       </div>
@@ -680,7 +702,8 @@ const PrivacyAndSecurity = () => {
                   </div>
                 ))}
               </div>
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
+              <Tooltip title="Not available right now!">
+              <div className="opacity-50 mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
                 <h3 className="font-medium text-blue-800 mb-2 text-base max-[400px]:text-xs">Privacy Controls</h3>
                 <p className="text-blue-700 text-sm mb-3 max-[400px]:text-xs">
                   Control how your watch history is used for recommendations and personalization.
@@ -694,8 +717,10 @@ const PrivacyAndSecurity = () => {
                     <input type="checkbox" className="mr-2" defaultChecked />
                     <span className="text-sm text-blue-800 max-[400px]:text-xs">Include in search suggestions</span>
                   </label>
+                  </div>
+              
                 </div>
-              </div>
+              </Tooltip>
             </div>
           </div>
         </div>

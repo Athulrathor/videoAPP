@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import favicon from "../assets/favicon.png";
 
 const OtpVerificationPage = () => {
+
+    const { user } = useSelector(state => state.user);
+
     const dispatch = useDispatch();
     const Navigate = useNavigate();
 
@@ -123,7 +126,7 @@ const OtpVerificationPage = () => {
         setIsLoading(true);
         try {
             await new Promise(resolve => setTimeout(resolve, 2000));
-            dispatch(updatePassword(passwordData.newPassword));
+            dispatch(updatePassword({newPassword:passwordData.newPassword,UserId:user._id}));
             console.log('Password updated successfully');
             Navigate('/login');
             setPasswordData({

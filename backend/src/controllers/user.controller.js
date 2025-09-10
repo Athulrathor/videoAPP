@@ -777,15 +777,13 @@ const generateMailVerify = asyncHandler(async (req, res) => {
 
 const updatePassword = asyncHandler(async (req, res) => {
   try {
-    const { newPassword } = req.body;
+    const { newPassword,UserId } = req.body;
 
-    const user = await User.findById(req.user?._id);
+    if (!newPassword) throw new ApiError(401, "New password is missing!");
 
-    // const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+    const user = await User.findById(UserId);
 
-    // if (!isPasswordCorrect) {
-    //   throw new ApiError(400, "Invalid password!");
-    // }
+    if (!user) throw new ApiError(401, "User not found!");
 
     user.password = newPassword;
 
@@ -795,6 +793,7 @@ const updatePassword = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, {}, "Password changed successfully!"));
   } catch (error) {
+    console.error(error)
     throw new ApiError(500, "Error in updating password!");
   }
 });
@@ -862,8 +861,7 @@ const logoutDevice = asyncHandler(async (req, res) => {
 });
 
 const verifypassword = asyncHandler(async (req, res) => {
-  const { currentPassword } = req.body;
-
+  const { currentPassword } = req.query;
   try {
     const check = await User.findById(req.user._id);
 
@@ -871,8 +869,9 @@ const verifypassword = asyncHandler(async (req, res) => {
 
     const result = await check.isPasswordCorrect(currentPassword);
 
-    res.json(ApiResponse(200, result, "check successfully fetched!"));
+    res.json(new ApiResponse(200, result, "check successfully fetched!"));
   } catch (error) {
+    console.error(error)
     res.status(500).json({ message: 'Error verifying password', error: error.message });
   }
 })
