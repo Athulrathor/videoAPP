@@ -7,7 +7,7 @@ import Accessibility from '../pages/Accessibility';
 import HelpAndSupport from '../pages/HelpAndSupport';
 import { useSelector } from 'react-redux';
 
-const SettingMain = ({appearance}) => {
+const SettingMain = () => {
 
   const { settingsActive } = useSelector((state) => state.user);
 
@@ -16,7 +16,7 @@ const SettingMain = ({appearance}) => {
       {(settingsActive === 'Accounts' ? <AccountSettings /> : '') ||
         (settingsActive === 'Privacy & Security' ? <PrivacyAndSecurity /> : '') ||
         (settingsActive === 'Notification Settings' ? <NotificationSettings /> : '') ||
-        (settingsActive === 'Appearance' ? <Appearance appearance={appearance} /> : '') ||
+        (settingsActive === 'Appearance' ? <Appearance /> : '') ||
         (settingsActive === 'Accessibility' ? <Accessibility /> : '') ||
         (settingsActive === 'Help & Support' ? <HelpAndSupport /> : '')}
     </div>

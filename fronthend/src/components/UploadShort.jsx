@@ -12,8 +12,10 @@ import {
   Clock,
 } from "lucide-react";
 import { axiosInstance } from "../libs/axios";
+// import { useAppearance } from '../hooks/appearances';
 
 const CircularProgressBar = ({ percentage, size = 120, strokeWidth = 8 }) => {
+  // const { appearanceSettings } = useAppearance();
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -31,8 +33,8 @@ const CircularProgressBar = ({ percentage, size = 120, strokeWidth = 8 }) => {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e5e7eb"
           strokeWidth={strokeWidth}
+          style={{ stroke: 'var(--color-border)' }}
         />
         {/* Progress circle */}
         <circle
@@ -40,17 +42,27 @@ const CircularProgressBar = ({ percentage, size = 120, strokeWidth = 8 }) => {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#3b82f6"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           className="transition-all duration-300 ease-in-out"
+          style={{
+            stroke: 'var(--accent-color)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
         />
       </svg>
       {/* Percentage text */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-2xl font-bold text-gray-800">
+        <span
+          className="text-2xl font-bold"
+          style={{
+            color: 'var(--color-text-primary)',
+            fontSize: 'var(--font-size-2xl)',
+            fontFamily: 'var(--font-family)'
+          }}
+        >
           {Math.round(percentage)}%
         </span>
       </div>
@@ -59,6 +71,8 @@ const CircularProgressBar = ({ percentage, size = 120, strokeWidth = 8 }) => {
 };
 
 const ShortUploadContainer = (props) => {
+  // const { appearanceSettings } = useAppearance();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -67,19 +81,15 @@ const ShortUploadContainer = (props) => {
   });
 
   const [selectedShort, setSelectedShort] = useState(null);
-  // const [selectedThumbnail, setSelectedThumbnail] = useState(null);
   const [shortDragging, setShortDragging] = useState(false);
-  // const [thumbnailDragging, setThumbnailDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState({});
   const [shortPreviewUrl, setShortPreviewUrl] = useState("");
-  // const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState("");
 
   const { toggleShortUploading, setToggleShortUploading } = props;
 
   const shortInputRef = useRef(null);
-  // const thumbnailInputRef = useRef(null);
 
   const videoFormats = [
     "video/mp4",
@@ -88,11 +98,10 @@ const ShortUploadContainer = (props) => {
     "video/wmv",
     "video/webm",
   ];
-  // const imageFormats = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-  const maxShortSize = 150 * 1024 * 1024; // 100MB for shorts
-  // const maxImageSize = 5 * 1024 * 1024; // 5MB
-  const maxShortDuration = 180; // 60 seconds for shorts
+  const maxShortSize = 150 * 1024 * 1024; // 150MB for shorts
+  const maxShortDuration = 180; // 180 seconds for shorts
 
+  // All your existing handler functions remain the same...
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -100,7 +109,6 @@ const ShortUploadContainer = (props) => {
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -124,10 +132,6 @@ const ShortUploadContainer = (props) => {
     if (!selectedShort) {
       newErrors.short = "Short video file is required";
     }
-
-    // if (!selectedThumbnail) {
-    //   newErrors.thumbnail = "Thumbnail image is required";
-    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -170,7 +174,6 @@ const ShortUploadContainer = (props) => {
       return;
     }
 
-    // Check video duration
     const duration = await checkVideoDuration(file);
     if (duration && duration > maxShortDuration) {
       setErrors((prev) => ({
@@ -186,51 +189,23 @@ const ShortUploadContainer = (props) => {
     setShortPreviewUrl(url);
   };
 
-  // const handleThumbnailSelect = (file) => {
-  //   setErrors((prev) => ({ ...prev, thumbnail: "" }));
-
-  //   if (!imageFormats.includes(file.type)) {
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       thumbnail: "Please select a valid image file (JPEG, PNG, WebP)",
-  //     }));
-  //     return;
-  //   }
-
-  //   if (file.size > maxImageSize) {
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       thumbnail: "Thumbnail must be less than 5MB",
-  //     }));
-  //     return;
-  //   }
-
-  //   setSelectedThumbnail(file);
-  //   const url = URL.createObjectURL(file);
-  //   setThumbnailPreviewUrl(url);
-  // };
-
   const handleDragOver = (e, type) => {
     e.preventDefault();
     if (type === "short") setShortDragging(true);
-    // else setThumbnailDragging(true);
   };
 
   const handleDragLeave = (e, type) => {
     e.preventDefault();
     if (type === "short") setShortDragging(false);
-    // else setThumbnailDragging(false);
   };
 
   const handleDrop = (e, type) => {
     e.preventDefault();
     if (type === "short") setShortDragging(false);
-    // else setThumbnailDragging(false);
 
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       if (type === "short") handleShortSelect(files[0]);
-      // else handleThumbnailSelect(files[0]);
     }
   };
 
@@ -255,7 +230,6 @@ const ShortUploadContainer = (props) => {
     setUploadProgress(0);
 
     try {
-
       const data = new FormData();
       data.append("title", formData.title);
       data.append("description", formData.description);
@@ -263,7 +237,6 @@ const ShortUploadContainer = (props) => {
 
       if (formData.shortFile) data.append("shortFile", formData.shortFile);
 
-      // Make API call
       const apiPromise = await axiosInstance.post("short/publish-short", data, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (progressEvent) => {
@@ -271,16 +244,14 @@ const ShortUploadContainer = (props) => {
             let percentCompleted = Math.round(
               (progressEvent.loaded * 100) / progressEvent.total
             );
-            // Don't show 100% until API responds
             if (percentCompleted >= 99) percentCompleted = 99;
             setUploadProgress(percentCompleted);
           }
         },
       });
 
-            const response = await apiPromise;
-
-            console.log("Upload complete!", response);
+      await apiPromise;
+      setUploadProgress(100);
 
       setTimeout(() => {
         setIsUploading(false);
@@ -289,8 +260,7 @@ const ShortUploadContainer = (props) => {
           title: "",
           description: "",
           isPublished: false,
-          videoFile: "",
-          thumbnail: "",
+          shortFile: null,
         });
         setToggleShortUploading(true);
       }, 1000);
@@ -313,60 +283,125 @@ const ShortUploadContainer = (props) => {
 
   return (
     <div
-      className={`flex justify-center items-center absolute inset-0 z-10 ${
-        toggleShortUploading === true ? "hidden" : ""
-      }`}
+      className={`flex justify-center items-center absolute inset-0 z-10 transition-all ${toggleShortUploading === true ? "hidden" : ""
+        }`}
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(4px)',
+        transitionDuration: 'var(--animation-duration)'
+      }}
     >
       {isUploading === false ? (
         <form
           onSubmit={handleSubmitWithSimulation}
-          className="max-w-4xl max-md:w-full mx-auto max-md:m-0 p-6 bg-white rounded-lg shadow-lg"
+          className="max-w-4xl max-md:w-full mx-auto max-md:m-0 p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto scrollBar transition-all"
+          style={{
+            backgroundColor: 'var(--color-bg-primary)',
+            borderRadius: 'var(--spacing-unit)',
+            padding: 'var(--component-padding)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
         >
-          <div className="text-center flex justify-between items-center">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          {/* Header */}
+          <div className="text-center flex justify-between items-center mb-4">
+            <h2
+              className="text-3xl font-bold mb-2"
+              style={{
+                color: 'var(--color-text-primary)',
+                fontSize: 'var(--font-size-3xl)',
+                fontFamily: 'var(--font-family)'
+              }}
+            >
               Upload Short Video
             </h2>
             <div>
               <button
                 onClick={() => setToggleShortUploading(true)}
-                className="p-3 rounded-full bg-gray-300 hover:bg-gray-400"
+                className="p-3 rounded-full transition-all"
+                style={{
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                }}
               >
-                <X />
+                <X style={{ color: 'var(--color-text-primary)' }} />
               </button>
             </div>
           </div>
 
-          <div className="">
+          <div className="space-y-6" style={{ gap: 'var(--section-gap)' }}>
             {/* Title and Published Status */}
-            <div className="grid grid-cols-1 max-md:w-full max-md:-full max-md:gap-0 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 max-md:w-full max-md:gap-4 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title <span className="text-red-500">*</span>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
+                  Title <span style={{ color: 'var(--color-error)' }}>*</span>
                 </label>
                 <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.title ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-all"
                   placeholder="Enter short video title"
                   maxLength={100}
+                  style={{
+                    backgroundColor: 'var(--color-bg-primary)',
+                    borderColor: errors.title ? 'var(--color-error)' : 'var(--color-border)',
+                    color: 'var(--color-text-primary)',
+                    fontFamily: 'var(--font-family)',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--accent-color)';
+                    e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = errors.title ? 'var(--color-error)' : 'var(--color-border)';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
                 {errors.title && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p
+                    className="mt-1 text-sm flex items-center"
+                    style={{
+                      color: 'var(--color-error)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.title}
                   </p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">
+                <p
+                  className="mt-1 text-sm"
+                  style={{
+                    color: 'var(--color-text-secondary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
                   {formData.title.length}/100 characters
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
                   Published Status
                 </label>
                 <div className="flex items-center space-x-3 mt-3">
@@ -375,54 +410,87 @@ const ShortUploadContainer = (props) => {
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
-                        published: !prev.published,
+                        isPublished: !prev.isPublished,
                       }))
                     }
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      formData.published ? "bg-blue-600" : "bg-gray-200"
-                    }`}
+                    className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                    style={{
+                      backgroundColor: formData.isPublished ? 'var(--accent-color)' : 'var(--color-border)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        formData.published ? "translate-x-6" : "translate-x-1"
-                      }`}
+                      className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                      style={{
+                        transform: formData.isPublished ? 'translateX(1.5rem)' : 'translateX(0.25rem)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
                     />
                   </button>
-                  <span className="flex items-center text-sm text-gray-700">
-                    {formData.published ? (
+                  <span
+                    className="flex items-center text-sm"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
+                    {formData.isPublished ? (
                       <Eye className="w-4 h-4 mr-1" />
                     ) : (
                       <EyeOff className="w-4 h-4 mr-1" />
                     )}
-                    {formData.published ? "Published" : "Draft"}
+                    {formData.isPublished ? "Published" : "Draft"}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Short Video and Thumbnail Upload */}
+            {/* Short Video and Preview Upload */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Short Video Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Short Video <span className="text-red-500">*</span>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
+                  Short Video <span style={{ color: 'var(--color-error)' }}>*</span>
                 </label>
                 <div
-                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 ${
-                    shortDragging
-                      ? "border-blue-500 bg-blue-50"
-                      : selectedShort
-                      ? "border-green-500 bg-green-50"
-                      : errors.short
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 cursor-pointer`}
                   onDragOver={(e) => handleDragOver(e, "short")}
                   onDragLeave={(e) => handleDragLeave(e, "short")}
                   onDrop={(e) => handleDrop(e, "short")}
-                  onClick={() =>
-                    !selectedShort && shortInputRef.current?.click()
-                  }
+                  onClick={() => !selectedShort && shortInputRef.current?.click()}
+                  style={{
+                    borderColor: shortDragging
+                      ? 'var(--accent-color)'
+                      : selectedShort
+                        ? 'var(--color-success)'
+                        : errors.short
+                          ? 'var(--color-error)'
+                          : 'var(--color-border)',
+                    backgroundColor: shortDragging
+                      ? 'var(--color-accent-bg)'
+                      : selectedShort
+                        ? 'rgba(16, 185, 129, 0.1)'
+                        : errors.short
+                          ? 'rgba(239, 68, 68, 0.1)'
+                          : 'transparent',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selectedShort && !shortDragging) {
+                      e.target.style.borderColor = 'var(--color-text-secondary)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selectedShort && !shortDragging) {
+                      e.target.style.borderColor = errors.short ? 'var(--color-error)' : 'var(--color-border)';
+                    }
+                  }}
                 >
                   <input
                     ref={shortInputRef}
@@ -436,19 +504,43 @@ const ShortUploadContainer = (props) => {
                     <div className="space-y-3">
                       <div className="flex justify-center">
                         <div className="relative">
-                          <FileVideo className="w-10 h-10 text-gray-400" />
-                          <Clock className="w-4 h-4 text-blue-500 absolute -top-1 -right-1" />
+                          <FileVideo
+                            className="w-10 h-10"
+                            style={{ color: 'var(--color-text-secondary)' }}
+                          />
+                          <Clock
+                            className="w-4 h-4 absolute -top-1 -right-1"
+                            style={{ color: 'var(--accent-color)' }}
+                          />
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p
+                          className="text-sm font-medium"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
                           Drop short video or click to browse
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p
+                          className="text-xs mt-1"
+                          style={{
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--font-size-xs)'
+                          }}
+                        >
                           MP4, MOV, AVI, WMV, WebM
                         </p>
-                        <p className="text-xs text-blue-600 font-medium mt-1">
-                          Max 60 seconds • Max 100MB
+                        <p
+                          className="text-xs font-medium mt-1"
+                          style={{
+                            color: 'var(--accent-color)',
+                            fontSize: 'var(--font-size-xs)'
+                          }}
+                        >
+                          Max 180 seconds • Max 150MB
                         </p>
                       </div>
                     </div>
@@ -456,15 +548,33 @@ const ShortUploadContainer = (props) => {
                     <div className="space-y-3">
                       <div className="flex justify-center">
                         <div className="relative">
-                          <FileVideo className="w-10 h-10 text-green-500" />
-                          <Clock className="w-4 h-4 text-green-600 absolute -top-1 -right-1" />
+                          <FileVideo
+                            className="w-10 h-10"
+                            style={{ color: 'var(--color-success)' }}
+                          />
+                          <Clock
+                            className="w-4 h-4 absolute -top-1 -right-1"
+                            style={{ color: 'var(--color-success)' }}
+                          />
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p
+                          className="text-sm font-medium"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
                           {selectedShort.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p
+                          className="text-xs"
+                          style={{
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--font-size-xs)'
+                          }}
+                        >
                           {formatFileSize(selectedShort.size)}
                         </p>
                       </div>
@@ -478,14 +588,33 @@ const ShortUploadContainer = (props) => {
                         e.stopPropagation();
                         handleRemoveShort();
                       }}
-                      className="absolute top-2 right-2 p-1 rounded-full bg-red-100 hover:bg-red-200 transition-colors"
+                      className="absolute top-2 right-2 p-1 rounded-full transition-colors"
+                      style={{
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                      }}
                     >
-                      <X className="w-4 h-4 text-red-600" />
+                      <X
+                        className="w-4 h-4"
+                        style={{ color: 'var(--color-error)' }}
+                      />
                     </button>
                   )}
                 </div>
                 {errors.short && (
-                  <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <p
+                    className="mt-2 text-sm flex items-center"
+                    style={{
+                      color: 'var(--color-error)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.short}
                   </p>
@@ -495,134 +624,86 @@ const ShortUploadContainer = (props) => {
               {/* Short Video Preview */}
               {shortPreviewUrl && (
                 <div>
-                  <h3 className="text-lg font-medium text-gray-700 mb-2">
+                  <h3
+                    className="text-lg font-medium mb-2"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-lg)'
+                    }}
+                  >
                     Short Video Preview
                   </h3>
                   <div className="flex justify-center">
                     <video
                       src={shortPreviewUrl}
                       controls
-                      className="max-w-sm h-96 rounded-lg border border-gray-300 object-cover"
-                      style={{ aspectRatio: "9/16" }}
+                      className="max-w-sm h-96 rounded-lg border object-cover"
+                      style={{
+                        aspectRatio: "9/16",
+                        borderColor: 'var(--color-border)'
+                      }}
                     >
                       Your browser does not support the video tag.
                     </video>
                   </div>
                 </div>
               )}
-
-              {/* Thumbnail Upload */}
-              {/* <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Thumbnail Image <span className="text-red-500">*</span>
-              </label>
-              <div
-                className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 ${
-                  thumbnailDragging
-                    ? "border-blue-500 bg-blue-50"
-                    : selectedThumbnail
-                    ? "border-green-500 bg-green-50"
-                    : errors.thumbnail
-                    ? "border-red-500 bg-red-50"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
-                onDragOver={(e) => handleDragOver(e, "thumbnail")}
-                onDragLeave={(e) => handleDragLeave(e, "thumbnail")}
-                onDrop={(e) => handleDrop(e, "thumbnail")}
-                onClick={() =>
-                  !selectedThumbnail && thumbnailInputRef.current?.click()
-                }
-              >
-                <input
-                  ref={thumbnailInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleThumbnailInputChange}
-                  className="hidden"
-                />
-
-                {!selectedThumbnail ? (
-                  <div className="space-y-3">
-                    <div className="flex justify-center">
-                      <Image className="w-10 h-10 text-gray-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">
-                        Drop thumbnail or click to browse
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        JPEG, PNG, WebP (Max 5MB)
-                      </p>
-                      <p className="text-xs text-blue-600 font-medium mt-1">
-                        Recommended: 1280x720 (16:9)
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex justify-center">
-                      <img
-                        src={thumbnailPreviewUrl}
-                        alt="Thumbnail preview"
-                        className="w-20 h-20 object-cover rounded-md border-2 border-green-200"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">
-                        {selectedThumbnail.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatFileSize(selectedThumbnail.size)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {selectedThumbnail && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveThumbnail();
-                    }}
-                    className="absolute top-2 right-2 p-1 rounded-full bg-red-100 hover:bg-red-200 transition-colors"
-                  >
-                    <X className="w-4 h-4 text-red-600" />
-                  </button>
-                )}
-              </div>
-              {errors.thumbnail && (
-                <p className="mt-2 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="w-4 h-4 mr-1" />
-                  {errors.thumbnail}
-                </p>
-              )}
-            </div> */}
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description <span className="text-red-500">*</span>
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                Description <span style={{ color: 'var(--color-error)' }}>*</span>
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={4}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.description ? "border-red-500" : "border-gray-300"
-                }`}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-all"
                 placeholder="Enter short video description"
                 maxLength={500}
+                style={{
+                  backgroundColor: 'var(--color-bg-primary)',
+                  borderColor: errors.description ? 'var(--color-error)' : 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--accent-color)';
+                  e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = errors.description ? 'var(--color-error)' : 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
               {errors.description && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p
+                  className="mt-1 text-sm flex items-center"
+                  style={{
+                    color: 'var(--color-error)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.description}
                 </p>
               )}
-              <p className="mt-1 text-sm text-gray-500">
+              <p
+                className="mt-1 text-sm"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
                 {formData.description.length}/500 characters
               </p>
             </div>
@@ -631,18 +712,36 @@ const ShortUploadContainer = (props) => {
             {isUploading && (
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span
+                    className="text-sm font-medium"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     Uploading short video...
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span
+                    className="text-sm"
+                    style={{
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     {uploadProgress}%
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="w-full rounded-full h-2"
+                  style={{ backgroundColor: 'var(--color-border)' }}
+                >
                   <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${uploadProgress}%`,
+                      backgroundColor: 'var(--accent-color)'
+                    }}
+                  />
                 </div>
               </div>
             )}
@@ -652,11 +751,28 @@ const ShortUploadContainer = (props) => {
               <button
                 type="submit"
                 disabled={isUploading}
-                className={`px-8 mt-2 py-3 rounded-md font-medium flex items-center space-x-2 transition-colors ${
-                  isUploading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
+                className={`px-8 mt-2 py-3 rounded-md font-medium flex items-center space-x-2 transition-all ${isUploading ? "cursor-not-allowed" : ""
+                  }`}
+                style={{
+                  backgroundColor: isUploading ? 'var(--color-text-secondary)' : 'var(--accent-color)',
+                  color: 'white',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  opacity: isUploading ? '0.6' : '1',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isUploading) {
+                    e.target.style.opacity = '0.9';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isUploading) {
+                    e.target.style.opacity = '1';
+                    e.target.style.transform = 'translateY(0)';
+                  }
+                }}
               >
                 <Save className="w-5 h-5" />
                 <span>{isUploading ? "Uploading..." : "Publish Short"}</span>
@@ -665,8 +781,17 @@ const ShortUploadContainer = (props) => {
 
             {/* Success Message */}
             {uploadProgress === 100 && !isUploading && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-md">
-                <div className="flex items-center justify-center space-x-2 text-green-700">
+              <div
+                className="p-4 border rounded-md"
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                  borderColor: 'rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                <div
+                  className="flex items-center justify-center space-x-2"
+                  style={{ color: 'var(--color-success)' }}
+                >
                   <Play className="w-5 h-5" />
                   <span className="font-medium">
                     Short video published successfully!
@@ -677,25 +802,50 @@ const ShortUploadContainer = (props) => {
           </div>
         </form>
       ) : (
-        <div className="flex flex-col bg-white p-6 items-center justify-center space-y-6">
+        <div
+          className="flex flex-col p-6 items-center justify-center space-y-6 rounded-lg"
+          style={{
+            backgroundColor: 'var(--color-bg-primary)',
+            borderRadius: 'var(--spacing-unit)',
+            padding: 'var(--component-padding)'
+          }}
+        >
           <CircularProgressBar percentage={uploadProgress} />
 
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-              {uploadProgress < 100 ? "Sending..." : "Success!"}
+            <h3
+              className="text-xl font-semibold mb-2"
+              style={{
+                color: 'var(--color-text-primary)',
+                fontSize: 'var(--font-size-xl)',
+                fontFamily: 'var(--font-family)'
+              }}
+            >
+              {uploadProgress < 100 ? "Uploading..." : "Success!"}
             </h3>
-            <p className="text-gray-600">
+            <p
+              style={{
+                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--font-size-base)'
+              }}
+            >
               {uploadProgress < 100
-                ? "Please wait while we process your message"
-                : "Your message has been sent successfully!"}
+                ? "Please wait while we process your short video"
+                : "Your short video has been uploaded successfully!"}
             </p>
           </div>
 
           {uploadProgress < 100 && (
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="w-full rounded-full h-2"
+              style={{ backgroundColor: 'var(--color-border)' }}
+            >
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${uploadProgress}%` }}
+                className="h-2 rounded-full transition-all duration-300"
+                style={{
+                  width: `${uploadProgress}%`,
+                  backgroundColor: 'var(--accent-color)'
+                }}
               />
             </div>
           )}

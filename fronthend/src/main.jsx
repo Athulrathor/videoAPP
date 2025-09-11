@@ -9,12 +9,14 @@ import { persistor } from "./redux/store.js";
 import VidTubeLoading from './components/LoadingScreen/VidTubeLoading.jsx';
 import { GoogleAuthWrapper } from "./components/GoogleAuthProvider.jsx";
 // import { GoogleOAuthProvider } from "@react-oauth/google";
+import { AppearanceProvider } from "./hooks/appearances.jsx";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <StrictMode>
     <GoogleAuthWrapper>
+      <AppearanceProvider>
       <Provider store={store}>
         <PersistGate
           loading={
@@ -26,7 +28,8 @@ root.render(
         >
           <App />
         </PersistGate>
-      </Provider>
+        </Provider>
+        </AppearanceProvider>
     </GoogleAuthWrapper>
   </StrictMode>
 );

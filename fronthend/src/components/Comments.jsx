@@ -1,26 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { ThumbsUp, ThumbsDown, MoreVertical, Heart, X, User } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAddCommentReplies, fetchAddShortComment, fetchAddVideoComment, fetchCommentReplies, fetchShortComment, fetchVideoComment } from '../redux/features/comment';
+import { fetchAddCommentReplies, fetchAddShortComment, fetchAddVideoComment, fetchCommentReplies, fetchVideoComment } from '../redux/features/comment';
 import { fetchLikeToggleComment } from '../redux/features/likes';
 import { isCommentLiked } from '../redux/features/likes';
+// import { useAppearance } from '../hooks/appearances';
 
-const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseComment, toggle={shortComments:true,setShowComment:null} }) => {
+const Comments = ({
+    whichContent,
+    contentId,
+    minimiseComment = true,
+    setMinimiseComment,
+    toggle = { shortComments: true, setShowComment: null }
+}) => {
+    // const { appearanceSettings } = useAppearance();
     const dispatch = useDispatch();
 
-    const { videosComments, repliesOnComment,shortComments } = useSelector(state => state.comments);
+    const { videosComments, repliesOnComment, shortComments } = useSelector(state => state.comments);
     const { commentLiked } = useSelector(state => state.likes);
     const { user } = useSelector(state => state.user);
-    
-    const [localCommentData, setLocalCommentData] = useState({});
 
+    const [localCommentData, setLocalCommentData] = useState({});
     const [newComment, setNewComment] = useState('');
     const [showCommentActions, setShowCommentActions] = useState(false);
     const [replyingTo, setReplyingTo] = useState(null);
     const [showRepliesFor, setShowRepliesFor] = useState(null);
-
     const [commentStatus, setCommentStatus] = useState({});
 
+    // All your existing useEffects and handlers remain the same...
     useEffect(() => {
         if (videosComments && videosComments?.length > 0) {
             const initialData = {};
@@ -46,19 +53,19 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
             });
             setLocalCommentData(initialData);
         }
-            
-    }, [videosComments,shortComments]);
+    }, [videosComments, shortComments]);
 
     useEffect(() => {
         if (contentId && whichContent === "videos") {
             dispatch(fetchVideoComment(contentId));
         }
     }, [contentId, dispatch, whichContent]);
-    // Handle functions
+
+    // All your existing handlers remain the same, but I'll show a few key ones...
     const handleLikeToggleComment = (id) => {
         const currentLiked = localCommentData[id]?.isLiked || commentStatus[id]?.like || false;
         const currentLikes = localCommentData[id]?.totalLikes || 0;
-        
+
         // Optimistic UI update
         setLocalCommentData(prev => ({
             ...prev,
@@ -77,11 +84,9 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
             }
         }));
 
-        // API call
         dispatch(fetchLikeToggleComment(id))
             .unwrap()
             .then((response) => {
-                // Update with actual server response if available
                 if (response?.totalLikes !== undefined) {
                     setLocalCommentData(prev => ({
                         ...prev,
@@ -94,7 +99,6 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                 }
             })
             .catch((error) => {
-                // Revert optimistic update on error
                 setLocalCommentData(prev => ({
                     ...prev,
                     [id]: {
@@ -114,17 +118,6 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
             });
     };
 
-    const handleDisLike = (id) => {
-        // Fixed: Similar structure for dislike
-        setCommentStatus((prev) => ({
-            ...prev,
-            [id]: {
-                ...prev[id],
-                dislike: !prev[id]?.dislike
-            }
-        }));
-    };
-
     const handleAddComment = () => {
         if (whichContent === "videos") {
             if (newComment.trim()) {
@@ -133,8 +126,6 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                     .then(() => {
                         setNewComment('');
                         setShowCommentActions(false);
-                        // Refresh comments to get updated list
-                        // dispatch(fetchVideoComment(contentId));
                     })
                     .catch((error) => {
                         console.error('Failed to add comment:', error);
@@ -147,8 +138,6 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                     .then(() => {
                         setNewComment('');
                         setShowCommentActions(false);
-                        // Refresh comments to get updated list
-                        // dispatch(fetchShortComment(contentId));
                     })
                     .catch((error) => {
                         console.error('Failed to add comment:', error);
@@ -157,9 +146,9 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
         }
     };
 
+    // Other handlers remain the same...
     const handleAddCommentReplies = (commentId, replied) => {
         if (replied?.trim()) {
-            // Optimistically update reply count
             setLocalCommentData(prev => ({
                 ...prev,
                 [commentId]: {
@@ -171,9 +160,6 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
             dispatch(fetchAddCommentReplies({ id: commentId, newComment: replied.trim() }))
                 .unwrap()
                 .then(() => {
-                    // Refresh replies for the specific comment
-                    // dispatch(fetchCommentReplies(commentId));
-                    // Clear reply input and close reply form
                     setCommentStatus((prev) => ({
                         ...prev,
                         [commentId]: {
@@ -182,14 +168,9 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                         }
                     }));
                     setReplyingTo(null);
-                    // Keep replies visible after adding a new one
                     setShowRepliesFor(commentId);
-                    
-                    // Also refresh main comments to get updated reply counts
-                    // dispatch(fetchVideoComment(contentId));
                 })
                 .catch((error) => {
-                    // Revert optimistic update on error
                     setLocalCommentData(prev => ({
                         ...prev,
                         [commentId]: {
@@ -203,12 +184,11 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
     };
 
     const handleCommentReplies = (commentId) => {
-        // Toggle replies visibility and fetch if not already loaded
         if (showRepliesFor === commentId) {
-            setShowRepliesFor(null); // Hide replies if already showing
+            setShowRepliesFor(null);
         } else {
-            setShowRepliesFor(commentId); // Show replies for this comment
-            dispatch(fetchCommentReplies(commentId)); // Fetch replies from API
+            setShowRepliesFor(commentId);
+            dispatch(fetchCommentReplies(commentId));
         }
     };
 
@@ -216,7 +196,6 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
         setReplyingTo(replyingTo === commentId ? null : commentId);
     };
 
-    // Fixed: Handle replies input change properly
     const handleRepliesInputChange = (commentId, value) => {
         setCommentStatus((prev) => ({
             ...prev,
@@ -228,43 +207,134 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
     };
 
     const Comment = ({ comment, isReply = false }) => {
-        // Get current like status and counts from local state or fallback to comment data
         const currentLikes = localCommentData[comment._id]?.totalLikes ?? comment.totalLikes ?? 0;
-        // const currentReplies = localCommentData[comment._id]?.totalReplies ?? comment.totalReplies ?? comment.repliesCount ?? 0;
         const isLiked = localCommentData[comment._id]?.isLiked ?? commentStatus[comment._id]?.like ?? comment.isLiked ?? false;
 
         return (
-            <div className={`flex gap-3 ${isReply ? 'ml-6 max-sm:ml-0 max-sm:mt-1 mt-3' : 'mb-4 max-sm:mb-2'}`}>
-                <div className={`${isReply ? 'w-6 h-6' : 'w-10 h-10'} rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs`}>
-                    {comment?.user_info?.avatar}
+            <div
+                className={`flex gap-3 ${isReply ? 'ml-6 max-sm:ml-0 max-sm:mt-1 mt-3' : 'mb-4 max-sm:mb-2'} transition-all`}
+                style={{
+                    gap: 'var(--spacing-unit)',
+                    marginBottom: isReply ? 'var(--spacing-unit)' : 'var(--section-gap)',
+                    transitionDuration: 'var(--animation-duration)'
+                }}
+                role={isReply ? "listitem" : "article"}
+                aria-label={`Comment by ${comment?.user_info?.username}`}
+            >
+                <div
+                    className={`${isReply ? 'w-6 h-6' : 'w-10 h-10'} rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs overflow-hidden`}
+                    style={{
+                        background: 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))'
+                    }}
+                >
+                    <img
+                        src={comment?.user_info?.avatar}
+                        alt={`${comment?.user_info?.username}'s avatar`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                    />
                 </div>
 
                 <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium">
+                    <div
+                        className="flex items-center gap-2 mb-1"
+                        style={{
+                            gap: 'var(--spacing-unit)',
+                            marginBottom: 'var(--spacing-unit)'
+                        }}
+                    >
+                        <span
+                            className="font-medium"
+                            style={{
+                                color: 'var(--color-text-primary)',
+                                fontSize: 'var(--font-size-sm)',
+                                fontFamily: 'var(--font-family)'
+                            }}
+                        >
                             @{comment?.user_info?.username}
                         </span>
-                        <span className="text-gray-400 text-xs">{comment?.createdAt}</span>
+                        <span
+                            className="text-xs"
+                            style={{
+                                color: 'var(--color-text-secondary)',
+                                fontSize: 'var(--font-size-xs)'
+                            }}
+                        >
+                            {comment?.createdAt}
+                        </span>
                     </div>
 
-                    <div className="text-sm leading-relaxed mb-2">
+                    <div
+                        className="text-sm leading-relaxed mb-2"
+                        style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)',
+                            fontFamily: 'var(--font-family)',
+                            marginBottom: 'var(--spacing-unit)'
+                        }}
+                    >
                         {comment?.content}
                     </div>
 
-                    <div className="flex items-center">
+                    <div
+                        className="flex items-center"
+                        style={{ gap: 'var(--spacing-unit)' }}
+                    >
                         <div className="flex items-center gap-1">
                             <button
                                 onClick={() => handleLikeToggleComment(comment._id)}
-                                className={` flex items-center rounded-full transition-colors ${isLiked ? 'text-blue-500' : 'text-gray-400'}`}
+                                className="flex items-center rounded-full transition-all p-2"
+                                style={{
+                                    color: isLiked ? 'var(--accent-color)' : 'var(--color-text-secondary)',
+                                    transitionDuration: 'var(--animation-duration)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = 'var(--color-hover)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'transparent';
+                                }}
+                                aria-label={isLiked ? "Unlike this comment" : "Like this comment"}
+                                aria-pressed={isLiked}
+                                role="button"
+                                tabIndex={0}
                             >
                                 <ThumbsUp className="w-4 h-4" />
-                                <span className='ml-1 text-black'>{currentLikes === 0 ? "" : currentLikes}</span>
+                                <span
+                                    className='ml-1'
+                                    style={{
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: 'var(--font-size-xs)'
+                                    }}
+                                >
+                                    {currentLikes === 0 ? "" : currentLikes}
+                                </span>
                             </button>
                         </div>
 
                         <button
-                            onClick={() => handleDisLike(comment._id)}
-                            className={`p-2 rounded-full transition-colors ${commentStatus[comment?._id]?.dislike ? 'text-red-500' : 'text-gray-400'}`}
+                            onClick={() => setCommentStatus((prev) => ({
+                                ...prev,
+                                [comment._id]: {
+                                    ...prev[comment._id],
+                                    dislike: !prev[comment._id]?.dislike
+                                }
+                            }))}
+                            className="p-2 rounded-full transition-all"
+                            style={{
+                                color: commentStatus[comment?._id]?.dislike ? 'var(--color-error)' : 'var(--color-text-secondary)',
+                                transitionDuration: 'var(--animation-duration)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = 'var(--color-hover)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = 'transparent';
+                            }}
+                            aria-label={commentStatus[comment?._id]?.dislike ? "Remove dislike" : "Dislike this comment"}
+                            aria-pressed={commentStatus[comment?._id]?.dislike}
+                            role="button"
+                            tabIndex={0}
                         >
                             <ThumbsDown className="w-4 h-4" />
                         </button>
@@ -272,35 +342,110 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                         {!isReply && (
                             <button
                                 onClick={() => handleReplyToggle(comment._id)}
-                                className="text-xs font-medium bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full  transition-colors"
+                                className="text-xs font-medium px-3 py-1 rounded-full transition-all"
+                                style={{
+                                    backgroundColor: 'var(--color-bg-secondary)',
+                                    color: 'var(--color-text-primary)',
+                                    fontSize: 'var(--font-size-xs)',
+                                    transitionDuration: 'var(--animation-duration)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = 'var(--color-hover)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                                }}
+                                aria-label={`Reply to ${comment?.user_info?.username}`}
+                                role="button"
+                                tabIndex={0}
                             >
                                 Reply
                             </button>
                         )}
 
-                        <button className="p-2 rounded-full transition-colors hover:bg-gray-100 active:bg-gray-300 text-gray-800">
+                        <button
+                            className="p-2 rounded-full transition-all"
+                            style={{
+                                color: 'var(--color-text-secondary)',
+                                transitionDuration: 'var(--animation-duration)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = 'var(--color-hover)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = 'transparent';
+                            }}
+                            aria-label="More options for this comment"
+                            role="button"
+                            tabIndex={0}
+                        >
                             <MoreVertical className="w-4 h-4" />
                         </button>
                     </div>
 
+                    {/* Reply Input */}
                     {replyingTo === comment?._id && (
-                        <div className="mt-3 max-sm:mt-1.5 flex gap-2">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs">
-                                <img src={comment?.user_info?.avatar} className='w-full h-full aspect-square rounded-full object-fill' />
+                        <div
+                            className="mt-3 max-sm:mt-1.5 flex gap-2"
+                            style={{
+                                marginTop: 'var(--spacing-unit)',
+                                gap: 'var(--spacing-unit)'
+                            }}
+                        >
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs overflow-hidden">
+                                <img
+                                    src={user?.avatar}
+                                    alt="Your avatar"
+                                    className='w-full h-full aspect-square rounded-full object-cover'
+                                />
                             </div>
                             <div className="flex-1">
                                 <textarea
                                     value={commentStatus[comment._id]?.repliesInput || ''}
                                     onChange={(e) => handleRepliesInputChange(comment._id, e.target.value)}
                                     placeholder={`Reply to @${comment?.user_info?.username}...`}
-                                    className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none resize-none text-sm p-2"
+                                    className="w-full bg-transparent border-b-2 focus:outline-none resize-none text-sm p-2 transition-all"
+                                    style={{
+                                        borderColor: 'var(--color-border)',
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: 'var(--font-size-sm)',
+                                        fontFamily: 'var(--font-family)',
+                                        transitionDuration: 'var(--animation-duration)'
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = 'var(--accent-color)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = 'var(--color-border)';
+                                    }}
                                     rows="2"
+                                    aria-label={`Reply to ${comment?.user_info?.username}'s comment`}
                                 />
-                                <div className="flex gap-2 mt-2">
+                                <div
+                                    className="flex gap-2 mt-2"
+                                    style={{
+                                        gap: 'var(--spacing-unit)',
+                                        marginTop: 'var(--spacing-unit)'
+                                    }}
+                                >
                                     <button
                                         onClick={() => handleAddCommentReplies(comment._id, commentStatus[comment._id]?.repliesInput)}
-                                        className="px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-full hover:bg-blue-700 transition-colors"
+                                        className="px-4 py-2 text-white text-xs font-medium rounded-full transition-all"
+                                        style={{
+                                            backgroundColor: commentStatus[comment._id]?.repliesInput ? 'var(--accent-color)' : 'var(--color-text-secondary)',
+                                            fontSize: 'var(--font-size-xs)',
+                                            transitionDuration: 'var(--animation-duration)'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (commentStatus[comment._id]?.repliesInput) {
+                                                e.target.style.opacity = '0.9';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.opacity = '1';
+                                        }}
                                         disabled={!commentStatus[comment._id]?.repliesInput}
+                                        aria-label="Submit reply"
                                     >
                                         Reply
                                     </button>
@@ -315,7 +460,20 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                                                 }
                                             }));
                                         }}
-                                        className="px-4 py-2 bg-gray-100 text-xs font-medium rounded-full active:opacity-75 active:bg-gray-300 hover:bg-gray-200 transition-colors"
+                                        className="px-4 py-2 text-xs font-medium rounded-full transition-all"
+                                        style={{
+                                            backgroundColor: 'var(--color-bg-secondary)',
+                                            color: 'var(--color-text-primary)',
+                                            fontSize: 'var(--font-size-xs)',
+                                            transitionDuration: 'var(--animation-duration)'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = 'var(--color-hover)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                                        }}
+                                        aria-label="Cancel reply"
                                     >
                                         Cancel
                                     </button>
@@ -324,29 +482,59 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                         </div>
                     )}
 
-                    {/* Updated: Show replies button for comments */}
+                    {/* Show Replies Button */}
                     {!isReply && (
-                        <button 
-                            onClick={() => handleCommentReplies(comment._id)} 
-                            className={`border-1 my-1 px-4 py-1 rounded-2xl border-gray-300 ${
-                                showRepliesFor === comment._id 
-                                    ? 'bg-blue-100 text-blue-600 border-blue-300' 
-                                    : 'bg-gray-100 hover:bg-gray-200'
-                            } active:bg-gray-200 transition-colors`}
+                        <button
+                            onClick={() => handleCommentReplies(comment._id)}
+                            className="my-1 px-4 py-1 rounded-2xl border transition-all"
+                            style={{
+                                backgroundColor: showRepliesFor === comment._id ? 'var(--color-accent-bg)' : 'var(--color-bg-secondary)',
+                                color: showRepliesFor === comment._id ? 'var(--accent-color)' : 'var(--color-text-primary)',
+                                borderColor: showRepliesFor === comment._id ? 'var(--accent-color)' : 'var(--color-border)',
+                                fontSize: 'var(--font-size-xs)',
+                                transitionDuration: 'var(--animation-duration)'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (showRepliesFor !== comment._id) {
+                                    e.target.style.backgroundColor = 'var(--color-hover)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (showRepliesFor !== comment._id) {
+                                    e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                                }
+                            }}
+                            aria-expanded={showRepliesFor === comment._id}
+                            aria-label={`${showRepliesFor === comment._id ? 'Hide' : 'Show'} ${comment?.totalReplies || comment?.totalComment || 0} replies`}
                         >
-                            {showRepliesFor === comment._id ? 'Hide Replies' : 'Show Replies'} 
-                            <span className='ml-1'>{(comment?.totalReplies || comment?.totalComment) === 0 ? "" : (comment?.totalReplies || comment?.totalComment)}</span>
+                            {showRepliesFor === comment._id ? 'Hide Replies' : 'Show Replies'}
+                            <span className='ml-1'>
+                                {(comment?.totalReplies || comment?.totalComment) === 0 ? "" : (comment?.totalReplies || comment?.totalComment)}
+                            </span>
                         </button>
                     )}
 
-                    {/* Updated: Show replies only for the specific comment that's expanded */}
+                    {/* Replies List */}
                     {!isReply && showRepliesFor === comment._id && repliesOnComment?.data && (
-                        <div className="mt-3">
+                        <div
+                            className="mt-3"
+                            style={{ marginTop: 'var(--spacing-unit)' }}
+                            role="list"
+                            aria-label="Comment replies"
+                        >
                             {repliesOnComment.data.map(reply => (
                                 <Comment key={reply?._id || reply?.id} comment={reply} isReply={true} />
                             ))}
                             {repliesOnComment.data.length === 0 && (
-                                <div className="ml-6 text-gray-500 text-sm">No replies yet.</div>
+                                <div
+                                    className="ml-6 text-sm"
+                                    style={{
+                                        color: 'var(--color-text-secondary)',
+                                        fontSize: 'var(--font-size-sm)'
+                                    }}
+                                >
+                                    No replies yet.
+                                </div>
                             )}
                         </div>
                     )}
@@ -357,39 +545,106 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
 
     return (
         <div>
-            <div className={`${toggle.showComment ? "" : ""} ${!minimiseComment ? "h-[100px]" : `${whichContent === "shorts" ? "h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)]" : "h-fit"}`} p-3`}>
-                <div className={` max-w-4xl mx-auto`}>
+            <div
+                className={`${toggle.showComment ? "" : ""} ${!minimiseComment ? "h-[100px]" :
+                        `${whichContent === "shorts" ? "h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)]" : "h-fit"}`
+                    } p-3 transition-all`}
+                style={{
+                    backgroundColor: 'var(--color-bg-primary)',
+                    padding: 'var(--component-padding)',
+                    transitionDuration: 'var(--animation-duration)'
+                }}
+                role="region"
+                aria-label="Comments section"
+            >
+                <div className="max-w-4xl mx-auto">
                     {/* Comments Header */}
                     <div>
-                        <div className="flex items-center justify-between gap-6 mb-2 max-sm:mb-1">
-                            <div className='flex space-x-2'>
-                                <h3 className="text-xl font-medium">Comments</h3>
-                                <button className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <div
+                            className="flex items-center justify-between gap-6 mb-2 max-sm:mb-1"
+                            style={{
+                                gap: 'var(--section-gap)',
+                                marginBottom: 'var(--spacing-unit)'
+                            }}
+                        >
+                            <div
+                                className='flex space-x-2'
+                                style={{ gap: 'var(--spacing-unit)' }}
+                            >
+                                <h3
+                                    className="text-xl font-medium"
+                                    style={{
+                                        color: 'var(--color-text-primary)',
+                                        fontSize: 'var(--font-size-xl)',
+                                        fontFamily: 'var(--font-family)'
+                                    }}
+                                >
+                                    Comments
+                                </h3>
+                                <button
+                                    className="flex items-center gap-2 text-sm font-medium transition-colors"
+                                    style={{
+                                        color: 'var(--color-text-secondary)',
+                                        fontSize: 'var(--font-size-sm)',
+                                        transitionDuration: 'var(--animation-duration)'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.color = 'var(--color-text-primary)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.color = 'var(--color-text-secondary)';
+                                    }}
+                                    aria-label="Sort comments"
+                                >
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z" />
                                     </svg>
                                     Sort by
                                 </button>
                             </div>
-                            
+
                             <div className={`${whichContent === "videos" ? "hidden" : ""}`}>
-                                {/* close button */}
                                 <button
                                     onClick={() => toggle.setShowComment(true)}
-                                    className="p-3 rounded-full hover:bg-gray-100 active:bg-gray-200"
+                                    className="p-3 rounded-full transition-all"
+                                    style={{
+                                        backgroundColor: 'transparent',
+                                        color: 'var(--color-text-primary)',
+                                        transitionDuration: 'var(--animation-duration)'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.backgroundColor = 'var(--color-hover)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.backgroundColor = 'transparent';
+                                    }}
+                                    aria-label="Close comments"
                                 >
                                     <X />
                                 </button>
                             </div>
                         </div>
-                        
                     </div>
 
-                    {/* <div className={`${whichContent === "shorts" ? "flex-col-reverse" : "" } flex`}></div> */}
                     {/* Add Comment */}
-                    <div className={`flex gap-3 max-sm:gap-1.5 mb-3 max-sm:mb-1.5 ${whichContent === "shorts" ? "" : ""} bottom-0`}>
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                            <img src={user?.avatar || <User />} className='w-full h-full aspect-square rounded-full object-fill' />
+                    <div
+                        className={`flex gap-3 max-sm:gap-1.5 mb-3 max-sm:mb-1.5 ${whichContent === "shorts" ? "" : ""} bottom-0`}
+                        style={{
+                            gap: 'var(--spacing-unit)',
+                            marginBottom: 'var(--spacing-unit)'
+                        }}
+                    >
+                        <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 overflow-hidden"
+                            style={{
+                                background: 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))'
+                            }}
+                        >
+                            <img
+                                src={user?.avatar}
+                                alt="Your avatar"
+                                className='w-full h-full aspect-square rounded-full object-cover'
+                            />
                         </div>
                         <div className="flex-1">
                             <textarea
@@ -397,15 +652,49 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                                 onChange={(e) => setNewComment(e.target.value)}
                                 onFocus={() => setShowCommentActions(true)}
                                 placeholder="Add a comment..."
-                                className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none resize-none text-sm pt-2"
+                                className="w-full bg-transparent border-b-2 focus:outline-none resize-none text-sm pt-2 transition-all"
+                                style={{
+                                    borderColor: 'var(--color-border)',
+                                    color: 'var(--color-text-primary)',
+                                    fontSize: 'var(--font-size-sm)',
+                                    fontFamily: 'var(--font-family)',
+                                    transitionDuration: 'var(--animation-duration)'
+                                }}
+                                onFocusCapture={(e) => {
+                                    e.target.style.borderColor = 'var(--accent-color)';
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = 'var(--color-border)';
+                                }}
                                 rows="2"
+                                aria-label="Write a comment"
                             />
                             {showCommentActions && (
-                                <div className="flex gap-2 mt-3 max-sm:mt-1.5">
+                                <div
+                                    className="flex gap-2 mt-3 max-sm:mt-1.5"
+                                    style={{
+                                        gap: 'var(--spacing-unit)',
+                                        marginTop: 'var(--spacing-unit)'
+                                    }}
+                                >
                                     <button
                                         onClick={handleAddComment}
-                                        className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-full hover:bg-blue-600 transition-colors"
+                                        className="px-4 py-2 text-white text-sm font-medium rounded-full transition-all"
+                                        style={{
+                                            backgroundColor: newComment.trim() ? 'var(--accent-color)' : 'var(--color-text-secondary)',
+                                            fontSize: 'var(--font-size-sm)',
+                                            transitionDuration: 'var(--animation-duration)'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (newComment.trim()) {
+                                                e.target.style.opacity = '0.9';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.opacity = '1';
+                                        }}
                                         disabled={!newComment.trim()}
+                                        aria-label="Submit comment"
                                     >
                                         Comment
                                     </button>
@@ -414,7 +703,20 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                                             setShowCommentActions(false);
                                             setNewComment('');
                                         }}
-                                        className="px-4 py-2 bg-gray-200 text-sm font-medium rounded-full hover:bg-gray-300 transition-colors"
+                                        className="px-4 py-2 text-sm font-medium rounded-full transition-all"
+                                        style={{
+                                            backgroundColor: 'var(--color-bg-secondary)',
+                                            color: 'var(--color-text-primary)',
+                                            fontSize: 'var(--font-size-sm)',
+                                            transitionDuration: 'var(--animation-duration)'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = 'var(--color-hover)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                                        }}
+                                        aria-label="Cancel comment"
                                     >
                                         Cancel
                                     </button>
@@ -424,14 +726,46 @@ const Comments = ({ whichContent, contentId, minimiseComment=true, setMinimiseCo
                     </div>
 
                     {/* Comments List */}
-                    <div className={`${minimiseComment ? "" : "h-16 overflow-hidden"} h-[calc(100vh_-_200px)] overflow-x-hidden max-sm:pb-7 scrollBar overflow-y-scroll`}>
-                        {(whichContent === "videos" ? videosComments : shortComments )?.map(comment => (
+                    <div
+                        className={`${minimiseComment ? "" : "h-16 overflow-hidden"} h-[calc(100vh_-_200px)] overflow-x-hidden max-sm:pb-7 scrollBar overflow-y-scroll`}
+                        role="list"
+                        aria-label="Comments list"
+                    >
+                        {(whichContent === "videos" ? videosComments : shortComments)?.map(comment => (
                             <Comment key={comment?._id} comment={comment} />
                         ))}
                     </div>
                 </div>
-                <div className={`${!minimiseComment ? "hidden" : ""} cursor-pointer ${whichContent === "shorts" ? "hidden" : ""}`} onClick={(e) => { e.stopPropagation(); setMinimiseComment(!minimiseComment);}}>
-                    see Less
+
+                {/* Minimize Toggle */}
+                <div
+                    className={`${!minimiseComment ? "hidden" : ""} cursor-pointer transition-colors ${whichContent === "shorts" ? "hidden" : ""}`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setMinimiseComment(!minimiseComment);
+                    }}
+                    style={{
+                        color: 'var(--color-text-secondary)',
+                        fontSize: 'var(--font-size-sm)',
+                        transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.target.style.color = 'var(--accent-color)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.color = 'var(--color-text-secondary)';
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Show fewer comments"
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setMinimiseComment(!minimiseComment);
+                        }
+                    }}
+                >
+                    See Less
                 </div>
             </div>
         </div>

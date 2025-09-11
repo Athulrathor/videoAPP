@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Bell,
@@ -15,33 +14,21 @@ import {
   Filter,
   Edit
 } from 'lucide-react';
-
+// import { useAppearance } from '../hooks/appearances';
 
 const NotificationSettings = () => {
+  // const { appearanceSettings } = useAppearance();
+
   const [emailSettings, setEmailSettings] = useState({
-    // recommendations: true,
     comments: true,
     subscriptions: true,
     likes: false,
-    // followers: true,
-    // bookmarks: false,
     trending: true,
     newsletter: true,
-    // security: true,
-    // promotions: false
   });
-
-  // const [pushSettings, setPushSettings] = useState({
-  //   comments: true,
-  //   likes: true,
-  //   followers: true,
-  //   subscriptions: false,
-  //   recommendations: false
-  // });
 
   const [globalSettings, setGlobalSettings] = useState({
     emailEnabled: true,
- // instant, daily, weekly
     quietHours: {
       enabled: false,
       start: '22:00',
@@ -102,13 +89,6 @@ const NotificationSettings = () => {
   };
 
   const emailCategories = [
-    // {
-    //   id: 'recommendations',
-    //   title: 'Recommendation Emails',
-    //   description: 'Get personalized content based on your interests',
-    //   icon: TrendingUp,
-    //   hasFrequency: true
-    // },
     {
       id: 'comments',
       title: 'Comment Notifications',
@@ -130,20 +110,6 @@ const NotificationSettings = () => {
       icon: Heart,
       hasFrequency: false
     },
-    // {
-    //   id: 'followers',
-    //   title: 'New Followers',
-    //   description: 'When someone starts following you',
-    //   icon: UserPlus,
-    //   hasFrequency: false
-    // },
-    // {
-    //   id: 'bookmarks',
-    //   title: 'Bookmark Reminders',
-    //   description: 'Reminders about your saved content',
-    //   icon: Bookmark,
-    //   hasFrequency: false
-    // },
     {
       id: 'trending',
       title: 'Trending Content',
@@ -158,87 +124,133 @@ const NotificationSettings = () => {
       icon: Mail,
       hasFrequency: true
     },
-    // {
-    //   id: 'security',
-    //   title: 'Security Alerts',
-    //   description: 'security updates and login notifications',
-    //   icon: Settings,
-    //   hasFrequency: false
-    // },
-    // {
-    //   id: 'promotions',
-    //   title: 'Promotions',
-    //   description: 'offers, discounts, and promotional content',
-    //   icon: TrendingUp,
-    //   hasFrequency: false
-    // }
   ];
 
   return (
-    <div className="max-sm:w-full px-2 max-sm:p-0 sm:px-4 py-2 sm:py-4 bg-white overflow-y-scroll scrollBar max-md:h-[calc(100vh-53px)] h-[calc(100vh-65px)]">
-
+    <div
+      className="max-sm:w-full px-2 max-sm:p-0 sm:px-4 py-2 sm:py-4 overflow-y-scroll scrollBar max-md:h-[calc(100vh-41px)] h-[calc(100vh-57px)] transition-all"
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        color: 'var(--color-text-primary)',
+        fontFamily: 'var(--font-family)',
+        transitionDuration: 'var(--animation-duration)'
+      }}
+    >
       {/* Header */}
-      <div className="mb-6 max-sm:p-2">
-        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 leading-tight">
+      <div
+        className="mb-6 max-sm:p-2"
+        style={{ marginBottom: 'var(--section-gap)' }}
+      >
+        <h1
+          className="text-xl sm:text-3xl font-bold mb-1 leading-tight"
+          style={{
+            color: 'var(--color-text-primary)',
+            fontSize: 'var(--font-size-3xl)',
+            fontFamily: 'var(--font-family)'
+          }}
+        >
           Notification Settings
         </h1>
-        <p className="text-gray-600 text-xs sm:text-base max-w-full truncate">
+        <p
+          className="text-xs sm:text-base max-w-full truncate"
+          style={{
+            color: 'var(--color-text-secondary)',
+            fontSize: 'var(--font-size-base)'
+          }}
+        >
           Manage how and when you receive notifications
         </p>
       </div>
 
       {/* Global Controls */}
-      <div className="bg-gray-50 rounded-lg p-0 max-sm:py-2 max-sm:p-2 sm:p-6 mb-6">
-        <h2 className="flex items-center font-semibold mb-4 text-base sm:text-lg">
+      <div
+        className="rounded-lg p-0 max-sm:py-2 max-sm:p-2 sm:p-6 mb-6 transition-all"
+        style={{
+          backgroundColor: 'var(--color-bg-tertiary)',
+          padding: 'var(--component-padding)',
+          marginBottom: 'var(--section-gap)',
+          transitionDuration: 'var(--animation-duration)'
+        }}
+      >
+        <h2
+          className="flex items-center font-semibold mb-4 text-base sm:text-lg"
+          style={{
+            color: 'var(--color-text-primary)',
+            fontSize: 'var(--font-size-lg)',
+            marginBottom: 'var(--component-padding)'
+          }}
+        >
           <Settings className="mr-2 h-5 w-5 flex-shrink-0" />
           Global Settings
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Master Email Toggle */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 bg-white border border-gray-200 rounded-lg">
+          <div
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 border rounded-lg transition-all"
+            style={{
+              backgroundColor: 'var(--color-bg-primary)',
+              borderColor: 'var(--color-border)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+          >
             <div className="mb-3 sm:mb-0 sm:flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 truncate">Email Notifications</h3>
-              <p className="text-sm text-gray-600 truncate">Master control for all email notifications</p>
+              <h3
+                className="font-medium truncate"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Email Notifications
+              </h3>
+              <p
+                className="text-sm truncate"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                Master control for all email notifications
+              </p>
             </div>
             <button
               onClick={() => handleGlobalToggle('emailEnabled')}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${globalSettings.emailEnabled ? 'bg-blue-600' : 'bg-gray-200'
-                }`}
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0"
+              style={{
+                backgroundColor: globalSettings.emailEnabled ? 'var(--accent-color)' : 'var(--color-border)',
+                transitionDuration: 'var(--animation-duration)'
+              }}
               aria-label="Toggle Email Notifications"
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${globalSettings.emailEnabled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-              />
-            </button>
-          </div>
-
-          {/* Master Push Toggle */}
-          <div className="hidden flex-col sm:flex-row items-start sm:items-center justify-between p-2 bg-white border border-gray-200 rounded-lg">
-            <div className="mb-3 sm:mb-0 sm:flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 truncate">Push Notifications</h3>
-              <p className="text-sm text-gray-600 truncate">Master control for push notifications</p>
-            </div>
-            <button
-              onClick={() => handleGlobalToggle('pushEnabled')}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${globalSettings.pushEnabled ? 'bg-blue-600' : 'bg-gray-200'
-                }`}
-              aria-label="Toggle Push Notifications"
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${globalSettings.pushEnabled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
+                className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                style={{
+                  transform: globalSettings.emailEnabled ? 'translateX(1.5rem)' : 'translateX(0.25rem)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
               />
             </button>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200">
+        <div
+          className="flex flex-wrap gap-2 mt-4 pt-4 border-t"
+          style={{ borderColor: 'var(--color-border)' }}
+        >
           <button
             onClick={stopAllEmails}
-            className="flex items-center px-3 py-1 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors text-xs sm:text-sm whitespace-nowrap"
+            className="flex items-center px-3 py-1 border rounded-lg transition-all text-xs sm:text-sm whitespace-nowrap"
+            style={{
+              color: 'var(--color-error)',
+              borderColor: 'var(--color-error)',
+              backgroundColor: 'transparent',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+            }}
             aria-label="Stop All Emails"
           >
             <VolumeX className="mr-2 h-4 w-4 flex-shrink-0" />
@@ -246,7 +258,19 @@ const NotificationSettings = () => {
           </button>
           <button
             onClick={enableAllEmails}
-            className="flex items-center px-3 py-1 text-green-600 border border-green-600 rounded-lg hover:bg-green-50 transition-colors text-xs sm:text-sm whitespace-nowrap"
+            className="flex items-center px-3 py-1 border rounded-lg transition-all text-xs sm:text-sm whitespace-nowrap"
+            style={{
+              color: 'var(--color-success)',
+              borderColor: 'var(--color-success)',
+              backgroundColor: 'transparent',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+            }}
             aria-label="Enable All Emails"
           >
             <Volume2 className="mr-2 h-4 w-4 flex-shrink-0" />
@@ -256,26 +280,60 @@ const NotificationSettings = () => {
       </div>
 
       {/* Quiet Hours */}
-      <div className="bg-gray-50 rounded-lg max-sm:p-2 sm:p-6 mb-8">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center">
+      <div
+        className="rounded-lg max-sm:p-2 sm:p-6 mb-8 transition-all"
+        style={{
+          backgroundColor: 'var(--color-bg-tertiary)',
+          padding: 'var(--component-padding)',
+          marginBottom: 'var(--section-gap)',
+          transitionDuration: 'var(--animation-duration)'
+        }}
+      >
+        <h2
+          className="text-lg sm:text-xl font-semibold mb-4 flex items-center"
+          style={{
+            color: 'var(--color-text-primary)',
+            fontSize: 'var(--font-size-xl)',
+            marginBottom: 'var(--component-padding)'
+          }}
+        >
           <Clock className="mr-2 h-5 w-5 flex-shrink-0" />
           Quiet Hours
         </h2>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-y-2 sm:space-y-0 sm:space-x-4">
           <div className="min-w-0">
-            <h3 className="font-medium text-gray-900 truncate">Enable Quiet Hours</h3>
-            <p className="text-sm text-gray-600 truncate">Pause notifications during specified hours</p>
+            <h3
+              className="font-medium truncate"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              Enable Quiet Hours
+            </h3>
+            <p
+              className="text-sm truncate"
+              style={{
+                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--font-size-sm)'
+              }}
+            >
+              Pause notifications during specified hours
+            </p>
           </div>
           <button
             onClick={handleQuietHoursToggle}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${globalSettings.quietHours.enabled ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
+            className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0"
+            style={{
+              backgroundColor: globalSettings.quietHours.enabled ? 'var(--accent-color)' : 'var(--color-border)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
             aria-label="Toggle Quiet Hours"
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${globalSettings.quietHours.enabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
+              className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+              style={{
+                transform: globalSettings.quietHours.enabled ? 'translateX(1.5rem)' : 'translateX(0.25rem)',
+                transitionDuration: 'var(--animation-duration)'
+              }}
             />
           </button>
         </div>
@@ -283,21 +341,67 @@ const NotificationSettings = () => {
         {globalSettings.quietHours.enabled && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 truncate">Start Time</label>
+              <label
+                className="block text-sm font-medium mb-2 truncate"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                Start Time
+              </label>
               <input
                 type="time"
                 value={globalSettings.quietHours.start}
                 onChange={(e) => handleQuietHoursChange('start', e.target.value)}
-                className="w-full min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full min-w-0 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-all"
+                style={{
+                  backgroundColor: 'var(--color-bg-primary)',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--accent-color)';
+                  e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 truncate">End Time</label>
+              <label
+                className="block text-sm font-medium mb-2 truncate"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                End Time
+              </label>
               <input
                 type="time"
                 value={globalSettings.quietHours.end}
                 onChange={(e) => handleQuietHoursChange('end', e.target.value)}
-                className="w-full min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full min-w-0 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-all"
+                style={{
+                  backgroundColor: 'var(--color-bg-primary)',
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--accent-color)';
+                  e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
             </div>
           </div>
@@ -305,8 +409,23 @@ const NotificationSettings = () => {
       </div>
 
       {/* Email Notification Categories */}
-      <div className={`${!globalSettings.emailEnabled ? "hidden" : ""} bg-gray-50 rounded-lg max-sm:p-2 sm:p-6 mb-8`}>
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center">
+      <div
+        className={`${!globalSettings.emailEnabled ? "hidden" : ""} rounded-lg max-sm:p-2 sm:p-6 mb-8 transition-all`}
+        style={{
+          backgroundColor: 'var(--color-bg-tertiary)',
+          padding: 'var(--component-padding)',
+          marginBottom: 'var(--section-gap)',
+          transitionDuration: 'var(--animation-duration)'
+        }}
+      >
+        <h2
+          className="text-lg sm:text-xl font-semibold mb-6 flex items-center"
+          style={{
+            color: 'var(--color-text-primary)',
+            fontSize: 'var(--font-size-xl)',
+            marginBottom: 'var(--component-padding)'
+          }}
+        >
           <Mail className="mr-2 h-5 w-5 flex-shrink-0" />
           Email Notifications
         </h2>
@@ -317,42 +436,61 @@ const NotificationSettings = () => {
             const isEnabled = emailSettings[category.id] && globalSettings.emailEnabled;
 
             return (
-              <div key={category.id} className="p-2 sm:p-4 bg-white border border-gray-200 rounded-lg">
+              <div
+                key={category.id}
+                className="p-2 sm:p-4 border rounded-lg transition-all"
+                style={{
+                  backgroundColor: 'var(--color-bg-primary)',
+                  borderColor: 'var(--color-border)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+              >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 max-sm:space-y-1 sm:space-y-0">
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
-                      <Icon className="h-5 w-5 text-gray-600" />
+                    <div
+                      className="p-2 rounded-lg flex-shrink-0"
+                      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+                    >
+                      <Icon
+                        className="h-5 w-5"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 truncate max-sm:text-sm">{category.title}</h3>
-                      <p className="text-sm text-gray-600 truncate max-sm:text-xs">{category.description}</p>
+                      <h3
+                        className="font-medium truncate max-sm:text-sm"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
+                        {category.title}
+                      </h3>
+                      <p
+                        className="text-sm truncate max-sm:text-xs"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          fontSize: 'var(--font-size-sm)'
+                        }}
+                      >
+                        {category.description}
+                      </p>
                     </div>
                   </div>
 
-                  <div className=" items-center space-x-2 sm:space-x-4 flex-shrink-0 min-w-max">
-                    {/* { isEnabled && (
-                      <select
-                        className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        aria-label={`Frequency for ${category.title}`}
-                      >
-                        {frequencyOptions.map(option => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    )} */}
-
+                  <div className="items-center space-x-2 sm:space-x-4 flex-shrink-0 min-w-max">
                     <button
                       onClick={() => handleEmailToggle(category.id)}
-                      // disabled={!globalSettings.emailEnabled}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isEnabled ? 'bg-blue-600' : 'bg-gray-200'
-                        } /`}
+                      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                      style={{
+                        backgroundColor: isEnabled ? 'var(--accent-color)' : 'var(--color-border)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
                       aria-label={`Toggle email notifications for ${category.title}`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isEnabled ? 'translate-x-6' : 'translate-x-1'
-                          }`}
+                        className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                        style={{
+                          transform: isEnabled ? 'translateX(1.5rem)' : 'translateX(0.25rem)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
                       />
                     </button>
                   </div>
@@ -363,89 +501,84 @@ const NotificationSettings = () => {
         </div>
       </div>
 
-      {/* Push Notification Categories */}
-      <div className="bg-gray-50 hidden rounded-lg max-sm:p-2 sm:p-6 mb-8">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center">
-          <Bell className="mr-2 h-5 w-5 flex-shrink-0" />
-          Push Notifications
-        </h2>
-
-        <div className="hidden grid-cols-1 md:grid-cols-2 gap-4">
-          {/* {pushCategories.map((category) => {
-            const Icon = category.icon;
-            const isEnabled = pushSettings[category.id] && globalSettings.pushEnabled;
-
-            return (
-              <div key={category.id} className="hidden flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-4 bg-white border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
-                <div className="flex items-center space-x-3 max-sm:space-x-1 flex-1 min-w-0">
-                  <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
-                    <Icon className="h-4 w-4 text-gray-600" />
-                  </div>
-                  <span className="font-medium text-gray-900 truncate">{category.title}</span>
-                </div>
-                <button
-                  // onClick={() => handlePushToggle(category.id)}
-                  disabled={!globalSettings.pushEnabled}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${isEnabled ? 'bg-blue-600' : 'bg-gray-200'
-                    } ${!globalSettings.pushEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  aria-label={`Toggle push notifications for ${category.title}`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isEnabled ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                  />
-                </button>
-              </div>
-            );
-          })} */}
-        </div>
-      </div>
-
       {/* Recent Notifications */}
-      <div className="bg-gray-50 rounded-lg max-sm:p-2 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-3  sm:space-y-0">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center max-w-full">
+      <div
+        className="rounded-lg max-sm:p-2 sm:p-6 transition-all"
+        style={{
+          backgroundColor: 'var(--color-bg-tertiary)',
+          padding: 'var(--component-padding)',
+          transitionDuration: 'var(--animation-duration)'
+        }}
+      >
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-3 sm:space-y-0">
+          <h2
+            className="text-lg sm:text-xl font-semibold flex items-center max-w-full"
+            style={{
+              color: 'var(--color-text-primary)',
+              fontSize: 'var(--font-size-xl)'
+            }}
+          >
             <Filter className="mr-2 h-5 w-5 flex-shrink-0" />
             Recent Notifications
           </h2>
-          <button className="flex items-center px-2 sm:px-4 py-1 sm:py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-xs sm:text-sm whitespace-nowrap">
+          <button
+            className="flex items-center px-2 sm:px-4 py-1 sm:py-2 border rounded-lg transition-all text-xs sm:text-sm whitespace-nowrap"
+            style={{
+              color: 'var(--accent-color)',
+              borderColor: 'var(--accent-color)',
+              backgroundColor: 'transparent',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--color-accent-bg)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+            }}
+          >
             <Edit className="mr-2 h-4 w-4" />
             Manage All
           </button>
         </div>
 
-        <div className="hidden space-y-3 w-full">
-          {/* {recentNotifications.map((notification) => (
-            <div
-              key={notification.id}
-              className="flex items-center justify-between p-3 max-sm:p-2 bg-white border border-gray-200 rounded-lg"
-            >
-              <div className="flex items-center space-x-3">
-                <div
-                  className={`w-2 h-2 rounded-full flex-shrink-0 ${notification.read ? 'bg-gray-300' : 'bg-blue-600'
-                    }`}
-                />
-                <div className="overflow-hidden">
-                  <h4 className="font-medium text-gray-900 text-ellipsis overflow-hidden whitespace-nowrap">{notification.title}</h4>
-                  <p className="text-sm text-gray-600 truncate">{notification.time}</p>
-                </div>
-              </div>
-              <button
-                className="p-1 text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
-                aria-label={`Delete notification ${notification.title}`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          ))} */}
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm">
-          <h3 className="font-medium mb-2 max-sm:sm">Email Management</h3>
-          <p className="mb-3 max-sm:xs">
+        <div
+          className="mt-6 p-4 border rounded-lg text-sm transition-all"
+          style={{
+            backgroundColor: 'var(--color-accent-bg)',
+            borderColor: 'var(--accent-color)',
+            color: 'var(--accent-color)',
+            fontSize: 'var(--font-size-sm)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
+        >
+          <h3
+            className="font-medium mb-2 max-sm:sm"
+            style={{ color: 'var(--accent-color)' }}
+          >
+            Email Management
+          </h3>
+          <p
+            className="mb-3 max-sm:xs"
+            style={{
+              color: 'var(--accent-color)',
+              opacity: '0.8'
+            }}
+          >
             You can also manage your email preferences by clicking the unsubscribe link in any email we send you.
           </p>
-          <button className="max-sm:xs text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap">
+          <button
+            className="max-sm:xs font-medium whitespace-nowrap transition-colors"
+            style={{
+              color: 'var(--accent-color)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.opacity = '1';
+            }}
+          >
             View Email Subscription Center →
           </button>
         </div>
@@ -454,4 +587,4 @@ const NotificationSettings = () => {
   )
 }
 
-export default NotificationSettings
+export default NotificationSettings;

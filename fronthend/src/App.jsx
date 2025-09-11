@@ -8,19 +8,18 @@ import VideoPages from "./pages/VideoPages";
 import Channel from "./pages/Channel";
 import Settings from "./pages/Settings";
 import { useSelector } from "react-redux";
-import { GoogleAuthWrapper } from "./components/GoogleAuthProvider";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PlayListPage from "./pages/PlayListPage";
 import OtpVerification from "./components/OtpVerification.jsx";
-import ErrorPage from "./components/ErrorPage.jsx";
+import ErrorPage from "./pages/ErrorPage.jsx";
 
 function App() {
 
   const { loggedIn } = useSelector((state) => state.user);
 
   return (
-    <div className={`--font-${"mono"} --font-size-${"small"} dark`}>
+    <div>
       <Router>
         <Routes>
           <Route
@@ -77,7 +76,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      />
+        />
     </div>
   );
 }

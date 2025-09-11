@@ -12,8 +12,10 @@ import UploadVideo from '../components/UploadVideo';
 import UploadShort from "../components/UploadShort";
 import UploadLive from '../components/UploadLive';
 import { addingToWatchHistory } from "../redux/features/user";
+import { useAppearance } from "../hooks/appearances";
 
 const VideoPages = (props) => {
+  const { appearanceSettings } = useAppearance();
 
   const { VideoId } = useParams();
   const dispatch = useDispatch();
@@ -50,7 +52,7 @@ const VideoPages = (props) => {
 
   const videoRecommendationRefs = useRef({});
   const currentVideoRef = useRef(null);
-  const muteButtonRef = useRef({})
+  // const muteButtonRef = useRef({})
 
   const [isAutoplayOn, setIsAutoplayOn] = useState(false);
   const [showDesc, setshowDesc] = useState(false);
@@ -153,43 +155,43 @@ const VideoPages = (props) => {
     }
   };
   
-  const handleNextVideo = () => {
-    const videos = filteredVideos;
+  // const handleNextVideo = () => {
+  //   const videos = filteredVideos;
 
-    const randomIndex = Math.floor(Math.random() * videos.length);
-    const video_id = videos[randomIndex]._id;
+  //   const randomIndex = Math.floor(Math.random() * videos.length);
+  //   const video_id = videos[randomIndex]._id;
 
-    Navigate(`/video/${video_id}`)
-  }
+  //   Navigate(`/video/${video_id}`)
+  // }
 
-  const togglePauseRecommendation = (videoId2) => {
-    const video = videoRecommendationRefs.current[videoId2];
-    if (video) {
+  // const togglePauseRecommendation = (videoId2) => {
+  //   const video = videoRecommendationRefs.current[videoId2];
+  //   if (video) {
         
-      setRecommendationStates((prev) => ({
-        ...prev,
-        [videoId2]: { ...prev[videoId2], isPlaying: false },
-      }));
-      video.pause();
-    }
-  };
+  //     setRecommendationStates((prev) => ({
+  //       ...prev,
+  //       [videoId2]: { ...prev[videoId2], isPlaying: false },
+  //     }));
+  //     video.pause();
+  //   }
+  // };
 
-  const toggleMuteRecommendation = (e, videoId2) => {
-    e.stopPropagation();
+  // const toggleMuteRecommendation = (e, videoId2) => {
+  //   e.stopPropagation();
 
-    const video = videoRecommendationRefs.current[videoId2];
-    if (video) {
-      const currentMuteState = recommendationStates[videoId2]?.isMuted;
-      const newMuteState = !currentMuteState;
+  //   const video = videoRecommendationRefs.current[videoId2];
+  //   if (video) {
+  //     const currentMuteState = recommendationStates[videoId2]?.isMuted;
+  //     const newMuteState = !currentMuteState;
 
-      video.muted = newMuteState;
+  //     video.muted = newMuteState;
 
-      setRecommendationStates((prev) => ({
-        ...prev,
-        [videoId2]: { ...prev[videoId2], isMuted: newMuteState },
-      }));
-    }
-  };
+  //     setRecommendationStates((prev) => ({
+  //       ...prev,
+  //       [videoId2]: { ...prev[videoId2], isMuted: newMuteState },
+  //     }));
+  //   }
+  // };
   
   const togglePlayCurrent = () => {
     const video = currentVideoRef.current;
@@ -243,11 +245,11 @@ const VideoPages = (props) => {
       subcriberStatus: isSubcribedStatus,
     }));
     // dispatch(fetchVideosById(VideoId));
-  },[dispatch,targetVideo])
+  },[dispatch,targetVideo,isSubcribedStatus])
   
   useEffect(() => {
     handleIsSubcribed();
-  }, []);
+  }, [handleIsSubcribed]);
 
   const handleIsVideoLiked = useCallback(() => {
     dispatch(isVideoLiked(VideoId));
@@ -256,11 +258,11 @@ const VideoPages = (props) => {
       ...prev,
       likeStatus: videoLiked,
     }));
-  },[dispatch,VideoId])
+  },[dispatch,VideoId,videoLiked])
   
   useEffect(() => {
     handleIsVideoLiked();
-  }, []);
+  }, [handleIsVideoLiked]);
 
   const [showMenu, setShowMenu] = useState(false);
     const [toggleVideoUploading, setToggleVideoUploading] = useState(true);
@@ -401,7 +403,15 @@ const VideoPages = (props) => {
   }
 
   return (
-    <div className="relative h-full">
+    <div
+      className="relative h-full transition-all"
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        color: 'var(--color-text-primary)',
+        fontFamily: 'var(--font-family)',
+        transitionDuration: 'var(--animation-duration)'
+      }}
+    >
       <UploadVideo
         setToggleVideoUploading={setToggleVideoUploading}
         toggleVideoUploading={toggleVideoUploading}
@@ -420,41 +430,78 @@ const VideoPages = (props) => {
         setToggleShortUploading={setToggleShortUploading}
         setToggleLiveUploading={setToggleLiveUploading}
       />
-      {/* <SideMenu /> */}
-      <div className="h-[calc(100vh_-_57px)] max-md;h-[calc(100vh_-_41px)] max-lg:flex-col flex justify-evenly max-sm:justify-baseline max-md:pl-0 max-md:pr-0 w-full pb-2  pr-4  overflow-y-scroll scroll-smooth scrollBar overflow-x-hidden">
-        
+
+      <div
+        className="h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] max-lg:flex-col flex justify-evenly max-sm:justify-baseline max-md:pl-0 max-md:pr-0 w-full pb-2 pr-4 overflow-y-scroll scroll-smooth scrollBar overflow-x-hidden transition-all"
+        style={{
+          transitionDuration: 'var(--animation-duration)'
+        }}
+        role="main"
+        aria-label="Video player page"
+      >
         <div className="max-lg:absolute top-[57px] fixed max-md:top-[41px] z-40 left-0">
-          <SideMenu menuToggle={{ showMenu, setShowMenu }}
-            videoParam={{ setVideoParams, videoParams }} />
+          <SideMenu
+            menuToggle={{ showMenu, setShowMenu }}
+            videoParam={{ setVideoParams, videoParams }}
+          />
         </div>
-        {/* video section */}
-        <div className=" w-[70%] max-lg:w-full pl-4 pt-2 max-lg:flex-shrink-0 px-2 max-md:px-0 h-auto">
-          {/* video and its controls */}
+
+        {/* Video Section */}
+        <div
+          className="w-[70%] max-lg:w-full pl-4 pt-2 max-lg:flex-shrink-0 px-2 max-md:px-0 h-auto transition-all"
+          style={{
+            paddingLeft: 'var(--component-padding)',
+            paddingTop: 'var(--spacing-unit)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
+        >
+          {/* Video and Controls */}
           <div className="relative">
-            {/* videos */}
-            <div className="w-full aspect-video">
+            {/* Video Player */}
+            <div
+              className="w-full aspect-video"
+              role="region"
+              aria-label="Main video player"
+            >
               <video
                 src={targetVideo?.videoFile}
                 ref={currentVideoRef}
                 poster={targetVideo?.thumbnail}
-                className="bg-black w-full h-full max-md:rounded-none rounded-2xl"
+                className="w-full h-full max-md:rounded-none rounded-2xl transition-all"
+                style={{
+                  backgroundColor: '#000000',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
                 muted={isMuted}
                 onTimeUpdate={handleOntimeCurrent}
                 volume={volume}
                 autoPlay
-              ></video>
+                aria-label={`Playing: ${targetVideo?.title}`}
+              />
             </div>
-            {/* controls */}
+
+            {/* Video Controls Overlay */}
             <div
-              className={`absolute inset-0 p-2.5 w-full h-full flex flex-col justify-between`}
+              className="absolute inset-0 p-2.5 w-full h-full flex flex-col justify-between"
+              style={{ padding: 'var(--spacing-unit)' }}
             >
-              {/* top container */}
+              {/* Top Controls */}
               <div className="flex justify-end">
-                {/* video user logo */}
-                <button></button>
-                {/* options */}
                 <div>
-                  <button className="rounded-full p-2">
+                  <button
+                    className="rounded-full p-2 transition-all"
+                    style={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+                    }}
+                    aria-label="Video options"
+                  >
                     <EllipsisVertical
                       size={20}
                       color={"white"}
@@ -463,16 +510,25 @@ const VideoPages = (props) => {
                   </button>
                 </div>
               </div>
-              {/* middle container */}
+
+              {/* Center Play/Pause Button */}
               <div className="flex items-center justify-center mx-auto h-fit">
-                {/* openables dropdown list */}
-                <div className="absolute inset-0 mx-[72%] my-[18%] w-fit h-fit  rounded-2xl"></div>
-                {/* move left button */}
-                {/* <button></button> */}
-                {/* play pause button */}
                 <button
                   onClick={togglePlayCurrent}
-                  className={`max-md:p-3 p-6 rounded-full bg-black/25`}
+                  className="max-md:p-3 p-6 rounded-full transition-all"
+                  style={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+                    e.target.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.25)';
+                    e.target.style.transform = 'scale(1)';
+                  }}
+                  aria-label={isPlaying ? "Pause video" : "Play video"}
                 >
                   {isPlaying ? (
                     <Pause
@@ -492,12 +548,11 @@ const VideoPages = (props) => {
                     />
                   )}
                 </button>
-                {/* move right button */}
-                {/* <button></button> */}
               </div>
-              {/* buttom container */}
-              <div className="">
-                {/* progressBar */}
+
+              {/* Bottom Controls */}
+              <div>
+                {/* Progress Bar */}
                 <div className="w-full px-0.5 mb-0.5">
                   <input
                     type="range"
@@ -507,18 +562,36 @@ const VideoPages = (props) => {
                     max={100}
                     value={progess}
                     onChange={handleProgressCurrent}
-                    className="w-full h-1"
+                    className="w-full h-1 transition-all"
+                    style={{
+                      accentColor: 'var(--accent-color)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    aria-label="Video progress"
                   />
                 </div>
 
-                {/* bottom controlable controls */}
-                <div className=" w-full px-3 max-sm:p-1 flex justify-between">
-                  {/* bottm left part */}
+                {/* Bottom Control Bar */}
+                <div
+                  className="w-full px-3 max-sm:p-1 flex justify-between"
+                  style={{ padding: 'var(--spacing-unit)' }}
+                >
+                  {/* Left Controls */}
                   <div className="flex space-x-1">
-                    {/* play button */}
+                    {/* Play/Pause */}
                     <button
                       onClick={togglePlayCurrent}
-                      className="rounded-full p-2 max-sm:p-1"
+                      className="rounded-full p-2 max-sm:p-1 transition-all"
+                      style={{
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                      }}
+                      aria-label={isPlaying ? "Pause" : "Play"}
                     >
                       {isPlaying ? (
                         <Pause
@@ -538,10 +611,21 @@ const VideoPages = (props) => {
                         />
                       )}
                     </button>
-                    {/* next video in the list */}
+
+                    {/* Skip Forward */}
                     <button
-                      onClick={handleNextVideo}
-                      className="rounded-full p-2 max-sm:p-1"
+                      onClick={() => {/* handleNextVideo function */ }}
+                      className="rounded-full p-2 max-sm:p-1 transition-all"
+                      style={{
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                      }}
+                      aria-label="Next video"
                     >
                       <SkipForward
                         size={20}
@@ -550,7 +634,8 @@ const VideoPages = (props) => {
                         className="max-md:size-4"
                       />
                     </button>
-                    {/* toggle volume mute */}
+
+                    {/* Volume Controls */}
                     <div
                       className="flex items-center ml-1.5 w-fit rounded-full text-white cursor-pointer"
                       onMouseEnter={() => setCurrentVolumeBar(true)}
@@ -558,7 +643,17 @@ const VideoPages = (props) => {
                     >
                       <button
                         onClick={toggleMuteCurrent}
-                        className="flex justify-center items-center w-fit p-2 max-sm:p-1"
+                        className="flex justify-center items-center w-fit p-2 max-sm:p-1 transition-all"
+                        style={{
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                        }}
+                        aria-label={isMuted ? "Unmute" : "Mute"}
                       >
                         {isMuted ? (
                           <VolumeX
@@ -578,69 +673,119 @@ const VideoPages = (props) => {
                         max="100"
                         value={volume}
                         onChange={handleVolumeChange}
-                        className={`${
-                          volume === 0 ? "bg-gray-300" : "bg-white"
-                        } w-16 h-1 appearance-none transition-all delay-75 rounded-lg cursor-pointer ${
-                          currentVolumeBar ? "block" : "hidden"
-                        } ml-2`}
+                        className={`w-16 h-1 appearance-none transition-all delay-75 rounded-lg cursor-pointer ml-2 ${currentVolumeBar ? "block" : "hidden"
+                          }`}
+                        style={{
+                          backgroundColor: volume === 0 ? 'var(--color-border)' : 'white',
+                          accentColor: 'var(--accent-color)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                        aria-label="Volume control"
                       />
                     </div>
-                    {/* duration runner with progressbar */}
-                    <div className="text-white max-sm:text-sm flex items-center justify-center">
+
+                    {/* Duration Display */}
+                    <div
+                      className="text-white max-sm:text-sm flex items-center justify-center"
+                      style={{
+                        fontSize: 'var(--font-size-sm)',
+                        fontFamily: 'var(--font-family)'
+                      }}
+                    >
                       {formatTime(currentDuration) +
                         " / " +
                         formatTime(targetVideo?.duration) ||
-                        "12:90 / 13:90"}
+                        "0:00 / 0:00"}
                     </div>
                   </div>
-                  {/* bottom right part */}
-                  <div className=" space-x-2 flex items-center">
-                    {/* autoPlay toggle button */}
+
+                  {/* Right Controls */}
+                  <div className="space-x-2 flex items-center">
+                    {/* Autoplay Toggle */}
                     <button
                       onClick={() => setIsAutoplayOn(!isAutoplayOn)}
-                      className={`
-              relative inline-flex items-center max-md:h-2 max-md:w-4 h-3 w-6 rounded-full transition-colors duration-300 ease-in-out focus:outline-none focus:ring-0
-              ${
-                isAutoplayOn
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-gray-300 hover:bg-gray-400"
-              }
-            `}
+                      className="relative inline-flex items-center max-md:h-2 max-md:w-4 h-3 w-6 rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-0"
+                      style={{
+                        backgroundColor: isAutoplayOn ? 'var(--accent-color)' : 'var(--color-border)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isAutoplayOn) {
+                          e.target.style.opacity = '0.9';
+                        } else {
+                          e.target.style.backgroundColor = 'var(--color-hover)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isAutoplayOn) {
+                          e.target.style.opacity = '1';
+                        } else {
+                          e.target.style.backgroundColor = 'var(--color-border)';
+                        }
+                      }}
+                      aria-label={`Autoplay is ${isAutoplayOn ? 'on' : 'off'}`}
                     >
-                      {/* Toggle Circle */}
                       <span
-                        className={`
-                 max-md:h-3 max-md:w-3 h-4 w-4 absolute transform rounded-full appearance-none outline-0 bg-gray-300 shadow-lg transition-transform duration-300 ease-in-out flex items-center justify-center
-                ${isAutoplayOn ? "translate-x-2.5" : "translate-x-0"}
-              `}
+                        className="max-md:h-3 max-md:w-3 h-4 w-4 absolute transform rounded-full appearance-none outline-0 shadow-lg transition-transform duration-300 ease-in-out flex items-center justify-center"
+                        style={{
+                          backgroundColor: 'var(--color-bg-primary)',
+                          transform: isAutoplayOn ? 'translateX(0.625rem)' : 'translateX(0)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
                       >
                         {isAutoplayOn ? (
                           <Play
                             size={12}
-                            fill="black/50"
+                            fill="var(--accent-color)"
                             stroke="3"
-                            className="max-md:size-4 text-gray-200"
+                            className="max-md:size-2"
                           />
                         ) : (
                           <Pause
                             size={12}
-                            fill="black/50"
+                            fill="var(--color-text-secondary)"
                             stroke="3"
-                            className="max-md:size-4 text-gray-100"
+                            className="max-md:size-2"
                           />
                         )}
                       </span>
                     </button>
-                    {/* setting drop down */}
-                    <button className="rounded-full p-2 max-sm:p-1">
+
+                    {/* Settings */}
+                    <button
+                      className="rounded-full p-2 max-sm:p-1 transition-all"
+                      style={{
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                      }}
+                      aria-label="Video settings"
+                    >
                       <Settings
                         size={20}
                         color={"white"}
                         className="max-md:size-4"
                       />
                     </button>
-                    {/* full screen toggle */}
-                    <button className="rounded-full p-2 max-sm:p-1">
+
+                    {/* Fullscreen */}
+                    <button
+                      className="rounded-full p-2 max-sm:p-1 transition-all"
+                      style={{
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                      }}
+                      aria-label="Enter fullscreen"
+                    >
                       <Maximize
                         size={20}
                         color={"white"}
@@ -653,147 +798,361 @@ const VideoPages = (props) => {
             </div>
           </div>
 
-          {/* button and some details */}
-          <div className="pb-2">
-            {/* title */}
-            <div className="flex items-center justify-between max-sm:p-1 max-sm:text-sm p-2.5 text-lg font-bold">
+          {/* Video Information */}
+          <div
+            className="pb-2 transition-all"
+            style={{
+              paddingBottom: 'var(--spacing-unit)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+          >
+            {/* Video Title */}
+            <div
+              className="flex items-center justify-between max-sm:p-1 max-sm:text-sm p-2.5 text-lg font-bold"
+              style={{
+                padding: 'var(--spacing-unit)',
+                fontSize: 'var(--font-size-lg)',
+                fontFamily: 'var(--font-family)',
+                color: 'var(--color-text-primary)'
+              }}
+            >
               <span className="line-clamp-2">{targetVideo?.title}</span>
             </div>
-            {/* button and detail */}
-            <div className="flex items-center justify-between p-2.5 max-sm:p-1">
+
+            {/* Channel Info and Actions */}
+            <div
+              className="flex items-center justify-between p-2.5 max-sm:p-1"
+              style={{
+                padding: 'var(--spacing-unit)',
+                gap: 'var(--spacing-unit)'
+              }}
+            >
+              {/* Channel Info */}
               <div className="h-full flex items-center">
                 <div className="flex justify-center items-center">
                   <img
                     src={targetVideo?.owner?.avatar}
-                    alt=""
-                    className="w-12 max-lg:w-8 bg-pink-300 aspect-square rounded-full drop-shadow-lg"
+                    alt={`${targetVideo?.owner?.username} avatar`}
+                    className="w-12 max-lg:w-8 aspect-square rounded-full drop-shadow-lg"
+                    loading="lazy"
                   />
                 </div>
-                <div className="flex flex-col ml-2">
-                  <span className="text-[24px] max-lg:text-[16px] font-medium leading-tight">
+                <div
+                  className="flex flex-col ml-2"
+                  style={{ marginLeft: 'var(--spacing-unit)' }}
+                >
+                  <span
+                    className="text-[24px] max-lg:text-[16px] font-medium leading-tight"
+                    style={{
+                      fontSize: 'var(--font-size-xl)',
+                      fontFamily: 'var(--font-family)',
+                      color: 'var(--color-text-primary)'
+                    }}
+                  >
                     {targetVideo?.owner?.username}
                   </span>
-                  <span className="text-[11px] max-lg:text-xs font-medium opacity-65">
-                    {"12.23M"} <span className="leading-0 ">subcribers</span>
+                  <span
+                    className="text-[11px] max-lg:text-xs font-medium opacity-65"
+                    style={{
+                      fontSize: 'var(--font-size-xs)',
+                      color: 'var(--color-text-secondary)'
+                    }}
+                  >
+                    {"12.23M"} <span>subscribers</span>
                   </span>
                 </div>
                 <div className="h-full flex justify-center items-center">
                   <button
-                    onClick={() =>
-                      handleSubcribeUser()
-                    }
-                    className={`${
-                      currentStatus?.subcriberStatus
-                        ? "bg-gray-300 hover:bg-gray-500 active:bg-gray-600"
-                        : "bg-red-400 hover:bg-red-500 active:bg-red-600"
-                    } ml-3 px-3 max-sm:px-2 max-sm:py-1 max-lg:px-2 max-lg:text-sm py-2 max-lg:py-2 rounded-4xl flex justify-center items-center font-medium`}
+                    onClick={handleSubcribeUser}
+                    className="ml-3 px-3 max-sm:px-2 max-sm:py-1 max-lg:px-2 max-lg:text-sm py-2 max-lg:py-2 rounded-full flex justify-center items-center font-medium transition-all"
+                    style={{
+                      backgroundColor: currentStatus?.subcriberStatus
+                        ? 'var(--color-bg-secondary)'
+                        : 'var(--color-error)',
+                      color: currentStatus?.subcriberStatus ? 'var(--color-text-primary)' : 'white',
+                      fontSize: 'var(--font-size-base)',
+                      fontFamily: 'var(--font-family)',
+                      marginLeft: 'var(--spacing-unit)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.opacity = '0.9';
+                      e.target.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.opacity = '1';
+                      e.target.style.transform = 'translateY(0)';
+                    }}
+                    aria-label={`${currentStatus?.subcriberStatus ? 'Unsubscribe from' : 'Subscribe to'} ${targetVideo?.owner?.username}`}
                   >
-                    {currentStatus?.subcriberStatus ? "Subcribed" : "Subcribe"}
+                    {currentStatus?.subcriberStatus ? "Subscribed" : "Subscribe"}
                   </button>
                 </div>
-                <div></div>
               </div>
-              <div className=" h-full flex max-sm:space-x-1 space-x-3">
-                {/* like */}
+
+              {/* Action Buttons */}
+              <div
+                className="h-full flex max-sm:space-x-1 space-x-3"
+                style={{ gap: 'var(--spacing-unit)' }}
+              >
+                {/* Like Button */}
                 <div className="h-full flex justify-center items-center">
-                  <div className=" font-medium flex">
+                  <div className="font-medium flex">
                     <button
                       onClick={handleLikeToggleVideos}
-                      className=" font-medium max-lg:text-sm max-sm:px-2 max-sm:py-1 pt-2 pl-4 pb-2 pr-4 rounded-4xl items-center  flex bg-gray-100 hover:bg-gray-200 active:bg-gray-300"
+                      className="font-medium max-lg:text-sm max-sm:px-2 max-sm:py-1 pt-2 pl-4 pb-2 pr-4 rounded-full items-center flex transition-all"
+                      style={{
+                        backgroundColor: 'var(--color-bg-secondary)',
+                        color: 'var(--color-text-primary)',
+                        fontSize: 'var(--font-size-base)',
+                        fontFamily: 'var(--font-family)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'var(--color-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                      }}
+                      aria-label={`${currentStatus?.likeStatus ? 'Unlike' : 'Like'} this video`}
                     >
                       {currentStatus?.likeStatus ? (
                         <ThumbsUp
-                          fill="black"
+                          fill="var(--accent-color)"
                           className="mr-2 max-lg:w-4"
+                          style={{ color: 'var(--accent-color)' }}
                         />
                       ) : (
                         <ThumbsUp className="mr-2 max-lg:w-4" />
                       )}
-                      <span>{targetVideo?.likeCount || "12k"}</span>
+                      <span>{targetVideo?.likeCount || "0"}</span>
                     </button>
                   </div>
                 </div>
-                {/* save */}
-                <div className="hidden h-full justify-center items-center space-x-3">
-                  <button className="pt-2 max-lg:text-sm max-sm:px-2 max-sm:py-1 pb-2 pl-4 pr-4 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-4xl flex justify-center items-center font-medium space-x-2">
-                    <Share2 className={`max-lg:w-4`} /> <span>Share</span>
-                  </button>
-                </div>
-                {/* Download */}
-                <div className="hidden h-full justify-center items-center space-x-3">
-                  <button className="pt-2 max-lg:text-sm max-sm:px-2 max-sm:py-1 pb-2 pl-4 pr-4 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-4xl flex justify-center items-center font-medium space-x-2">
-                    <ArrowDownToLine className={`max-lg:w-4`} />{" "}
-                    <span>Download</span>
-                  </button>
-                </div>
-                {/* add video to playlist */}
-                
-                <div className=" h-full justify-center items-center">
-                  <div className={`${ToggleAddPlaylistBtn ? "-translate-y-[104%] max-sm:-translate-x-[25%] translate-x-[5%] max-lg:-translate-x-[3%]" : "hidden"} absolute max-sm:right-1  h-[160px] aspect-square   transition-all duration-1000 overflow-hidden bg-gray-50 rounded-lg shadow-2xs`}>
-                    <h3 className="text-center mt-1">Add To PlayList</h3>
-                    <ul className=" overflow-y-scroll scrollBar w-full h-full">
-                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
-                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
-                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
-                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
-                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
-                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
-                      <li className="flex justify-center py-2 hover:bg-gray-100 active:bg-gray-200 active:opacity-80"><span><input type="checkbox" name="" id="1" className="mr-1" /></span> playlist name</li>
+
+                {/* Add to Playlist */}
+                <div className="h-full justify-center items-center relative">
+                  <div
+                    className={`${ToggleAddPlaylistBtn
+                        ? "-translate-y-[104%] max-sm:-translate-x-[25%] translate-x-[5%] max-lg:-translate-x-[3%]"
+                        : "hidden"
+                      } absolute max-sm:right-1 h-[160px] aspect-square transition-all duration-1000 overflow-hidden rounded-lg shadow-lg z-50`}
+                    style={{
+                      backgroundColor: 'var(--color-bg-primary)',
+                      border: '1px solid var(--color-border)',
+                      transitionDuration: appearanceSettings.reducedMotion ? '0s' : '1s'
+                    }}
+                  >
+                    <h3
+                      className="text-center mt-1"
+                      style={{
+                        color: 'var(--color-text-primary)',
+                        fontSize: 'var(--font-size-base)',
+                        fontFamily: 'var(--font-family)'
+                      }}
+                    >
+                      Add To Playlist
+                    </h3>
+                    <ul className="overflow-y-scroll scrollBar w-full h-full">
+                      {/* Playlist items would go here */}
+                      <li
+                        className="flex justify-center py-2 transition-all"
+                        style={{
+                          color: 'var(--color-text-primary)',
+                          fontSize: 'var(--font-size-sm)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = 'var(--color-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <span><input type="checkbox" className="mr-1" /></span>
+                        Sample Playlist
+                      </li>
                     </ul>
                   </div>
-                  <button onClick={() => setToggleAddPlaylistBtn(!ToggleAddPlaylistBtn)} className="pt-2 max-lg:text-sm max-sm:px-2 max-sm:py-1 pb-2 pl-4 pr-4 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-4xl flex justify-center items-center font-medium max-sm:space-x-0 space-x-2">
-                    <Plus className={`max-lg:w-4`} />{" "}
-                    <span className="max-sm:hidden">Add to playList</span>
+                  <button
+                    onClick={() => setToggleAddPlaylistBtn(!ToggleAddPlaylistBtn)}
+                    className="pt-2 max-lg:text-sm max-sm:px-2 max-sm:py-1 pb-2 pl-4 pr-4 rounded-full flex justify-center items-center font-medium max-sm:space-x-0 space-x-2 transition-all"
+                    style={{
+                      backgroundColor: 'var(--color-bg-secondary)',
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-base)',
+                      fontFamily: 'var(--font-family)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-hover)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                    }}
+                    aria-label="Add to playlist"
+                  >
+                    <Plus className="max-lg:w-4" />
+                    <span className="max-sm:hidden">Add to playlist</span>
                   </button>
                 </div>
-                {/* more list */}
+
+                {/* More Options */}
                 <div className="h-full flex justify-center items-center">
-                  <button className="max-sm:py-1 sm:px-4 sm:py-2 max-sm:px-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-4xl flex justify-center items-center font-medium">
-                    <EllipsisVertical className={`max-lg:w-4 aspect-square`} />
+                  <button
+                    className="max-sm:py-1 sm:px-4 sm:py-2 max-sm:px-2 rounded-full flex justify-center items-center font-medium transition-all"
+                    style={{
+                      backgroundColor: 'var(--color-bg-secondary)',
+                      color: 'var(--color-text-primary)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-hover)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                    }}
+                    aria-label="More options"
+                  >
+                    <EllipsisVertical className="max-lg:w-4 aspect-square" />
                   </button>
                 </div>
-                {/* can add button for video videos like save,flag etc  */}
               </div>
             </div>
-            {/* descriptions  */}
-            <div onClick={() => setshowDesc(true)} onBlur={() =>showDesc(false)} className={`${showDesc ? "h-fit" : "line-clamp-2"} w-full my-2.5`}>
-              <div className={`p-3 max-md:p-1.5 max-md:mx-2 flex-col bg-gray-50  border-2 border-gray-200   rounded-lg ${showDesc ? "" : "line-clamp-2 max-md:line-clamp-1"}`}>
-                {/* views and day date year */}
-                <div className={`${showDesc ? "" : "hidden"} flex space-x-2 text-[11px] font-medium `}>
+
+            {/* Video Description */}
+            <div
+              onClick={() => setshowDesc(true)}
+              onBlur={() => setshowDesc(false)}
+              className={`${showDesc ? "h-fit" : "line-clamp-2"} w-full my-2.5 transition-all`}
+              style={{
+                margin: 'var(--spacing-unit) 0',
+                transitionDuration: 'var(--animation-duration)'
+              }}
+            >
+              <div
+                className={`p-3 max-md:p-1.5 max-md:mx-2 flex-col border-2 rounded-lg ${showDesc ? "" : "line-clamp-2 max-md:line-clamp-1"
+                  } transition-all cursor-pointer`}
+                style={{
+                  backgroundColor: 'var(--color-bg-tertiary)',
+                  borderColor: 'var(--color-border)',
+                  padding: 'var(--component-padding)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-tertiary)';
+                }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={showDesc}
+                aria-label="Video description"
+              >
+                {/* Views and Date */}
+                <div
+                  className={`${showDesc ? "" : "hidden"} flex space-x-2 text-[11px] font-medium`}
+                  style={{
+                    fontSize: 'var(--font-size-xs)',
+                    color: 'var(--color-text-secondary)'
+                  }}
+                >
                   <span>
-                    {targetVideo?.views} <span>View</span>
+                    {targetVideo?.views} <span>Views</span>
                   </span>
                   <span className="flex space-x-2">
                     {formatToLocalString(targetVideo?.createdAt)}
                   </span>
                 </div>
-                {/* description */}
-                <p className="w-full">{targetVideo?.description}</p>
-                <div className="text-xs cursor-pointer" onClick={(e) => {
-                  e.stopPropagation();
-                  setshowDesc(false);
-                }}>Show Less</div>
+                {/* Description Text */}
+                <p
+                  className="w-full"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-base)',
+                    fontFamily: 'var(--font-family)'
+                  }}
+                >
+                  {targetVideo?.description}
+                </p>
+                <div
+                  className="text-xs cursor-pointer transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setshowDesc(false);
+                  }}
+                  style={{
+                    color: 'var(--accent-color)',
+                    fontSize: 'var(--font-size-xs)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.opacity = '0.8';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.opacity = '1';
+                  }}
+                >
+                  Show Less
+                </div>
               </div>
-              
             </div>
-            {/* comments setion */}
-            <div onClick={() => setMinimiseComment(true)} className="border-2 my-3 border-gray-200 bg-gray-50 rounded-2xl overflow-hidden">
-              <Comments whichContent={"videos"} contentId={VideoId} timeAgo={timeAgo} minimiseComment={minimiseComment} setMinimiseComment={setMinimiseComment} />
+
+            {/* Comments Section */}
+            <div
+              onClick={() => setMinimiseComment(true)}
+              className="border-2 my-3 rounded-2xl overflow-hidden transition-all"
+              style={{
+                backgroundColor: 'var(--color-bg-tertiary)',
+                borderColor: 'var(--color-border)',
+                margin: 'var(--spacing-unit) 0',
+                transitionDuration: 'var(--animation-duration)'
+              }}
+            >
+              <Comments
+                whichContent={"videos"}
+                contentId={VideoId}
+                timeAgo={timeAgo}
+                minimiseComment={minimiseComment}
+                setMinimiseComment={setMinimiseComment}
+              />
             </div>
           </div>
         </div>
-        {/* recommandation section */}
-        <div className=" w-[30%] max-lg:mt-2 px-2 pt-2 max-md:px-0 max-lg:w-full max-lg:rounded-none rounded-lg flex flex-col space-y-3">
-          <div className={``}>
+
+        {/* Recommendations Section */}
+        <div
+          className="w-[30%] max-lg:mt-2 px-2 pt-2 max-md:px-0 max-lg:w-full max-lg:rounded-none rounded-lg flex flex-col space-y-3 transition-all"
+          style={{
+            gap: 'var(--spacing-unit)',
+            padding: 'var(--spacing-unit)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
+        >
+          {/* Playlist Videos */}
+          <div>
             {playlist?.video?.map((video) => (
               <div
                 key={video._id}
-                className="flex max-lg:flex-col max-lg:w-full h-fit"
+                className="flex max-lg:flex-col max-lg:w-full h-fit mb-3 transition-all cursor-pointer"
                 onClick={() => Navigate(`/video/${video?._id}`)}
+                style={{
+                  marginBottom: 'var(--spacing-unit)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Play ${video?.title}`}
               >
-                {/* video */}
+                {/* Video Thumbnail */}
                 <div
-                  className="relative w-[40%] max-lg:w-full  h-fit"
+                  className="relative w-[40%] max-lg:w-full h-fit"
                   onMouseEnter={(prev) => {
                     setRecommendationStates({
                       ...prev,
@@ -806,7 +1165,7 @@ const VideoPages = (props) => {
                       ...prev,
                       [video?._id]: { ...prev[video?._id], mutedStatus: false },
                     });
-                    togglePauseRecommendation(video?._id);
+                    // togglePauseRecommendation(video?._id);
                   }}
                 >
                   <video
@@ -818,73 +1177,109 @@ const VideoPages = (props) => {
                     }}
                     muted={recommendationStates[video?._id]?.isMuted}
                     poster={video?.thumbnail}
-                    onTimeUpdate={() => handleOnTimeUpdate(video?._id)}
+                    // onTimeUpdate={() => handleOnTimeUpdate(video?._id)}
                     preload="metadata"
-                    className="bg-black/90 aspect-video max-md:rounded-none max-lg:w-full rounded-lg"
-                  ></video>
+                    className="aspect-video max-md:rounded-none max-lg:w-full rounded-lg"
+                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+                    aria-label={`Preview of ${video?.title}`}
+                  />
                   <div className="absolute inset-0 p-2">
                     <div className="flex justify-end">
                       <button
-                        ref={(el) => {
-                          if (el) {
-                            muteButtonRef.current[video?._id] = el;
-                          }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // toggleMuteRecommendation(e, video?._id);
                         }}
-                        onClick={(e) => toggleMuteRecommendation(e, video?._id)}
-                        className={`${recommendationStates[video?._id]?.mutedStatus
-                            ? ""
-                            : "hidden"
-                          } p-2 rounded-full hover:bg-black30 active:bg-black/50 z-13`}
+                        className={`${recommendationStates[video?._id]?.mutedStatus ? "" : "hidden"
+                          } p-2 rounded-full transition-all z-10`}
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+                        }}
+                        aria-label={recommendationStates[video?._id]?.isMuted ? "Unmute" : "Mute"}
                       >
                         {recommendationStates[video?._id]?.isMuted === true &&
                           recommendationStates[video?._id]?.mutedStatus === true ? (
-                          <VolumeX
-                            size={16}
-                            color="white"
-                          />
+                          <VolumeX size={16} color="white" />
                         ) : (
-                          <Volume2
-                            size={16}
-                            color="white"
-                          />
+                          <Volume2 size={16} color="white" />
                         )}
                       </button>
                     </div>
                     <div className="absolute inset-0 flex items-end justify-end bottom-0 p-2 text-[10px]">
-                      <h1 className="text-white text-lg max-md:text-sm bg-black/30 font-semibold px-1 py-0.1 rounded-sm">
+                      <h1
+                        className="text-white text-lg max-md:text-sm font-semibold px-1 py-0.1 rounded-sm"
+                        style={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                          fontSize: 'var(--font-size-sm)',
+                          fontFamily: 'var(--font-family)'
+                        }}
+                      >
                         {recommendationStates[video?._id]?.isPlaying === true
-                          ? formatTime(
-                            recommendationStates[video?._id]?.duration || 0
-                          )
+                          ? formatTime(recommendationStates[video?._id]?.duration || 0)
                           : formatTime(video?.duration || 0)}
                       </h1>
                     </div>
                   </div>
                 </div>
-                <div className="w-[60%] max-lg:w-full flex justify-base flex-col max-md:py-0 py-1 pl-2 max-md:my-1">
-                  {/* title */}
-                  <div className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]">
+
+                {/* Video Info */}
+                <div
+                  className="w-[60%] max-lg:w-full flex justify-base flex-col max-md:py-0 py-1 pl-2 max-md:my-1"
+                  style={{
+                    paddingLeft: 'var(--spacing-unit)',
+                    paddingTop: 'var(--spacing-unit)'
+                  }}
+                >
+                  {/* Title */}
+                  <div
+                    className="line-clamp-2 w-full font-medium text-md max-md:text-[16px]"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-base)',
+                      fontFamily: 'var(--font-family)'
+                    }}
+                  >
                     <h2>{video?.title}</h2>
                   </div>
                   <div className="flex">
-                    <div className="flex items-baseline ">
+                    <div className="flex items-baseline">
                       <img
                         src={video?.userInfo?.avatar}
-                        alt=""
+                        alt={`${video?.userInfo?.username} avatar`}
                         className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                        loading="lazy"
                       />
                     </div>
                     <div className="flex flex-col leading-tight">
-                      {/* user name */}
-                      <div className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
+                      {/* Username */}
+                      <div
+                        className="mb-1 text-xs font-normal max-md:text-xs"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          fontSize: 'var(--font-size-xs)'
+                        }}
+                      >
                         <h3>{video?.userInfo?.username}</h3>
                       </div>
-                      {/* view and month ago */}
-                      <div className="text-[11px] font-normal  text-gray-500 max-md:text-[11px] space-x-1.5">
+                      {/* Views and Date */}
+                      <div
+                        className="text-[11px] font-normal max-md:text-[11px] space-x-1.5"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          fontSize: 'var(--font-size-xs)'
+                        }}
+                      >
                         <span>{video?.views} views</span>
                         <span className="mx-1">•</span>
                         <span>
-                          {formatTimeAgo(video?.createdAt) || "12 year ago"}
+                          {formatTimeAgo(video?.createdAt) || "Unknown time"}
                         </span>
                       </div>
                     </div>
@@ -893,173 +1288,207 @@ const VideoPages = (props) => {
               </div>
             ))}
           </div>
+
+          {/* Filtered Recommendations */}
           {filteredVideos.map((video) => (
             <div
               key={video._id}
-              className="flex max-lg:flex-col max-lg:w-full h-fit"
-              // onClick={() => Navigate(`/video/${video?._id}`)}
+              className="flex max-lg:flex-col max-lg:w-full h-fit mb-3 transition-all"
               name="filter-container"
               data-id={video._id}
               onClick={handleOverAllEvent}
+              style={{
+                marginBottom: 'var(--spacing-unit)',
+                transitionDuration: 'var(--animation-duration)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--color-hover)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+              }}
             >
-              {/* video */}
+              {/* Video Thumbnail */}
               <div
-                className="relative w-[40%] max-lg:w-full  h-fit"
+                className="relative w-[40%] max-lg:w-full h-fit"
                 name="video-cover"
                 onMouseEnter={handleOverAllEvent}
                 onMouseLeave={handleOverAllEvent}
-                // onMouseEnter={(prev) => {
-                //   setRecommendationStates({
-                //     ...prev,
-                //     [video?._id]: { ...prev[video?._id], mutedStatus: true },
-                //   });
-                //   togglePlayRecommendation(video?._id);
-                // }}
-                // onMouseLeave={(prev) => {
-                //   setRecommendationStates({
-                //     ...prev,
-                //     [video?._id]: { ...prev[video._id], mutedStatus: false },
-                //   });
-                //   togglePauseRecommendation(video._id);
-                // }}
               >
                 <video
                   src={video?.videoFile}
-                  // ref={(el) => {
-                  //   if (el) {
-                  //     videoRecommendationRefs.current[video?._id] = el;
-                  //   }
-                  // }}
                   name="video"
                   id={video._id}
                   muted={recommendationStates[video?._id]?.isMuted}
                   poster={video?.thumbnail}
                   onTimeUpdate={() => handleOnTimeUpdate(video?._id)}
                   preload="metadata"
-                  className="bg-black/90 aspect-video max-md:rounded-none max-lg:w-full rounded-lg"
-                ></video>
+                  className="aspect-video max-md:rounded-none max-lg:w-full rounded-lg"
+                  style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+                />
                 <div name="control-container" className="absolute inset-0 p-1 max-lg:p-2">
                   <div className="flex justify-end items-baseline">
                     <button
-                      // ref={(el) => {
-                      //   if (el) {
-                      //     muteButtonRef.current[video?._id] = el;
-                      //   }
-                      // }}
                       name="volume"
-                      // onClick={(e) => toggleMuteRecommendation(e, video?._id)}
                       onClick={handleOverAllEvent}
                       id={video._id}
-                      className={`${
-                        recommendationStates[video?._id]?.mutedStatus
-                          ? ""
-                          : "hidden"
-                      } p-2 rounded-full hover:bg-black30 active:bg-black/50 z-13`}
-                      // className="lg:p-1 p-1 rounded-full hover:bg-black/30 active:bg-black/50 z-13"
+                      className={`${recommendationStates[video?._id]?.mutedStatus ? "" : "hidden"
+                        } p-2 rounded-full transition-all z-10`}
+                      style={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+                      }}
                     >
                       {recommendationStates[video?._id]?.isMuted === true ? (
                         <VolumeX
-                            // size={16}
-                            id={video._id}
+                          id={video._id}
                           color="white"
                           className="size-5 max-lg:size-7 max-sm:size-6"
                         />
                       ) : (
                         <Volume2
-                            // size={16}
-                            id={video._id}
-                            color="white"
-                            className="size-5 max-lg:size-7 max-sm:size-6"
+                          id={video._id}
+                          color="white"
+                          className="size-5 max-lg:size-7 max-sm:size-6"
                         />
                       )}
                     </button>
                   </div>
                   <div name="duration" id={video._id} className="absolute inset-0 flex items-end justify-end bottom-0 max-lg:p-2 lg:p-1">
-                    <h1 className="bg-black/50 text-white  max-md:text-xs text-[10px] lg:px-1 lg:py-0.5 px-2 py-1 rounded font-medium">
+                    <h1
+                      className="text-white max-md:text-xs text-[10px] lg:px-1 lg:py-0.5 px-2 py-1 rounded font-medium"
+                      style={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        fontSize: 'var(--font-size-xs)',
+                        fontFamily: 'var(--font-family)'
+                      }}
+                    >
                       {recommendationStates[video?._id]?.isPlaying === true
-                        ? formatTime(
-                            recommendationStates[video?._id]?.duration || 0
-                          )
+                        ? formatTime(recommendationStates[video?._id]?.duration || 0)
                         : formatTime(video?.duration || 0)}
                     </h1>
                   </div>
                 </div>
               </div>
-              <div className="w-[60%] max-lg:w-full flex justify-base flex-col max-md:py-0 py-1 pl-2 max-md:my-1">
 
-                {/* design for upto laptop */}
-                <div  className="line-clamp-2 max-lg:hidden w-full font-medium text-md max-md:text-[16px] ">
+              {/* Video Info */}
+              <div
+                className="w-[60%] max-lg:w-full flex justify-base flex-col max-md:py-0 py-1 pl-2 max-md:my-1"
+                style={{
+                  paddingLeft: 'var(--spacing-unit)',
+                  paddingTop: 'var(--spacing-unit)'
+                }}
+              >
+                {/* Desktop Layout */}
+                <div
+                  className="line-clamp-2 max-lg:hidden w-full font-medium text-md max-md:text-[16px]"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-base)',
+                    fontFamily: 'var(--font-family)'
+                  }}
+                >
                   <h2 name="title" id={video._id}>{video?.title}</h2>
                 </div>
                 <div className="flex max-lg:hidden">
                   <div className="flex items-baseline lg:hidden">
                     <img
                       src={video?.userInfo?.avatar}
-                      alt=""
+                      alt={`${video?.userInfo?.username} avatar`}
                       name="avatar"
                       id={video._id}
                       data-username={video?.userInfo?.username}
                       className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                      loading="lazy"
                     />
                   </div>
                   <div className="flex flex-col leading-tight">
-                    {/* user name */}
-                    <div  className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
-                      <h3 name="username" data-username={video?.userInfo?.username} id={video._id}>{video?.userInfo?.username}</h3>
+                    <div
+                      className="mb-1 text-xs font-normal max-md:text-xs"
+                      style={{
+                        color: 'var(--color-text-secondary)',
+                        fontSize: 'var(--font-size-xs)'
+                      }}
+                    >
+                      <h3 name="username" data-username={video?.userInfo?.username} id={video._id}>
+                        {video?.userInfo?.username}
+                      </h3>
                     </div>
-                    {/* view and month ago */}
-                    <div className="text-[11px] font-normal  text-gray-500 max-md:text-[11px] space-x-1.5">
+                    <div
+                      className="text-[11px] font-normal max-md:text-[11px] space-x-1.5"
+                      style={{
+                        color: 'var(--color-text-secondary)',
+                        fontSize: 'var(--font-size-xs)'
+                      }}
+                    >
                       <span>{video?.views} views</span>
                       <span className="mx-1">•</span>
                       <span>
-                        {formatTimeAgo(video?.createdAt) || "12 year ago"}
+                        {formatTimeAgo(video?.createdAt) || "Unknown time"}
                       </span>
                     </div>
                   </div>
                 </div>
-                {/* design for under laptop */}
+
+                {/* Mobile Layout */}
                 <div className="flex lg:hidden">
-                  {/* image */}
                   <div className="flex">
                     <div className="flex items-baseline">
                       <img
                         src={video?.userInfo?.avatar}
-                        alt=""
+                        alt={`${video?.userInfo?.username} avatar`}
                         name="avatar"
                         id={video._id}
                         data-username={video?.userInfo?.username}
                         className="w-6 mr-3 max-sm:w-8 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
+                        loading="lazy"
                       />
                     </div>
-                    {/* title username createdAt views */}
                     <div>
-                      {/* title */}
-                      <div  className="line-clamp-2 w-full font-medium text-lg max-md:text-[16px]">
-                        <h2 name="title" id={video._id} >{video?.title}</h2>
+                      <div
+                        className="line-clamp-2 w-full font-medium text-lg max-md:text-[16px]"
+                        style={{
+                          color: 'var(--color-text-primary)',
+                          fontSize: 'var(--font-size-lg)',
+                          fontFamily: 'var(--font-family)'
+                        }}
+                      >
+                        <h2 name="title" id={video._id}>{video?.title}</h2>
                       </div>
-                      <div className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs leading-tight flex">
-                        {/* username */}
-                        <div  className="mb-1  text-xs font-normal text-gray-500 max-md:text-xs">
-                          <h3 name="username" data-username={video?.userInfo?.username} id={video._id}>{video?.userInfo?.username}</h3>
+                      <div
+                        className="mb-1 text-xs font-normal max-md:text-xs leading-tight flex"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          fontSize: 'var(--font-size-xs)'
+                        }}
+                      >
+                        <div className="mb-1 text-xs font-normal max-md:text-xs">
+                          <h3 name="username" data-username={video?.userInfo?.username} id={video._id}>
+                            {video?.userInfo?.username}
+                          </h3>
                         </div>
                         <span className="mx-1">•</span>
-                        {/* view */}
                         <span>{video?.views} views</span>
                         <span className="mx-1">•</span>
-                        {/* time ago */}
                         <span>
-                          {formatTimeAgo(video?.createdAt) || "12 year ago"}
+                          {formatTimeAgo(video?.createdAt) || "Unknown time"}
                         </span>
                       </div>
                     </div>
                   </div>
-                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-      </div>
+    </div>
   );
 };
 

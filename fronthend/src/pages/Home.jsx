@@ -1,4 +1,4 @@
-import React,{ useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import SideMenu from "../components/SideMenu";
 import Main from "../components/Main";
@@ -11,8 +11,10 @@ import UploadShort from "../components/UploadShort";
 import UploadLive from '../components/UploadLive';
 
 import UserName from "../components/CheckHasUsername";
+import { useAppearance } from '../hooks/appearances';
 
 function Home() {
+  const { appearanceSettings } = useAppearance();
   const [showMenu, setShowMenu] = useState(false);
   const { user, loggedIn, sideActive } = useSelector((state) => state.user);
 
@@ -70,10 +72,10 @@ function Home() {
   }
 
   useEffect(() => {
-        if (loggedIn === true && sideActive === "home") {
-          dispatch(fetchVideos(videoParams));
-        }
-  }, [dispatch,videoParams,loggedIn,sideActive]);
+    if (loggedIn === true && sideActive === "home") {
+      dispatch(fetchVideos(videoParams));
+    }
+  }, [dispatch, videoParams, loggedIn, sideActive]);
 
   useEffect(() => {
     if (loggedIn === true && sideActive === "shorts") {
@@ -82,7 +84,21 @@ function Home() {
   }, [dispatch, shortParams, loggedIn, sideActive]);
 
   return (
-    <div className="relative">
+    <div
+      className="relative transition-all"
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        color: 'var(--color-text-primary)',
+        fontFamily: 'var(--font-family)',
+        backgroundImage: 'var(--background-image)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        transitionDuration: 'var(--animation-duration)',
+        minHeight: '100vh'
+      }}
+    >
+      {/* Upload Components with Theme Integration */}
       <UploadVideo
         setToggleVideoUploading={setToggleVideoUploading}
         toggleVideoUploading={toggleVideoUploading}
@@ -95,35 +111,81 @@ function Home() {
         setToggleLiveUploading={setToggleLiveUploading}
         toggleLiveUploading={toggleLiveUploading}
       />
+
+      {/* Header with Theme Support */}
       <Header
         menuToggle={{ showMenu, setShowMenu }}
         setToggleVideoUploading={setToggleVideoUploading}
         setToggleShortUploading={setToggleShortUploading}
         setToggleLiveUploading={setToggleLiveUploading}
         videoQueries={{ videoParams, setVideoParams }}
-        shortQueries={{shortParams,setShortParams}}
+        shortQueries={{ shortParams, setShortParams }}
       />
-      {/* pop up if user not has username */}
+
+      {/* Username Check Popup */}
       <UserName />
-      <div className={`w-screen h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] flex`}>
-        <div className=" h-full">
+
+      {/* Main Layout Container */}
+      <div
+        className="w-screen h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] flex transition-all"
+        style={{
+          transitionDuration: 'var(--animation-duration)'
+        }}
+      >
+        {/* Sidebar Container */}
+        <div
+          className="h-full transition-all"
+          style={{
+            transitionDuration: 'var(--animation-duration)'
+          }}
+        >
           <SideMenu
             menuToggle={{ showMenu, setShowMenu }}
             videoParam={{ setVideoParams, videoParams }}
           />
         </div>
 
-        <div className="w-full h-full">
-          {/* <TagSection /> */}
+        {/* Main Content Container */}
+        <div
+          className="w-full h-full transition-all"
+          style={{
+            backgroundColor: appearanceSettings.backgroundType !== 'default'
+              ? 'rgba(var(--color-bg-primary-rgb), 0.98)'
+              : 'var(--color-bg-primary)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
+        >
+          {/* Background Overlay for Custom Backgrounds */}
+          {appearanceSettings.backgroundType !== 'default' && (
+            <div
+              className="absolute inset-0 z-0 transition-opacity"
+              style={{
+                backgroundColor: 'var(--color-bg-primary)',
+                opacity: '0.95',
+                transitionDuration: 'var(--animation-duration)'
+              }}
+            />
+          )}
 
-          <Main
-            showMenu={showMenu}
-            timeAgo={timeAgo}
-            setToggleVideoUploading={setToggleVideoUploading}
-            toggleVideoUploading={toggleVideoUploading}
-          />
+          {/* Main Content Component */}
+          <div
+            className="relative z-10 h-full transition-all"
+            style={{
+              transitionDuration: 'var(--animation-duration)'
+            }}
+          >
+            <Main
+              showMenu={showMenu}
+              timeAgo={timeAgo}
+              setToggleVideoUploading={setToggleVideoUploading}
+              toggleVideoUploading={toggleVideoUploading}
+            />
+          </div>
         </div>
       </div>
+
+      {/* Global Theme Variables Applied */}
+      
     </div>
   );
 }

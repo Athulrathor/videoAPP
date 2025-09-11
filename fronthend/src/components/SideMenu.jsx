@@ -21,8 +21,10 @@ import { setSideActive } from "../redux/features/user";
 import { ChartNoAxesGanttIcon, History, LucideHistory } from "lucide-react";
 import { fetchVideoByOwner } from "../redux/features/videos";
 import { userSubcribers } from "../redux/features/subcribers";
+import { useAppearance } from '../hooks/appearances';
 
 function SideMenu(props) {
+  const { appearanceSettings } = useAppearance();
   const currentYear = new Date().getFullYear();
 
   const dispatch = useDispatch();
@@ -30,7 +32,7 @@ function SideMenu(props) {
   const Navigate = useNavigate();
 
   const { user, loggedIn, sideActive } = useSelector((state) => state.user);
-  const { subcriber } = useSelector(state => state.subscriber)
+  const { subcriber } = useSelector(state => state.subscriber);
 
   useEffect(() => {
     dispatch(userSubcribers());
@@ -38,383 +40,802 @@ function SideMenu(props) {
 
   return (
     <div>
-    <div
-      className={`scrollBar h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] ${
-        props.menuToggle?.showMenu ? `-translate-x-[100%] absolute` : "translate-x-[0%]"
-      } max-md:absolute bg-white shadow-2xl  p-2.5 max-w-[224px] z-14  -translate-x-[100%] overflow-y-scroll transition-transform duration-1000 ease-in-out scroll-smooth`}
-    >
-      <div className="border-b border-gray-300 pb-5 gap-1">
+      <div
+        className={`scrollBar h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] ${props.menuToggle?.showMenu ? `-translate-x-[100%] absolute` : "translate-x-[0%]"
+          } max-md:absolute p-2.5 max-w-[224px] z-14 -translate-x-[100%] overflow-y-scroll transition-all duration-1000 ease-in-out scroll-smooth`}
+        style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          transitionDuration: appearanceSettings.reducedMotion ? '0s' : '1s'
+        }}
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        {/* Main Navigation Section */}
         <div
-          className={`hover:bg-gray-100 cursor-pointer rounded-lg px-3 py-2 flex items-center gap-4 ${
-            sideActive === "home" ? "bg-gray-200" : ""
-          }`}
-          onClick={() => {
-            dispatch(setSideActive("home"));
-            props.menuToggle?.setShowMenu(true);
-            if (getLocation !== "/") return Navigate("/");
+          className="border-b pb-5 gap-1 transition-colors"
+          style={{
+            borderColor: 'var(--color-border)',
+            transitionDuration: 'var(--animation-duration)'
           }}
         >
-          {sideActive === "home" ? (
-            <GoHomeFill className="w-5 h-5" />
-          ) : (
-            <GrHomeRounded className="w-5 h-5" />
-          )}
-          {props.menuToggle?.showMenu === true ? "" : <h1>Home</h1>}
-        </div>
-        <div
-          className={`hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 gap-4 flex items-center ${
-            sideActive === "shorts" ? "bg-gray-200" : ""
-          }`}
-          onClick={() => {
-            dispatch(setSideActive("shorts"));
-            props.menuToggle?.setShowMenu(true);
-            if (getLocation !== "/") return Navigate("/");
-          }}
-        >
-          {sideActive === "shorts" ? (
-            <img
-              src={shortsfill}
-              alt="#"
-              className="w-5 h-5"
-            />
-          ) : (
-            <img
-              src={shorts}
-              alt="#"
-              className="w-5 h-5"
-            />
-          )}
-          {/* <SiYoutubeshorts className="w-5 h-5" /> */}
-          {props.menuToggle?.showMenu === true ? "" : <h1>Shorts</h1>}
-        </div>
-        <div
-          className={`hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 gap-4 flex items-center ${
-            sideActive === "subscription" ? "bg-gray-200" : ""
-          }`}
-          onClick={() => {
-            dispatch(setSideActive("subscription"));
-            props.menuToggle?.setShowMenu(true);
-            if (getLocation !== "/") return Navigate("/");
-          }}
-        >
-          {sideActive === "subscription" ? (
-            <BsCollectionPlayFill className=" w-5 h-5" />
-          ) : (
-            <BsCollectionPlay className=" w-5 h-5" />
-          )}
-          {props.menuToggle?.showMenu === true ? "" : <h1>Subcription</h1>}
-        </div>
-      </div>
+          <div
+            className={`cursor-pointer rounded-lg px-3 py-2 flex items-center gap-4 transition-all ${sideActive === "home" ? "" : ""
+              }`}
+            onClick={() => {
+              dispatch(setSideActive("home"));
+              props.menuToggle?.setShowMenu(true);
+              if (getLocation !== "/") return Navigate("/");
+            }}
+            style={{
+              backgroundColor: sideActive === "home"
+                ? 'var(--color-accent-bg)'
+                : 'transparent',
+              color: sideActive === "home"
+                ? 'var(--accent-color)'
+                : 'var(--color-text-primary)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              if (sideActive !== "home") {
+                e.target.style.backgroundColor = 'var(--color-hover)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (sideActive !== "home") {
+                e.target.style.backgroundColor = 'transparent';
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-current={sideActive === "home" ? "page" : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch(setSideActive("home"));
+                props.menuToggle?.setShowMenu(true);
+                if (getLocation !== "/") return Navigate("/");
+              }
+            }}
+          >
+            {sideActive === "home" ? (
+              <GoHomeFill className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <GrHomeRounded className="w-5 h-5 flex-shrink-0" />
+            )}
+            {props.menuToggle?.showMenu === true ? "" : (
+              <h1
+                className="font-medium"
+                style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)'
+                }}
+              >
+                Home
+              </h1>
+            )}
+          </div>
 
-      {loggedIn ? (
-        <div className="border-b border-gray-300 py-5">
-          {props.menuToggle?.showMenu === true ? (
-            ""
-          ) : (
-            <h1
-              onClick={() => Navigate(`/channel/${user?.username}`)}
-                className="flex items-center gap-4 py-1 font-semibold cursor-pointer rounded-lg px-3"
-            >
-              {loggedIn ? user?.username : "You"}{" "}
-              <IoIosArrowForward />
-            </h1>
-          )}
-          <div>
-            <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                sideActive === "history" ? "bg-gray-200" : ""
+          <div
+            className={`font-normal cursor-pointer rounded-lg px-3 py-2 gap-4 flex items-center transition-all ${sideActive === "shorts" ? "" : ""
               }`}
-              onClick={() => dispatch(setSideActive("history"))}
-            >
-              {sideActive === "history" ? (
-                <History className="text-xl fill-black stroke-3" />
-              ) : (
-                <LucideHistory className="text-xl" />
-              )}
-              {props.menuToggle?.showMenu === true ? "" : "History"}
-            </h1>
-            <h1
-              className={`flex items-center gap-4 text-nowrap hover:bg-gray-100  cursor-pointer font-normal rounded-lg px-3 py-2 ${
-                sideActive === "Manage Videos" ? "bg-gray-200" : ""
-              }`}
-              onClick={() => { dispatch(setSideActive("Manage Videos")); props.menuToggle?.setShowMenu(true); dispatch(fetchVideoByOwner(user?.data?.user?._id))}}
-            >
-              {sideActive === "Manage Videos" ? (
-                <ChartNoAxesGanttIcon className="text-xl stroke-3" />
-              ) : (
-                  <ChartNoAxesGanttIcon className="text-xl" />
-              )}
-              {props.menuToggle?.showMenu === true ? "" : "Manage Videos"}
-            </h1>
-            <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 cursor-pointer font-normal rounded-lg px-3 py-2 ${
-                sideActive === "playlists" ? "bg-gray-200" : ""
-              }`}
-              onClick={() => {
-                dispatch(setSideActive("playlists"));
-                if (getLocation !== "/") return Navigate("/");
-              }}
-            >
-              {sideActive === "playlists" ? (
-                <PiQueueBold className="text-xl stroke-1" />
-              ) : (
-                <PiQueueBold className="text-xl" />
-              )}
-              {props.menuToggle?.showMenu === true ? "" : "Playlists"}
-            </h1>
-            <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 cursor-pointer font-normal rounded-lg px-3 py-2 ${
-                sideActive === "your videos" ? "bg-gray-200" : ""
-              }`}
-              onClick={() => {
-                dispatch(setSideActive("your videos"));
-                dispatch(fetchVideoByOwner(user?._id));
+            onClick={() => {
+              dispatch(setSideActive("shorts"));
+              props.menuToggle?.setShowMenu(true);
+              if (getLocation !== "/") return Navigate("/");
+            }}
+            style={{
+              backgroundColor: sideActive === "shorts"
+                ? 'var(--color-accent-bg)'
+                : 'transparent',
+              color: sideActive === "shorts"
+                ? 'var(--accent-color)'
+                : 'var(--color-text-primary)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              if (sideActive !== "shorts") {
+                e.target.style.backgroundColor = 'var(--color-hover)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (sideActive !== "shorts") {
+                e.target.style.backgroundColor = 'transparent';
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-current={sideActive === "shorts" ? "page" : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch(setSideActive("shorts"));
                 props.menuToggle?.setShowMenu(true);
                 if (getLocation !== "/") return Navigate("/");
-              }}
-            >
-              {sideActive === "your videos" ? (
-                <BsPlayBtnFill className="text-xl" />
-              ) : (
-                <GoVideo className="text-xl" />
-              )}
-              {props.menuToggle?.showMenu === true ? "" : "Your Videos"}
-            </h1>
-            {/* <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-                sideActive === "watch later" ? "bg-gray-200" : ""
+              }
+            }}
+          >
+            {sideActive === "shorts" ? (
+              <img
+                src={shortsfill}
+                alt="Shorts"
+                className="w-5 h-5 flex-shrink-0"
+              />
+            ) : (
+              <img
+                src={shorts}
+                alt="Shorts"
+                className="w-5 h-5 flex-shrink-0"
+              />
+            )}
+            {props.menuToggle?.showMenu === true ? "" : (
+              <h1
+                className="font-medium"
+                style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)'
+                }}
+              >
+                Shorts
+              </h1>
+            )}
+          </div>
+
+          <div
+            className={`font-normal cursor-pointer rounded-lg px-3 py-2 gap-4 flex items-center transition-all ${sideActive === "subscription" ? "" : ""
               }`}
-              onClick={() => dispatch(setSideActive("watch later"))}
-            >
-              {sideActive === "watch later" ? (
-                <MdWatchLater className="text-2xl" />
-              ) : (
-                <MdOutlineWatchLater className="text-2xl" />
-              )}
-              {props.menuToggle?.showMenu === true ? "" : "Watch later"}
-            </h1> */}
-            <h1
-              className={`flex items-center gap-4 hover:bg-gray-100 cursor-pointer font-normal rounded-lg px-3 py-2 ${
-                sideActive === "likedVideos" ? "bg-gray-200" : ""
-              }`}
-              onClick={() => {
-                dispatch(setSideActive("likedVideos"));
+            onClick={() => {
+              dispatch(setSideActive("subscription"));
+              props.menuToggle?.setShowMenu(true);
+              if (getLocation !== "/") return Navigate("/");
+            }}
+            style={{
+              backgroundColor: sideActive === "subscription"
+                ? 'var(--color-accent-bg)'
+                : 'transparent',
+              color: sideActive === "subscription"
+                ? 'var(--accent-color)'
+                : 'var(--color-text-primary)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              if (sideActive !== "subscription") {
+                e.target.style.backgroundColor = 'var(--color-hover)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (sideActive !== "subscription") {
+                e.target.style.backgroundColor = 'transparent';
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-current={sideActive === "subscription" ? "page" : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch(setSideActive("subscription"));
                 props.menuToggle?.setShowMenu(true);
                 if (getLocation !== "/") return Navigate("/");
-              }}
-            >
-              {sideActive === "likedVideos" ? (
-                <BiSolidLike className="text-xl" />
-              ) : (
-                <BiLike className="text-xl" />
-              )}
-              {props.menuToggle?.showMenu === true ? "" : "Liked videos"}
-            </h1>
+              }
+            }}
+          >
+            {sideActive === "subscription" ? (
+              <BsCollectionPlayFill className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <BsCollectionPlay className="w-5 h-5 flex-shrink-0" />
+            )}
+            {props.menuToggle?.showMenu === true ? "" : (
+              <h1
+                className="font-medium"
+                style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)'
+                }}
+              >
+                Subscription
+              </h1>
+            )}
           </div>
         </div>
-      ) : (
-        ""
-      )}
 
-      {loggedIn ? (
-          <div className={`${subcriber.length === 0 ? "hidden" : ""} border-b border-gray-300 py-5`}>
-          {props.menuToggle?.showMenu === true ? (
-            ""
-          ) : (
-            <h1
-                className={`flex items-center gap-4 font-semibold cursor-pointer rounded-lg px-3 mb-2`}
-            >
-              {/* <GrChannel className="text-xl" /> */}
-              Subcribers
-            </h1>
-          )}
-          <div>
-            {subcriber !== null &&
-              subcriber.map((sub) => (
-                <div
-                  key={sub?._id}
-                  className={`flex items-center gap-4 hover:bg-gray-100 cursor-pointer font-normal rounded-lg px-3 py-2`}
-                  onClick={() =>{
-                    Navigate(`/channel/${sub?.subcribers?.username}`);
-                    props.menuToggle?.setShowMenu(true); }
+        {/* User Personal Section */}
+        {loggedIn ? (
+          <div
+            className="border-b py-5 transition-colors"
+            style={{
+              borderColor: 'var(--color-border)',
+              paddingTop: 'var(--component-padding)',
+              paddingBottom: 'var(--component-padding)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+          >
+            {props.menuToggle?.showMenu === true ? (
+              ""
+            ) : (
+              <h1
+                onClick={() => Navigate(`/channel/${user?.username}`)}
+                className="flex items-center gap-4 py-1 font-semibold cursor-pointer rounded-lg px-3 transition-all"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    Navigate(`/channel/${user?.username}`);
                   }
-                >
-                  <div className=" border-black">
-                    {/* <GrChannel className="" /> */}
-                    <img
-                      src={sub?.subcribers?.avatar}
-                      className="rounded-full w-6 aspect-square drop-shadow-xs"
-                      alt=""
-                    />
-                  </div>
-                  {props.menuToggle?.showMenu === true ? (
-                    ""
-                  ) : (
-                    <h1>{sub?.subcribers?.username}</h1>
-                  )}
-                </div>
-              ))}
+                }}
+              >
+                {loggedIn ? user?.username : "You"}{" "}
+                <IoIosArrowForward />
+              </h1>
+            )}
 
-            {/* <div className="flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2">
-              <div className="border-2 rounded-full p-0.5 border-black">
-                <GrChannel className="" />
-              </div>
-              {props.menuToggle?.showMenu === true ? "" : <h1>Channle_02</h1>}
-            </div> */}
+            <div>
+              <h1
+                className={`flex items-center gap-4 font-normal rounded-lg px-3 py-2 cursor-pointer transition-all ${sideActive === "history" ? "" : ""
+                  }`}
+                onClick={() => dispatch(setSideActive("history"))}
+                style={{
+                  backgroundColor: sideActive === "history"
+                    ? 'var(--color-accent-bg)'
+                    : 'transparent',
+                  color: sideActive === "history"
+                    ? 'var(--accent-color)'
+                    : 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  if (sideActive !== "history") {
+                    e.target.style.backgroundColor = 'var(--color-hover)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (sideActive !== "history") {
+                    e.target.style.backgroundColor = 'transparent';
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-current={sideActive === "history" ? "page" : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dispatch(setSideActive("history"));
+                  }
+                }}
+              >
+                {sideActive === "history" ? (
+                  <History className="text-xl fill-current stroke-3 flex-shrink-0" />
+                ) : (
+                  <LucideHistory className="text-xl flex-shrink-0" />
+                )}
+                {props.menuToggle?.showMenu === true ? "" : "History"}
+              </h1>
+
+              <h1
+                className={`flex items-center gap-4 text-nowrap cursor-pointer font-normal rounded-lg px-3 py-2 transition-all ${sideActive === "Manage Videos" ? "" : ""
+                  }`}
+                onClick={() => {
+                  dispatch(setSideActive("Manage Videos"));
+                  props.menuToggle?.setShowMenu(true);
+                  dispatch(fetchVideoByOwner(user?.data?.user?._id));
+                }}
+                style={{
+                  backgroundColor: sideActive === "Manage Videos"
+                    ? 'var(--color-accent-bg)'
+                    : 'transparent',
+                  color: sideActive === "Manage Videos"
+                    ? 'var(--accent-color)'
+                    : 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  if (sideActive !== "Manage Videos") {
+                    e.target.style.backgroundColor = 'var(--color-hover)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (sideActive !== "Manage Videos") {
+                    e.target.style.backgroundColor = 'transparent';
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-current={sideActive === "Manage Videos" ? "page" : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dispatch(setSideActive("Manage Videos"));
+                    props.menuToggle?.setShowMenu(true);
+                    dispatch(fetchVideoByOwner(user?.data?.user?._id));
+                  }
+                }}
+              >
+                {sideActive === "Manage Videos" ? (
+                  <ChartNoAxesGanttIcon className="text-xl stroke-3 flex-shrink-0" />
+                ) : (
+                  <ChartNoAxesGanttIcon className="text-xl flex-shrink-0" />
+                )}
+                {props.menuToggle?.showMenu === true ? "" : "Manage Videos"}
+              </h1>
+
+              <h1
+                className={`flex items-center gap-4 cursor-pointer font-normal rounded-lg px-3 py-2 transition-all ${sideActive === "playlists" ? "" : ""
+                  }`}
+                onClick={() => {
+                  dispatch(setSideActive("playlists"));
+                  if (getLocation !== "/") return Navigate("/");
+                }}
+                style={{
+                  backgroundColor: sideActive === "playlists"
+                    ? 'var(--color-accent-bg)'
+                    : 'transparent',
+                  color: sideActive === "playlists"
+                    ? 'var(--accent-color)'
+                    : 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  if (sideActive !== "playlists") {
+                    e.target.style.backgroundColor = 'var(--color-hover)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (sideActive !== "playlists") {
+                    e.target.style.backgroundColor = 'transparent';
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-current={sideActive === "playlists" ? "page" : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dispatch(setSideActive("playlists"));
+                    if (getLocation !== "/") return Navigate("/");
+                  }
+                }}
+              >
+                {sideActive === "playlists" ? (
+                  <PiQueueBold className="text-xl stroke-1 flex-shrink-0" />
+                ) : (
+                  <PiQueueBold className="text-xl flex-shrink-0" />
+                )}
+                {props.menuToggle?.showMenu === true ? "" : "Playlists"}
+              </h1>
+
+              <h1
+                className={`flex items-center gap-4 cursor-pointer font-normal rounded-lg px-3 py-2 transition-all ${sideActive === "your videos" ? "" : ""
+                  }`}
+                onClick={() => {
+                  dispatch(setSideActive("your videos"));
+                  dispatch(fetchVideoByOwner(user?._id));
+                  props.menuToggle?.setShowMenu(true);
+                  if (getLocation !== "/") return Navigate("/");
+                }}
+                style={{
+                  backgroundColor: sideActive === "your videos"
+                    ? 'var(--color-accent-bg)'
+                    : 'transparent',
+                  color: sideActive === "your videos"
+                    ? 'var(--accent-color)'
+                    : 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  if (sideActive !== "your videos") {
+                    e.target.style.backgroundColor = 'var(--color-hover)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (sideActive !== "your videos") {
+                    e.target.style.backgroundColor = 'transparent';
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-current={sideActive === "your videos" ? "page" : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dispatch(setSideActive("your videos"));
+                    dispatch(fetchVideoByOwner(user?._id));
+                    props.menuToggle?.setShowMenu(true);
+                    if (getLocation !== "/") return Navigate("/");
+                  }
+                }}
+              >
+                {sideActive === "your videos" ? (
+                  <BsPlayBtnFill className="text-xl flex-shrink-0" />
+                ) : (
+                  <GoVideo className="text-xl flex-shrink-0" />
+                )}
+                {props.menuToggle?.showMenu === true ? "" : "Your Videos"}
+              </h1>
+
+              <h1
+                className={`flex items-center gap-4 cursor-pointer font-normal rounded-lg px-3 py-2 transition-all ${sideActive === "likedVideos" ? "" : ""
+                  }`}
+                onClick={() => {
+                  dispatch(setSideActive("likedVideos"));
+                  props.menuToggle?.setShowMenu(true);
+                  if (getLocation !== "/") return Navigate("/");
+                }}
+                style={{
+                  backgroundColor: sideActive === "likedVideos"
+                    ? 'var(--color-accent-bg)'
+                    : 'transparent',
+                  color: sideActive === "likedVideos"
+                    ? 'var(--accent-color)'
+                    : 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  if (sideActive !== "likedVideos") {
+                    e.target.style.backgroundColor = 'var(--color-hover)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (sideActive !== "likedVideos") {
+                    e.target.style.backgroundColor = 'transparent';
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-current={sideActive === "likedVideos" ? "page" : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dispatch(setSideActive("likedVideos"));
+                    props.menuToggle?.setShowMenu(true);
+                    if (getLocation !== "/") return Navigate("/");
+                  }
+                }}
+              >
+                {sideActive === "likedVideos" ? (
+                  <BiSolidLike className="text-xl flex-shrink-0" />
+                ) : (
+                  <BiLike className="text-xl flex-shrink-0" />
+                )}
+                {props.menuToggle?.showMenu === true ? "" : "Liked videos"}
+              </h1>
+            </div>
           </div>
-        </div>
-      ) : (
-        ""
-      )}
+        ) : (
+          ""
+        )}
 
-      {/* <div className="border-b border-gray-300 py-5"> */}
-      {/* {props.menuToggle?.showMenu === true ? (
+        {/* Subscribers Section */}
+        {loggedIn ? (
+          <div
+            className={`${subcriber.length === 0 ? "hidden" : ""} border-b py-5 transition-colors`}
+            style={{
+              borderColor: 'var(--color-border)',
+              paddingTop: 'var(--component-padding)',
+              paddingBottom: 'var(--component-padding)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            role="region"
+            aria-label="Subscriptions"
+          >
+            {props.menuToggle?.showMenu === true ? (
+              ""
+            ) : (
+              <h1
+                className="flex items-center gap-4 font-semibold cursor-pointer rounded-lg px-3 mb-2"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  marginBottom: 'var(--spacing-unit)'
+                }}
+              >
+                Subscribers
+              </h1>
+            )}
+            <div>
+              {subcriber !== null &&
+                subcriber.map((sub) => (
+                  <div
+                    key={sub?._id}
+                    className="flex items-center gap-4 cursor-pointer font-normal rounded-lg px-3 py-2 transition-all"
+                    onClick={() => {
+                      Navigate(`/channel/${sub?.subcribers?.username}`);
+                      props.menuToggle?.setShowMenu(true);
+                    }}
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-base)',
+                      fontFamily: 'var(--font-family)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-hover)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        Navigate(`/channel/${sub?.subcribers?.username}`);
+                        props.menuToggle?.setShowMenu(true);
+                      }
+                    }}
+                  >
+                    <div className="border-transparent">
+                      <img
+                        src={sub?.subcribers?.avatar}
+                        className="rounded-full w-6 aspect-square drop-shadow-xs flex-shrink-0"
+                        alt={`${sub?.subcribers?.username} avatar`}
+                        loading="lazy"
+                      />
+                    </div>
+                    {props.menuToggle?.showMenu === true ? (
+                      ""
+                    ) : (
+                      <h1 className="truncate">{sub?.subcribers?.username}</h1>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
+
+        {/* Settings and Support Section */}
+        <div
+          className="border-b py-5 transition-colors"
+          style={{
+            borderColor: 'var(--color-border)',
+            paddingTop: 'var(--component-padding)',
+            paddingBottom: 'var(--component-padding)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
+        >
+          <h1
+            className={`flex items-center gap-4 font-normal cursor-pointer rounded-lg px-3 py-2 transition-all ${sideActive === "settings" ? "" : ""
+              }`}
+            onClick={() => Navigate(`/settings`)}
+            style={{
+              backgroundColor: sideActive === "settings"
+                ? 'var(--color-accent-bg)'
+                : 'transparent',
+              color: sideActive === "settings"
+                ? 'var(--accent-color)'
+                : 'var(--color-text-primary)',
+              fontSize: 'var(--font-size-base)',
+              fontFamily: 'var(--font-family)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              if (sideActive !== "settings") {
+                e.target.style.backgroundColor = 'var(--color-hover)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (sideActive !== "settings") {
+                e.target.style.backgroundColor = 'transparent';
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                Navigate(`/settings`);
+              }
+            }}
+          >
+            <IoSettingsOutline className="text-2xl flex-shrink-0" />
+            {props.menuToggle?.showMenu === true ? "" : "Settings"}
+          </h1>
+
+          <h1
+            className={`flex items-center gap-4 text-nowrap font-normal cursor-pointer rounded-lg px-3 py-2 transition-all ${sideActive === "report history" ? "" : ""
+              }`}
+            onClick={() => {
+              dispatch(setSideActive("report history"));
+              props.menuToggle?.setShowMenu(true);
+            }}
+            style={{
+              backgroundColor: sideActive === "report history"
+                ? 'var(--color-accent-bg)'
+                : 'transparent',
+              color: sideActive === "report history"
+                ? 'var(--accent-color)'
+                : 'var(--color-text-primary)',
+              fontSize: 'var(--font-size-base)',
+              fontFamily: 'var(--font-family)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              if (sideActive !== "report history") {
+                e.target.style.backgroundColor = 'var(--color-hover)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (sideActive !== "report history") {
+                e.target.style.backgroundColor = 'transparent';
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-current={sideActive === "report history" ? "page" : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch(setSideActive("report history"));
+                props.menuToggle?.setShowMenu(true);
+              }
+            }}
+          >
+            <MdOutlinedFlag className="text-2xl flex-shrink-0" />
+            {props.menuToggle?.showMenu === true ? "" : "Report history"}
+          </h1>
+
+          <h1
+            className={`flex items-center gap-4 font-normal cursor-pointer rounded-lg px-3 py-2 transition-all ${sideActive === "help" ? "" : ""
+              }`}
+            onClick={() => {
+              dispatch(setSideActive("help"));
+              props.menuToggle?.setShowMenu(true);
+            }}
+            style={{
+              backgroundColor: sideActive === "help"
+                ? 'var(--color-accent-bg)'
+                : 'transparent',
+              color: sideActive === "help"
+                ? 'var(--accent-color)'
+                : 'var(--color-text-primary)',
+              fontSize: 'var(--font-size-base)',
+              fontFamily: 'var(--font-family)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              if (sideActive !== "help") {
+                e.target.style.backgroundColor = 'var(--color-hover)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (sideActive !== "help") {
+                e.target.style.backgroundColor = 'transparent';
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-current={sideActive === "help" ? "page" : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch(setSideActive("help"));
+                props.menuToggle?.setShowMenu(true);
+              }
+            }}
+          >
+            <MdHelpOutline className="text-2xl flex-shrink-0" />
+            {props.menuToggle?.showMenu === true ? "" : "Help"}
+          </h1>
+
+          <h1
+            className={`flex items-center gap-4 font-normal cursor-pointer rounded-lg px-3 py-2 transition-all ${sideActive === "feedback" ? "" : ""
+              }`}
+            onClick={() => {
+              dispatch(setSideActive("feedback"));
+              props.menuToggle?.setShowMenu(true);
+            }}
+            style={{
+              backgroundColor: sideActive === "feedback"
+                ? 'var(--color-accent-bg)'
+                : 'transparent',
+              color: sideActive === "feedback"
+                ? 'var(--accent-color)'
+                : 'var(--color-text-primary)',
+              fontSize: 'var(--font-size-base)',
+              fontFamily: 'var(--font-family)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
+            onMouseEnter={(e) => {
+              if (sideActive !== "feedback") {
+                e.target.style.backgroundColor = 'var(--color-hover)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (sideActive !== "feedback") {
+                e.target.style.backgroundColor = 'transparent';
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-current={sideActive === "feedback" ? "page" : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch(setSideActive("feedback"));
+                props.menuToggle?.setShowMenu(true);
+              }
+            }}
+          >
+            <MdOutlineFeedback className="text-2xl flex-shrink-0" />
+            {props.menuToggle?.showMenu === true ? "" : "Send feedback"}
+          </h1>
+        </div>
+
+        {/* Footer Section */}
+        {props.menuToggle?.showMenu === true ? (
           ""
         ) : (
-          <h1 className="items-center gap-4 font-semibold rounded-lg px-3">
-            Explore
-          </h1>
-        )} */}
-      <div>
-        {/* <h1
-            className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              sideActive === "trending" ? "bg-gray-200" : ""
-            }`}
-            onClick={() => dispatch(setSideActive("trending"))}
+          <div
+            className="py-5 transition-colors"
+            style={{
+              paddingTop: 'var(--component-padding)',
+              paddingBottom: 'var(--component-padding)',
+              transitionDuration: 'var(--animation-duration)'
+            }}
           >
-            <IoMdTrendingUp className="text-xl" />
-            {props.menuToggle?.showMenu === true ? "" : "Trending"}
-          </h1> */}
-        {/* <h1
-            className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              sideActive === "music" ? "bg-gray-200" : ""
-            }`}
-            onClick={() => dispatch(setSideActive("music"))}
-          >
-            {sideActive === "music" ? (
-              <HiMusicalNote className="text-xl" />
-            ) : (
-              <HiOutlineMusicalNote className="text-xl" />
-            )}
-            {props.menuToggle?.showMenu === true ? "" : "Music"}
-          </h1> */}
-        {/* <h1
-            className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              sideActive === "gaming" ? "bg-gray-200" : ""
-            }`}
-            onClick={() => dispatch(setSideActive("gaming"))}
-          >
-            {sideActive === "gaming" ? (
-              <IoGameController className="text-xl" />
-            ) : (
-              <IoGameControllerOutline className="text-xl" />
-            )}
-            {props.menuToggle?.showMenu === true ? "" : "Gaming"}
-          </h1> */}
-        {/* <h1
-            className={`flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2 ${
-              sideActive === "sports" ? "bg-gray-200" : ""
-            }`}
-            onClick={() => dispatch(setSideActive("sports"))}
-          >
-
-            {sideActive === "sports" ? (
-              <img
-                src={achivefill}
-                className="w-5 h-5"
-              />
-            ) : (
-              <img
-                src={achiveout}
-                className="w-5 h-5"
-              />
-            )}
-            {props.menuToggle?.showMenu === true ? "" : "Sports"}
-          </h1> */}
-      </div>
-      {/* </div> */}
-      {/* 
-      <div className="border-b border-gray-300 py-5">
-        <h1 className="items-center gap-4 font-semibold rounded-lg px-3 py-2">
-          More from YouTube
-        </h1>
-        <div>
-          <h1 className="flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2">
-            <FaYoutube className="text-2xl text-red-500" />
-            YouTube Premium
-          </h1>
-          <h1 className="flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2">
-            <SiYoutubestudio className="text-2xl text-red-500" />
-            YouTube Studio
-          </h1>
-          <h1 className="flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2">
-            <SiYoutubemusic className="text-2xl text-red-500" />
-            YouTube Music
-          </h1>
-          <h1 className="flex items-center gap-4 hover:bg-gray-100 font-normal rounded-lg px-3 py-2">
-            <SiYoutubekids className="text-2xl text-red-500" />
-            YouTube Kids
-          </h1>
-        </div>
-      </div> */}
-
-      <div className="border-b border-gray-300 py-5">
-        <h1
-          className={`flex items-center gap-4 hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 ${
-            sideActive === "settings" ? "bg-gray-200" : ""
-          }`}
-          // onClick={() => dispatch(setSideActive("settings"))}
-          onClick={() => Navigate(`/settings`)}
-        >
-          <IoSettingsOutline className="text-2xl" />
-          {props.menuToggle?.showMenu === true ? "" : "Settings"}
-        </h1>
-        <h1
-          className={`flex items-center gap-4 text-nowrap hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 ${
-            sideActive === "report history" ? "bg-gray-200" : ""
-          }`}
-          onClick={() => { dispatch(setSideActive("report history")); props.menuToggle?.setShowMenu(true); }}
-        >
-          <MdOutlinedFlag className="text-2xl" />
-          {props.menuToggle?.showMenu === true ? "" : "Report history"}
-        </h1>
-        <h1
-          className={`flex items-center gap-4 hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 ${
-            sideActive === "help" ? "bg-gray-200" : ""
-          }`}
-          onClick={() => { dispatch(setSideActive("help")); props.menuToggle?.setShowMenu(true); }}
-        >
-          <MdHelpOutline className="text-2xl" />
-          {props.menuToggle?.showMenu === true ? "" : "Help"}
-        </h1>
-        <h1
-          className={`flex items-center gap-4 hover:bg-gray-100 font-normal cursor-pointer rounded-lg px-3 py-2 ${
-            sideActive === "feedback" ? "bg-gray-200" : ""
-          }`}
-          onClick={() => { dispatch(setSideActive("feedback")); props.menuToggle?.setShowMenu(true); }}
-        >
-          <MdOutlineFeedback className="text-2xl" />
-          {props.menuToggle?.showMenu === true ? "" : "Send feedback"}
-        </h1>
-      </div>
-
-      {props.menuToggle?.showMenu === true ? (
-        ""
-      ) : (
-        <div className="py-5 ">
-          <p className="text-gray-500 text-sm font-semibold pb-2 text-wrap">
-            About Press Copyright Contact us Creators Advertise Developers
-          </p>
-          <p className="text-gray-500 text-sm font-semibold pb-2 text-wrap">
-            Terms Privacy Policy & Safety How YouTube works Test new features
-          </p>
-          <div className="text-gray-400 pt-2">
-            <h1>@ {currentYear} VidTube CC</h1>
+            <p
+              className="text-sm font-semibold pb-2 text-wrap"
+              style={{
+                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--font-size-sm)',
+                paddingBottom: 'var(--spacing-unit)'
+              }}
+            >
+              About Press Copyright Contact us Creators Advertise Developers
+            </p>
+            <p
+              className="text-sm font-semibold pb-2 text-wrap"
+              style={{
+                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--font-size-sm)',
+                paddingBottom: 'var(--spacing-unit)'
+              }}
+            >
+              Terms Privacy Policy & Safety How YouTube works Test new features
+            </p>
+            <div
+              className="pt-2"
+              style={{ paddingTop: 'var(--spacing-unit)' }}
+            >
+              <h1
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                @ {currentYear} VidTube CC
+              </h1>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
-      </div>
+    </div>
   );
 }
 

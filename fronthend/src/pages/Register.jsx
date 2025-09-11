@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-  User,Mail,Lock,Eye,EyeOff,Upload,Check,AlertCircle,ArrowRight,ArrowLeft,Camera,Shield,CheckCircle,Loader,RefreshCw,UserCheck,Play
+  User, Mail, Lock, Eye, EyeOff, Upload, Check, AlertCircle, ArrowRight, ArrowLeft,
+  Camera, Shield, CheckCircle, Loader, RefreshCw, UserCheck, Play
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchRegisterUser, verifyEmailVerification } from '../redux/features/user';
 import { useNavigate } from 'react-router-dom';
 import favicon from '../assets/favicon.png';
+import { useAppearance } from '../hooks/appearances';
 
 const Register = () => {
-
+  const { appearanceSettings } = useAppearance();
   const dispatch = useDispatch();
   const Navigate = useNavigate();
 
@@ -29,7 +31,6 @@ const Register = () => {
   });
 
   const [emailStatus, setEmailStatus] = useState(false);
-
   const [previews, setPreviews] = useState({
     avatar: null,
     coverImage: null,
@@ -42,24 +43,22 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(false);
 
+  // All your existing validation and handler functions remain the same...
   const validateField = (name, value) => {
     switch (name) {
       case 'fullname':
         if (!value.trim()) return 'Full name is required';
         if (value.trim().length < 2) return 'Name must be at least 2 characters';
         return '';
-
       case 'email':
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!value) return 'Email is required';
         if (!emailRegex.test(value)) return 'Please enter a valid email address';
         return '';
-
       case 'username':
         const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
         if (!value) return 'Username is required';
@@ -67,18 +66,15 @@ const Register = () => {
         if (value.length > 20) return 'Username must be less than 20 characters';
         if (!usernameRegex.test(value)) return 'Username can only contain letters, numbers, and underscores';
         return '';
-
       case 'password':
         const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
         if (!value) return 'Password is required';
         if (!passwordRegex.test(value)) return 'Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character';
         return '';
-
       case 'confirmPassword':
         if (!value) return 'Please confirm your password';
         if (value !== formData.password) return 'Passwords do not match';
         return '';
-
       default:
         return '';
     }
@@ -95,22 +91,21 @@ const Register = () => {
     if (/[@$!%*?&]/.test(password)) strength++;
 
     const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-    const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+    const colors = ['var(--color-error)', 'var(--color-warning)', 'var(--color-warning)', 'var(--accent-color)', 'var(--color-success)'];
 
     return {
       strength,
       label: labels[strength - 1] || '',
-      color: colors[strength - 1] || 'bg-gray-300'
+      color: colors[strength - 1] || 'var(--color-border)'
     };
   };
 
+  // All other existing handlers remain the same...
   const handleInputChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
-
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
-
     if (touched[name]) {
       const error = validateField(name, value);
       setErrors(prev => ({ ...prev, [name]: error }));
@@ -148,7 +143,6 @@ const Register = () => {
 
   const validateStep = (step) => {
     const stepErrors = {};
-
     switch (step) {
       case 1:
         stepErrors.fullname = validateField('fullname', formData.fullname);
@@ -160,7 +154,7 @@ const Register = () => {
         stepErrors.confirmPassword = validateField('confirmPassword', formData.confirmPassword);
         break;
       case 3:
-        // for image upload step,bugging
+        // Image upload step
         break;
       default:
         break;
@@ -175,10 +169,8 @@ const Register = () => {
 
   const nextStep = () => {
     const stepErrors = validateStep(currentStep);
-
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
-
       const fieldsToTouch = Object.keys(stepErrors);
       fieldsToTouch.forEach(field => {
         setTouched(prev => ({ ...prev, [field]: true }));
@@ -191,19 +183,19 @@ const Register = () => {
     }
   };
 
-  useEffect(() => {
-    if (currentStep === 4) {
-      dispatch(verifyEmailVerification(formData.email));
-      console.log("email send");
-      setResendTimer(60);
-    }
-  },[dispatch,currentStep,formData])
-
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // All other handlers remain the same...
+  useEffect(() => {
+    if (currentStep === 4) {
+      dispatch(verifyEmailVerification(formData.email));
+      setResendTimer(60);
+    }
+  }, [dispatch, currentStep, formData]);
 
   const handleOtpChange = (index, value) => {
     if (value.length > 1) return;
@@ -244,7 +236,6 @@ const Register = () => {
 
   const handleSubmit = async () => {
     const allErrors = validateStep(2);
-
     if (Object.keys(allErrors).length > 0) {
       setErrors(allErrors);
       return;
@@ -253,7 +244,7 @@ const Register = () => {
     try {
       await dispatch(fetchRegisterUser(formData)).unwrap();
       await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success("Registration successfull! Please verify your email!");
+      toast.success("Registration successful! Please verify your email!");
       setCurrentStep(4);
       setResendTimer(60);
       setCanResend(false);
@@ -281,7 +272,7 @@ const Register = () => {
         toast.error('Invalid OTP. Please try again!');
       }
     } catch (error) {
-      toast.error('Invalid OTP. Please try again.',error);
+      toast.error('Invalid OTP. Please try again.', error);
       setOtp(['', '', '', '', '', '']);
     }
   };
@@ -294,7 +285,7 @@ const Register = () => {
       setResendTimer(60);
       setCanResend(false);
     } catch (error) {
-      toast.error('Failed to resend OTP',error);
+      toast.error('Failed to resend OTP', error);
     }
   };
 
@@ -308,23 +299,88 @@ const Register = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 scrollBar overflow-y-scroll h-screen">
-      <div className="container max-w-4xl mx-auto max-sm:px-2 px-4">
+    <div
+      className="min-h-screen py-8 scrollBar overflow-y-scroll h-screen transition-all"
+      style={{
+        background: 'linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%)',
+        transitionDuration: 'var(--animation-duration)',
+        fontFamily: 'var(--font-family)'
+      }}
+      role="main"
+      aria-label="Registration form"
+    >
+      <div
+        className="container max-w-4xl mx-auto max-sm:px-2 px-4"
+        style={{ padding: 'var(--component-padding)' }}
+      >
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-6">
-            <img src={favicon} alt="" className='w-12 h-12 max-sm:mr-1 mr-3'/>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-950 bg-clip-text text-transparent">
+        <div
+          className="text-center mb-8"
+          style={{ marginBottom: 'var(--section-gap)' }}
+        >
+          <div
+            className="flex items-center justify-center mb-6"
+            style={{ marginBottom: 'var(--section-gap)' }}
+          >
+            <img
+              src={favicon}
+              alt="VidTube Logo"
+              className='w-12 h-12 max-sm:mr-1 mr-3'
+              style={{ marginRight: 'var(--spacing-unit)' }}
+            />
+            <h1
+              className="text-3xl font-bold"
+              style={{
+                background: 'linear-gradient(135deg, var(--color-text-primary), var(--accent-color))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontSize: 'var(--font-size-3xl)',
+                fontFamily: 'var(--font-family)'
+              }}
+            >
               VidTube
             </h1>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Your Account</h2>
-          <p className="text-gray-600 text-lg">Join millions of creators worldwide</p>
+          <h2
+            className="text-3xl font-bold mb-2"
+            style={{
+              color: 'var(--color-text-primary)',
+              fontSize: 'var(--font-size-3xl)',
+              fontFamily: 'var(--font-family)',
+              marginBottom: 'var(--spacing-unit)'
+            }}
+          >
+            Create Your Account
+          </h2>
+          <p
+            className="text-lg"
+            style={{
+              color: 'var(--color-text-secondary)',
+              fontSize: 'var(--font-size-lg)'
+            }}
+          >
+            Join millions of creators worldwide
+          </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="max-w-4xl mx-auto mb-12 max-sm:mb-6">
-          <div className="flex justify-between items-center max-sm:mb-4 mb-6">
+        <div
+          className="max-w-4xl mx-auto mb-12 max-sm:mb-6"
+          style={{ marginBottom: 'var(--section-gap)' }}
+          role="progressbar"
+          aria-valuenow={currentStep}
+          aria-valuemin={1}
+          aria-valuemax={totalSteps}
+          aria-label={`Step ${currentStep} of ${totalSteps}: ${stepInfo[currentStep - 1].title}`}
+        >
+          <div
+            className="flex justify-between items-center max-sm:mb-4 mb-6"
+            style={{
+              gap: 'var(--spacing-unit)',
+              marginBottom: 'var(--section-gap)'
+            }}
+          >
             {stepInfo.map((step, index) => {
               const stepNumber = index + 1;
               const isActive = stepNumber === currentStep;
@@ -333,76 +389,188 @@ const Register = () => {
 
               return (
                 <div key={stepNumber} className="flex flex-col items-center flex-1">
-                  <div className={`w-16 h-16 max-sm:w-8 max-sm:h-8 rounded-full flex items-center justify-center font-semibold transition-all duration-300 max-sm:mb-1.5 mb-3 ${isCompleted
-                    ? 'bg-green-500 text-white shadow-lg'
-                    : isActive
-                      ? 'bg-indigo-600 text-white shadow-lg transform scale-110'
-                      : 'bg-gray-200 text-gray-500'
-                    } ${emailStatus && currentStep === 4 ? 'bg-green-500 text-white shadow-lg' : ""} `}>
-                    {isCompleted ? (
+                  <div
+                    className={`w-16 h-16 max-sm:w-8 max-sm:h-8 rounded-full flex items-center justify-center font-semibold transition-all duration-300 max-sm:mb-1.5 mb-3 ${emailStatus && currentStep === 4 ? '' : ''
+                      }`}
+                    style={{
+                      backgroundColor: isCompleted
+                        ? 'var(--color-success)'
+                        : isActive
+                          ? 'var(--accent-color)'
+                          : 'var(--color-bg-secondary)',
+                      color: (isCompleted || isActive) ? 'white' : 'var(--color-text-secondary)',
+                      transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                      boxShadow: (isCompleted || isActive) ? '0 8px 25px rgba(0, 0, 0, 0.15)' : 'none',
+                      transitionDuration: 'var(--animation-duration)',
+                      marginBottom: 'var(--spacing-unit)'
+                    }}
+                  >
+                    {isCompleted || (emailStatus && currentStep === 4) ? (
                       <Check className="w-7 h-7 max-sm:w-5 max-sm:h-5" />
                     ) : (
-                        <IconComponent className="w-7 h-7 max-sm:w-5 max-sm:h-5" />
+                      <IconComponent className="w-7 h-7 max-sm:w-5 max-sm:h-5" />
                     )}
                   </div>
                   <div className="text-center">
-                    <h3 className={`font-semibold text-sm max-sm:text-xs max-sm:mb-0.5 mb-1 ${isActive ? 'text-indigo-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
-                      }`}>
+                    <h3
+                      className={`font-semibold text-sm max-sm:text-xs max-sm:mb-0.5 mb-1`}
+                      style={{
+                        color: isActive
+                          ? 'var(--accent-color)'
+                          : isCompleted
+                            ? 'var(--color-success)'
+                            : 'var(--color-text-secondary)',
+                        fontSize: 'var(--font-size-sm)',
+                        fontFamily: 'var(--font-family)',
+                        marginBottom: 'calc(var(--spacing-unit) * 0.5)'
+                      }}
+                    >
                       {step.title}
                     </h3>
-                    <p className="text-xs text-gray-400 hidden sm:block">{step.description}</p>
+                    <p
+                      className="text-xs hidden sm:block"
+                      style={{
+                        color: 'var(--color-text-secondary)',
+                        fontSize: 'var(--font-size-xs)'
+                      }}
+                    >
+                      {step.description}
+                    </p>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="w-full bg-gray-200 rounded-full h-2 max-sm:mb-2 mb-4">
+          <div
+            className="w-full rounded-full h-2 max-sm:mb-2 mb-4"
+            style={{
+              backgroundColor: 'var(--color-bg-secondary)',
+              marginBottom: 'var(--spacing-unit)'
+            }}
+          >
             <div
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+              className="h-2 rounded-full transition-all duration-500 ease-out"
+              style={{
+                width: `${(currentStep / totalSteps) * 100}%`,
+                background: 'linear-gradient(90deg, var(--accent-color), var(--color-accent-hover))',
+                transitionDuration: appearanceSettings.reducedMotion ? '0s' : '0.5s'
+              }}
             />
           </div>
         </div>
 
         {/* Form Container */}
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl max-sm:rounded-lg shadow-2xl border border-white/20 p-8 max-sm:px-2 transition-all duration-300 hover:shadow-3xl">
-
+          <div
+            className="rounded-3xl max-sm:rounded-lg shadow-2xl border p-8 max-sm:px-2 transition-all duration-300"
+            style={{
+              backgroundColor: 'var(--color-bg-primary)',
+              borderColor: 'var(--color-border)',
+              backdropFilter: 'blur(10px)',
+              transitionDuration: 'var(--animation-duration)',
+              padding: 'var(--component-padding)'
+            }}
+            onMouseEnter={(e) => {
+              if (!appearanceSettings.reducedMotion) {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!appearanceSettings.reducedMotion) {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+              }
+            }}
+          >
             {/* Step 1: Personal Information */}
             {currentStep === 1 && (
-              <div className="space-y-6 max-sm:space-y-4 animate-in slide-in-from-right duration-500">
-                <div className="hidden text-center mb-8">
-                  <div className="mx-auto w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
-                    <User className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Personal Information</h3>
-                  <p className="text-gray-600">Tell us about yourself</p>
-                </div>
-
+              <div
+                className="space-y-6 max-sm:space-y-4"
+                style={{ gap: 'var(--section-gap)' }}
+                role="tabpanel"
+                aria-labelledby="step-1-tab"
+                aria-label="Personal Information Form"
+              >
                 {/* Full Name */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                <div
+                  className="space-y-2"
+                  style={{ gap: 'var(--spacing-unit)' }}
+                >
+                  <label
+                    htmlFor="fullname"
+                    className="block text-sm font-semibold"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontFamily: 'var(--font-family)'
+                    }}
+                  >
                     Full Name *
                   </label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <div
+                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      style={{ paddingLeft: 'var(--spacing-unit)' }}
+                    >
+                      <User
+                        className="h-5 w-5 transition-colors"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                      />
                     </div>
                     <input
+                      id="fullname"
                       type="text"
                       value={formData.fullname}
                       onChange={(e) => handleInputChange('fullname', e.target.value)}
                       onBlur={(e) => handleBlur('fullname', e.target.value)}
-                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 ${errors.fullname
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-gray-200 focus:border-indigo-500 hover:border-gray-300 bg-gray-50 focus:bg-white'
-                        }`}
+                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
+                      style={{
+                        paddingLeft: '3rem',
+                        padding: 'var(--spacing-unit)',
+                        borderColor: errors.fullname
+                          ? 'var(--color-error)'
+                          : 'var(--color-border)',
+                        backgroundColor: errors.fullname
+                          ? 'rgba(239, 68, 68, 0.05)'
+                          : 'var(--color-bg-secondary)',
+                        color: 'var(--color-text-primary)',
+                        fontSize: 'var(--font-size-base)',
+                        fontFamily: 'var(--font-family)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--accent-color)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                      }}
+                      onBlurCapture={(e) => {
+                        if (!errors.fullname) {
+                          e.target.style.borderColor = 'var(--color-border)';
+                          e.target.style.boxShadow = 'none';
+                        }
+                      }}
                       placeholder="Enter your full name"
+                      aria-describedby={errors.fullname ? "fullname-error" : undefined}
+                      aria-invalid={!!errors.fullname}
                     />
                   </div>
                   {errors.fullname && (
-                    <div className="flex items-center text-red-600 text-sm mt-2 animate-in slide-in-from-left duration-300">
+                    <div
+                      id="fullname-error"
+                      className="flex items-center text-sm mt-2"
+                      style={{
+                        color: 'var(--color-error)',
+                        fontSize: 'var(--font-size-sm)',
+                        marginTop: 'var(--spacing-unit)'
+                      }}
+                      role="alert"
+                      aria-live="polite"
+                    >
                       <AlertCircle className="w-4 h-4 mr-2" />
                       {errors.fullname}
                     </div>
@@ -410,28 +578,83 @@ const Register = () => {
                 </div>
 
                 {/* Email */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                <div
+                  className="space-y-2"
+                  style={{ gap: 'var(--spacing-unit)' }}
+                >
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-semibold"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontFamily: 'var(--font-family)'
+                    }}
+                  >
                     Email Address *
                   </label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <div
+                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      style={{ paddingLeft: 'var(--spacing-unit)' }}
+                    >
+                      <Mail
+                        className="h-5 w-5 transition-colors"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                      />
                     </div>
                     <input
+                      id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       onBlur={(e) => handleBlur('email', e.target.value)}
-                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 ${errors.email
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-gray-200 focus:border-indigo-500 hover:border-gray-300 bg-gray-50 focus:bg-white'
-                        }`}
+                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
+                      style={{
+                        paddingLeft: '3rem',
+                        padding: 'var(--spacing-unit)',
+                        borderColor: errors.email
+                          ? 'var(--color-error)'
+                          : 'var(--color-border)',
+                        backgroundColor: errors.email
+                          ? 'rgba(239, 68, 68, 0.05)'
+                          : 'var(--color-bg-secondary)',
+                        color: 'var(--color-text-primary)',
+                        fontSize: 'var(--font-size-base)',
+                        fontFamily: 'var(--font-family)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--accent-color)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                      }}
+                      onBlurCapture={(e) => {
+                        if (!errors.email) {
+                          e.target.style.borderColor = 'var(--color-border)';
+                          e.target.style.boxShadow = 'none';
+                        }
+                      }}
                       placeholder="Enter your email address"
+                      aria-describedby={errors.email ? "email-error" : undefined}
+                      aria-invalid={!!errors.email}
                     />
                   </div>
                   {errors.email && (
-                    <div className="flex items-center text-red-600 text-sm mt-2 animate-in slide-in-from-left duration-300">
+                    <div
+                      id="email-error"
+                      className="flex items-center text-sm mt-2"
+                      style={{
+                        color: 'var(--color-error)',
+                        fontSize: 'var(--font-size-sm)',
+                        marginTop: 'var(--spacing-unit)'
+                      }}
+                      role="alert"
+                      aria-live="polite"
+                    >
                       <AlertCircle className="w-4 h-4 mr-2" />
                       {errors.email}
                     </div>
@@ -442,38 +665,91 @@ const Register = () => {
 
             {/* Step 2: Account Details */}
             {currentStep === 2 && (
-              <div className="space-y-6 max-sm:space-y-4 animate-in slide-in-from-right duration-500">
-                <div className="hidden text-center mb-8">
-                  <div className="mx-auto w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
-                    <Shield className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Account Details</h3>
-                  <p className="text-gray-600">Choose your username and password</p>
-                </div>
-
+              <div
+                className="space-y-6 max-sm:space-y-4"
+                style={{ gap: 'var(--section-gap)' }}
+                role="tabpanel"
+                aria-labelledby="step-2-tab"
+                aria-label="Account Details Form"
+              >
                 {/* Username */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                <div
+                  className="space-y-2"
+                  style={{ gap: 'var(--spacing-unit)' }}
+                >
+                  <label
+                    htmlFor="username"
+                    className="block text-sm font-semibold"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontFamily: 'var(--font-family)'
+                    }}
+                  >
                     Username *
                   </label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <UserCheck className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <div
+                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      style={{ paddingLeft: 'var(--spacing-unit)' }}
+                    >
+                      <UserCheck
+                        className="h-5 w-5 transition-colors"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                      />
                     </div>
                     <input
+                      id="username"
                       type="text"
                       value={formData.username}
                       onChange={(e) => handleInputChange('username', e.target.value)}
                       onBlur={(e) => handleBlur('username', e.target.value)}
-                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 ${errors.username
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-gray-200 focus:border-indigo-500 hover:border-gray-300 bg-gray-50 focus:bg-white'
-                        }`}
+                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
+                      style={{
+                        paddingLeft: '3rem',
+                        padding: 'var(--spacing-unit)',
+                        borderColor: errors.username
+                          ? 'var(--color-error)'
+                          : 'var(--color-border)',
+                        backgroundColor: errors.username
+                          ? 'rgba(239, 68, 68, 0.05)'
+                          : 'var(--color-bg-secondary)',
+                        color: 'var(--color-text-primary)',
+                        fontSize: 'var(--font-size-base)',
+                        fontFamily: 'var(--font-family)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--accent-color)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                      }}
+                      onBlurCapture={(e) => {
+                        if (!errors.username) {
+                          e.target.style.borderColor = 'var(--color-border)';
+                          e.target.style.boxShadow = 'none';
+                        }
+                      }}
                       placeholder="Choose a unique username"
+                      aria-describedby={errors.username ? "username-error" : undefined}
+                      aria-invalid={!!errors.username}
                     />
                   </div>
                   {errors.username && (
-                    <div className="flex items-center text-red-600 text-sm mt-2 animate-in slide-in-from-left duration-300">
+                    <div
+                      id="username-error"
+                      className="flex items-center text-sm mt-2"
+                      style={{
+                        color: 'var(--color-error)',
+                        fontSize: 'var(--font-size-sm)',
+                        marginTop: 'var(--spacing-unit)'
+                      }}
+                      role="alert"
+                      aria-live="polite"
+                    >
                       <AlertCircle className="w-4 h-4 mr-2" />
                       {errors.username}
                     </div>
@@ -481,29 +757,87 @@ const Register = () => {
                 </div>
 
                 {/* Password */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                <div
+                  className="space-y-2"
+                  style={{ gap: 'var(--spacing-unit)' }}
+                >
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-semibold"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontFamily: 'var(--font-family)'
+                    }}
+                  >
                     Password *
                   </label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <div
+                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      style={{ paddingLeft: 'var(--spacing-unit)' }}
+                    >
+                      <Lock
+                        className="h-5 w-5 transition-colors"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                      />
                     </div>
                     <input
+                      id="password"
                       type={showPassword.password ? "text" : "password"}
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
                       onBlur={(e) => handleBlur('password', e.target.value)}
-                      className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 ${errors.password
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-gray-200 focus:border-indigo-500 hover:border-gray-300 bg-gray-50 focus:bg-white'
-                        }`}
+                      className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
+                      style={{
+                        paddingLeft: '3rem',
+                        paddingRight: '3rem',
+                        padding: 'var(--spacing-unit)',
+                        borderColor: errors.password
+                          ? 'var(--color-error)'
+                          : 'var(--color-border)',
+                        backgroundColor: errors.password
+                          ? 'rgba(239, 68, 68, 0.05)'
+                          : 'var(--color-bg-secondary)',
+                        color: 'var(--color-text-primary)',
+                        fontSize: 'var(--font-size-base)',
+                        fontFamily: 'var(--font-family)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--accent-color)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                      }}
+                      onBlurCapture={(e) => {
+                        if (!errors.password) {
+                          e.target.style.borderColor = 'var(--color-border)';
+                          e.target.style.boxShadow = 'none';
+                        }
+                      }}
                       placeholder="Create a strong password"
+                      aria-describedby={errors.password ? "password-error" : "password-strength"}
+                      aria-invalid={!!errors.password}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(prev => ({ ...prev, password: !prev.password }))}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-indigo-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center transition-colors"
+                      style={{
+                        color: 'var(--color-text-secondary)',
+                        paddingRight: 'var(--spacing-unit)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.color = 'var(--accent-color)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.color = 'var(--color-text-secondary)';
+                      }}
+                      aria-label={showPassword.password ? "Hide password" : "Show password"}
                     >
                       {showPassword.password ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -511,26 +845,64 @@ const Register = () => {
 
                   {/* Password Strength Indicator */}
                   {formData.password && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-xl">
-                      <div className="flex space-x-1 mb-2">
+                    <div
+                      id="password-strength"
+                      className="mt-3 p-3 rounded-xl"
+                      style={{
+                        backgroundColor: 'var(--color-bg-secondary)',
+                        marginTop: 'var(--spacing-unit)',
+                        padding: 'var(--spacing-unit)'
+                      }}
+                    >
+                      <div
+                        className="flex space-x-1 mb-2"
+                        style={{
+                          gap: 'calc(var(--spacing-unit) * 0.25)',
+                          marginBottom: 'var(--spacing-unit)'
+                        }}
+                      >
                         {[1, 2, 3, 4, 5].map((level) => (
                           <div
                             key={level}
-                            className={`h-2 flex-1 rounded-full transition-all duration-300 ${level <= passwordStrength.strength
-                              ? passwordStrength.color
-                              : 'bg-gray-200'
-                              }`}
+                            className={`h-2 flex-1 rounded-full transition-all duration-300`}
+                            style={{
+                              backgroundColor: level <= passwordStrength.strength
+                                ? passwordStrength.color
+                                : 'var(--color-border)',
+                              transitionDuration: 'var(--animation-duration)'
+                            }}
                           />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-600">
-                        Password strength: <span className="font-semibold">{passwordStrength.label}</span>
+                      <p
+                        className="text-xs"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          fontSize: 'var(--font-size-xs)'
+                        }}
+                      >
+                        Password strength: <span
+                          className="font-semibold"
+                          style={{ color: passwordStrength.color }}
+                        >
+                          {passwordStrength.label}
+                        </span>
                       </p>
                     </div>
                   )}
 
                   {errors.password && (
-                    <div className="flex items-start text-red-600 text-sm mt-2 animate-in slide-in-from-left duration-300">
+                    <div
+                      id="password-error"
+                      className="flex items-start text-sm mt-2"
+                      style={{
+                        color: 'var(--color-error)',
+                        fontSize: 'var(--font-size-sm)',
+                        marginTop: 'var(--spacing-unit)'
+                      }}
+                      role="alert"
+                      aria-live="polite"
+                    >
                       <AlertCircle className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
                       <span>{errors.password}</span>
                     </div>
@@ -538,35 +910,103 @@ const Register = () => {
                 </div>
 
                 {/* Confirm Password */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                <div
+                  className="space-y-2"
+                  style={{ gap: 'var(--spacing-unit)' }}
+                >
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-semibold"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontFamily: 'var(--font-family)'
+                    }}
+                  >
                     Confirm Password *
                   </label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <div
+                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      style={{ paddingLeft: 'var(--spacing-unit)' }}
+                    >
+                      <Lock
+                        className="h-5 w-5 transition-colors"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                      />
                     </div>
                     <input
+                      id="confirmPassword"
                       type={showPassword.confirmPassword ? "text" : "password"}
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                       onBlur={(e) => handleBlur('confirmPassword', e.target.value)}
-                      className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 ${errors.confirmPassword
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-gray-200 focus:border-indigo-500 hover:border-gray-300 bg-gray-50 focus:bg-white'
-                        }`}
+                      className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
+                      style={{
+                        paddingLeft: '3rem',
+                        paddingRight: '3rem',
+                        padding: 'var(--spacing-unit)',
+                        borderColor: errors.confirmPassword
+                          ? 'var(--color-error)'
+                          : 'var(--color-border)',
+                        backgroundColor: errors.confirmPassword
+                          ? 'rgba(239, 68, 68, 0.05)'
+                          : 'var(--color-bg-secondary)',
+                        color: 'var(--color-text-primary)',
+                        fontSize: 'var(--font-size-base)',
+                        fontFamily: 'var(--font-family)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--accent-color)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                      }}
+                      onBlurCapture={(e) => {
+                        if (!errors.confirmPassword) {
+                          e.target.style.borderColor = 'var(--color-border)';
+                          e.target.style.boxShadow = 'none';
+                        }
+                      }}
                       placeholder="Confirm your password"
+                      aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
+                      aria-invalid={!!errors.confirmPassword}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(prev => ({ ...prev, confirmPassword: !prev.confirmPassword }))}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-indigo-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center transition-colors"
+                      style={{
+                        color: 'var(--color-text-secondary)',
+                        paddingRight: 'var(--spacing-unit)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.color = 'var(--accent-color)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.color = 'var(--color-text-secondary)';
+                      }}
+                      aria-label={showPassword.confirmPassword ? "Hide password confirmation" : "Show password confirmation"}
                     >
                       {showPassword.confirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <div className="flex items-center text-red-600 text-sm mt-2 animate-in slide-in-from-left duration-300">
+                    <div
+                      id="confirm-password-error"
+                      className="flex items-center text-sm mt-2"
+                      style={{
+                        color: 'var(--color-error)',
+                        fontSize: 'var(--font-size-sm)',
+                        marginTop: 'var(--spacing-unit)'
+                      }}
+                      role="alert"
+                      aria-live="polite"
+                    >
                       <AlertCircle className="w-4 h-4 mr-2" />
                       {errors.confirmPassword}
                     </div>
@@ -577,22 +1017,45 @@ const Register = () => {
 
             {/* Step 3: Profile Setup */}
             {currentStep === 3 && (
-              <div className="space-y-8 max-sm:space-y-4 animate-in slide-in-from-right duration-500">
-                <div className="hidden text-center mb-8">
-                  <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
-                    <Camera className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Profile Setup</h3>
-                  <p className="text-gray-600">Add your profile picture and cover image (optional)</p>
-                </div>
-
+              <div
+                className="space-y-8 max-sm:space-y-4"
+                style={{ gap: 'var(--section-gap)' }}
+                role="tabpanel"
+                aria-labelledby="step-3-tab"
+                aria-label="Profile Setup Form"
+              >
                 {/* Avatar Upload */}
                 <div className="text-center">
-                  <label className="block text-sm font-semibold text-gray-700 mb-6">
+                  <label
+                    className="block text-sm font-semibold mb-6"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontFamily: 'var(--font-family)',
+                      marginBottom: 'var(--section-gap)'
+                    }}
+                  >
                     Profile Picture
                   </label>
                   <div className="relative inline-block group">
-                    <div className="w-40 h-40 rounded-full border-4 border-gradient-to-r from-purple-500 to-indigo-600 overflow-hidden bg-gradient-to-br flex items-center justify-center shadow-xl transition-transform duration-300 group-hover:scale-105">
+                    <div
+                      className="w-40 h-40 rounded-full border-4 overflow-hidden flex items-center justify-center shadow-xl transition-transform duration-300"
+                      style={{
+                        borderColor: 'var(--accent-color)',
+                        background: 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!appearanceSettings.reducedMotion) {
+                          e.target.style.transform = 'scale(1.05)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!appearanceSettings.reducedMotion) {
+                          e.target.style.transform = 'scale(1)';
+                        }
+                      }}
+                    >
                       {previews.avatar ? (
                         <img
                           src={previews.avatar}
@@ -600,12 +1063,40 @@ const Register = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <User className="w-16 h-16 text-gray-400" />
+                        <User
+                          className="w-16 h-16"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        />
                       )}
                     </div>
                     <label
                       htmlFor="avatar-upload"
-                      className="absolute bottom-2 right-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white p-3 rounded-full cursor-pointer shadow-lg transition-all duration-200 hover:scale-110 transform"
+                      className="absolute bottom-2 right-2 text-white p-3 rounded-full cursor-pointer shadow-lg transition-all duration-200 transform"
+                      style={{
+                        background: 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!appearanceSettings.reducedMotion) {
+                          e.target.style.transform = 'scale(1.1)';
+                        }
+                        e.target.style.opacity = '0.9';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!appearanceSettings.reducedMotion) {
+                          e.target.style.transform = 'scale(1)';
+                        }
+                        e.target.style.opacity = '1';
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Upload profile picture"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          document.getElementById('avatar-upload').click();
+                        }
+                      }}
                     >
                       <Camera className="w-6 h-6" />
                       <input
@@ -614,18 +1105,57 @@ const Register = () => {
                         accept="image/*"
                         onChange={(e) => handleFileUpload('avatar', e)}
                         className="hidden"
+                        aria-describedby="avatar-help"
                       />
                     </label>
                   </div>
+                  <p
+                    id="avatar-help"
+                    className="text-xs mt-2"
+                    style={{
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-xs)',
+                      marginTop: 'var(--spacing-unit)'
+                    }}
+                  >
+                    Recommended size: 400x400px. Max file size: 5MB
+                  </p>
                 </div>
 
                 {/* Cover Image Upload */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-4 text-center">
+                  <label
+                    className="block text-sm font-semibold mb-4 text-center"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontFamily: 'var(--font-family)',
+                      marginBottom: 'var(--spacing-unit)'
+                    }}
+                  >
                     Cover Image
                   </label>
                   <div className="relative group">
-                    <div className="w-full h-40 rounded-2xl border-2 border-dashed border-gray-300 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center transition-all duration-300 hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 group-hover:shadow-lg">
+                    <div
+                      className="w-full h-40 rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all duration-300"
+                      style={{
+                        borderColor: 'var(--color-border)',
+                        background: 'linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg-tertiary))',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.borderColor = 'var(--accent-color)';
+                        e.target.style.background = `linear-gradient(135deg, var(--color-accent-bg), var(--color-bg-secondary))`;
+                        if (!appearanceSettings.reducedMotion) {
+                          e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.borderColor = 'var(--color-border)';
+                        e.target.style.background = `linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg-tertiary))`;
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    >
                       {previews.coverImage ? (
                         <img
                           src={previews.coverImage}
@@ -634,16 +1164,42 @@ const Register = () => {
                         />
                       ) : (
                         <div className="text-center py-8">
-                          <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:from-indigo-200 group-hover:to-purple-200 transition-colors">
-                            <Upload className="w-8 h-8 text-indigo-500" />
+                          <div
+                            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors"
+                            style={{
+                              background: 'linear-gradient(135deg, var(--color-accent-bg), var(--color-bg-tertiary))',
+                              transitionDuration: 'var(--animation-duration)'
+                            }}
+                          >
+                            <Upload
+                              className="w-8 h-8"
+                              style={{ color: 'var(--accent-color)' }}
+                            />
                           </div>
-                          <p className="text-gray-500 font-medium">Click to upload cover image</p>
+                          <p
+                            className="font-medium"
+                            style={{
+                              color: 'var(--color-text-secondary)',
+                              fontSize: 'var(--font-size-base)'
+                            }}
+                          >
+                            Click to upload cover image
+                          </p>
                         </div>
                       )}
                     </div>
                     <label
                       htmlFor="cover-upload"
                       className="absolute inset-0 cursor-pointer"
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Upload cover image"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          document.getElementById('cover-upload').click();
+                        }
+                      }}
                     >
                       <input
                         id="cover-upload"
@@ -651,10 +1207,19 @@ const Register = () => {
                         accept="image/*"
                         onChange={(e) => handleFileUpload('coverImage', e)}
                         className="hidden"
+                        aria-describedby="cover-help"
                       />
                     </label>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2 text-center">
+                  <p
+                    id="cover-help"
+                    className="text-xs mt-2 text-center"
+                    style={{
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-xs)',
+                      marginTop: 'var(--spacing-unit)'
+                    }}
+                  >
                     Recommended size: 1200x300px. Max file size: 5MB
                   </p>
                 </div>
@@ -663,22 +1228,58 @@ const Register = () => {
 
             {/* Step 4: Email Verification */}
             {currentStep === 4 && (
-              <div className="space-y-6 max-sm:space-y-3">
-                <div className="hidden text-center mb-8">
-                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
-                    <Mail className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Verify Your Email</h3>
-                  <p className="text-gray-600 mb-2">We've sent a verification code to</p>
-                  <p className="text-indigo-600 font-semibold break-all">{formData.email}</p>
+              <div
+                className="space-y-6 max-sm:space-y-3"
+                style={{ gap: 'var(--section-gap)' }}
+                role="tabpanel"
+                aria-labelledby="step-4-tab"
+                aria-label="Email Verification Form"
+              >
+                <div className="text-center mb-6">
+                  <p
+                    className="mb-2"
+                    style={{
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-base)',
+                      marginBottom: 'var(--spacing-unit)'
+                    }}
+                  >
+                    We've sent a verification code to
+                  </p>
+                  <p
+                    className="font-semibold break-all"
+                    style={{
+                      color: 'var(--accent-color)',
+                      fontSize: 'var(--font-size-base)',
+                      fontFamily: 'var(--font-family)'
+                    }}
+                  >
+                    {formData.email}
+                  </p>
                 </div>
 
                 {/* OTP Input */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
+                  <label
+                    className="block text-sm font-medium mb-4 text-center"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontFamily: 'var(--font-family)',
+                      marginBottom: 'var(--spacing-unit)'
+                    }}
+                  >
                     Enter Verification Code
                   </label>
-                  <div className="flex gap-3 max-sm:gap-1.5 justify-center max-sm:mb-4 mb-6">
+                  <div
+                    className="flex gap-3 max-sm:gap-1.5 justify-center max-sm:mb-4 mb-6"
+                    style={{
+                      gap: 'var(--spacing-unit)',
+                      marginBottom: 'var(--section-gap)'
+                    }}
+                    role="group"
+                    aria-label="6-digit verification code"
+                  >
                     {otp.map((digit, index) => (
                       <input
                         key={index}
@@ -689,20 +1290,79 @@ const Register = () => {
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        className="w-12 h-12 max-sm:w-10 max-sm:h-10 text-center text-xl font-bold border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className="w-12 h-12 max-sm:w-10 max-sm:h-10 text-center text-xl font-bold border-2 rounded-xl focus:outline-none transition-colors"
+                        style={{
+                          borderColor: digit ? 'var(--accent-color)' : 'var(--color-border)',
+                          backgroundColor: digit ? 'var(--color-accent-bg)' : 'var(--color-bg-secondary)',
+                          color: 'var(--color-text-primary)',
+                          fontSize: 'var(--font-size-xl)',
+                          fontFamily: 'var(--font-family)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = 'var(--accent-color)';
+                          e.target.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.2)';
+                        }}
+                        onBlur={(e) => {
+                          if (!digit) {
+                            e.target.style.borderColor = 'var(--color-border)';
+                          }
+                          e.target.style.boxShadow = 'none';
+                        }}
+                        aria-label={`Digit ${index + 1} of verification code`}
+                        aria-describedby="otp-help"
                       />
                     ))}
                   </div>
+                  <p
+                    id="otp-help"
+                    className="text-xs text-center mb-4"
+                    style={{
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-xs)',
+                      marginBottom: 'var(--spacing-unit)'
+                    }}
+                  >
+                    Enter the 6-digit code sent to your email
+                  </p>
 
                   {/* Verify Button */}
                   <button
                     onClick={handleVerifyOTP}
                     disabled={emailStatus && currentStep === 4 || otp.join('').length !== 6}
-                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
+                    style={{
+                      background: (emailStatus && currentStep === 4) || otp.join('').length !== 6
+                        ? 'var(--color-text-secondary)'
+                        : 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))',
+                      opacity: (emailStatus && currentStep === 4) || otp.join('').length !== 6 ? 0.5 : 1,
+                      cursor: (emailStatus && currentStep === 4) || otp.join('').length !== 6 ? 'not-allowed' : 'pointer',
+                      fontSize: 'var(--font-size-base)',
+                      fontFamily: 'var(--font-family)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (otp.join('').length === 6 && !emailStatus) {
+                        e.target.style.transform = 'translateY(-1px)';
+                        e.target.style.boxShadow = '0 12px 25px rgba(0, 0, 0, 0.15)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (otp.join('').length === 6 && !emailStatus) {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+                      }
+                    }}
+                    aria-label="Verify email with entered code"
                   >
-                    {emailVerificationLoading && otp.length === 6 ? (
+                    {emailVerificationLoading && otp.join('').length === 6 ? (
                       <>
-                        <Loader className="w-5 h-5 animate-spin" />
+                        <Loader
+                          className="w-5 h-5 animate-spin"
+                          style={{
+                            animationDuration: appearanceSettings.reducedMotion ? '0s' : '1s'
+                          }}
+                        />
                         <span>Verifying...</span>
                       </>
                     ) : (
@@ -716,13 +1376,44 @@ const Register = () => {
 
                 {/* Resend OTP */}
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
+                  <p
+                    className="text-sm mb-2"
+                    style={{
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-sm)',
+                      marginBottom: 'var(--spacing-unit)'
+                    }}
+                  >
+                    Didn't receive the code?
+                  </p>
                   {!canResend ? (
-                    <p className="text-sm text-gray-500">Resend available in {resendTimer}s</p>
+                    <p
+                      className="text-sm"
+                      style={{
+                        color: 'var(--color-text-secondary)',
+                        fontSize: 'var(--font-size-sm)'
+                      }}
+                    >
+                      Resend available in {resendTimer}s
+                    </p>
                   ) : (
                     <button
                       onClick={handleResendOTP}
-                      className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center gap-2 mx-auto hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors"
+                      className="font-medium text-sm flex items-center gap-2 mx-auto px-3 py-2 rounded-lg transition-colors"
+                      style={{
+                        color: 'var(--accent-color)',
+                        fontSize: 'var(--font-size-sm)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'var(--color-accent-bg)';
+                        e.target.style.color = 'var(--color-accent-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                        e.target.style.color = 'var(--accent-color)';
+                      }}
+                      aria-label="Request new verification code"
                     >
                       <RefreshCw className="w-4 h-4" />
                       <span>Resend Code</span>
@@ -731,25 +1422,90 @@ const Register = () => {
                 </div>
 
                 {emailVerificationError && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center">
-                    <AlertCircle className="w-5 h-5 text-red-500 mr-3" />
-                    <span className="text-red-700 text-sm">{emailVerificationError}</span>
+                  <div
+                    className="p-4 border rounded-xl flex items-center"
+                    style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                      borderColor: 'var(--color-error)',
+                      padding: 'var(--spacing-unit)'
+                    }}
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    <AlertCircle
+                      className="w-5 h-5 mr-3"
+                      style={{ color: 'var(--color-error)' }}
+                    />
+                    <span
+                      className="text-sm"
+                      style={{
+                        color: 'var(--color-error)',
+                        fontSize: 'var(--font-size-sm)'
+                      }}
+                    >
+                      {emailVerificationError}
+                    </span>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Navigation Buttons - Add this section if missing */}
-            <div className="relative flex justify-between pt-8 mt-8 border-t border-gray-200">
-
-              <div onClick={() => Navigate('/login', { replace: true })} className={`${currentStep < 3 ? "" : "hidden"} cursor-pointer absolute -translate-y-8 text-sm hover:text-blue-600 active:opacity-70  text-gray-600 flex items-center my-1 w-full`}>
+            {/* Navigation Buttons */}
+            <div
+              className="relative flex justify-between pt-8 mt-8 border-t"
+              style={{
+                borderColor: 'var(--color-border)',
+                paddingTop: 'var(--section-gap)',
+                marginTop: 'var(--section-gap)'
+              }}
+            >
+              <div
+                onClick={() => Navigate('/login', { replace: true })}
+                className={`${currentStep < 3 ? "" : "hidden"} cursor-pointer absolute -translate-y-8 text-sm hover:text-blue-600 active:opacity-70 flex items-center my-1 w-full transition-colors`}
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: 'var(--font-size-sm)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = 'var(--accent-color)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = 'var(--color-text-secondary)';
+                }}
+                role="link"
+                tabIndex={0}
+                aria-label="Go to login page"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    Navigate('/login', { replace: true });
+                  }
+                }}
+              >
                 <p>Already have an account?</p>
               </div>
 
               {currentStep > 1 ? (
                 <button
                   onClick={prevStep}
-                  className="flex items-center cursor-pointer gap-2 px-6 py-3 text-gray-600 hover:text-gray-800 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                  className="flex items-center cursor-pointer gap-2 px-6 py-3 font-medium rounded-xl transition-colors"
+                  style={{
+                    color: 'var(--color-text-secondary)',
+                    backgroundColor: 'transparent',
+                    fontSize: 'var(--font-size-base)',
+                    gap: 'var(--spacing-unit)',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--color-hover)';
+                    e.target.style.color = 'var(--color-text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = 'var(--color-text-secondary)';
+                  }}
+                  aria-label="Go to previous step"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   <span>Previous</span>
@@ -761,7 +1517,22 @@ const Register = () => {
               {currentStep < totalSteps ? (
                 <button
                   onClick={nextStep}
-                  className="flex items-center cursor-pointer gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="flex items-center cursor-pointer gap-2 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))',
+                    fontSize: 'var(--font-size-base)',
+                    gap: 'var(--spacing-unit)',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = '0 12px 25px rgba(0, 0, 0, 0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+                  }}
+                  aria-label="Go to next step"
                 >
                   <span>Next</span>
                   <ArrowRight className="w-5 h-5" />
@@ -770,7 +1541,30 @@ const Register = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={!emailVerified}
-                  className="flex items-center cursor-pointer disabled:bg-gray-600 disabled:opacity-40 gap-2 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="flex items-center cursor-pointer gap-2 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg"
+                  style={{
+                    background: !emailVerified
+                      ? 'var(--color-text-secondary)'
+                      : 'linear-gradient(135deg, var(--color-success), var(--accent-color))',
+                    opacity: !emailVerified ? 0.4 : 1,
+                    cursor: !emailVerified ? 'not-allowed' : 'pointer',
+                    fontSize: 'var(--font-size-base)',
+                    gap: 'var(--spacing-unit)',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (emailVerified) {
+                      e.target.style.transform = 'translateY(-1px)';
+                      e.target.style.boxShadow = '0 12px 25px rgba(0, 0, 0, 0.15)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (emailVerified) {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+                    }
+                  }}
+                  aria-label="Complete registration"
                 >
                   <Check className="w-5 h-5" />
                   <span>Finish</span>

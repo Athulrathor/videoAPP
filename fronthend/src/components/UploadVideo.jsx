@@ -10,8 +10,10 @@ import {
   EyeOff,
 } from "lucide-react";
 import { axiosInstance } from "../libs/axios";
+// import { useAppearance } from '../hooks/appearances';
 
 const CircularProgressBar = ({ percentage, size = 120, strokeWidth = 8 }) => {
+  // const { appearanceSettings } = useAppearance();
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -29,8 +31,8 @@ const CircularProgressBar = ({ percentage, size = 120, strokeWidth = 8 }) => {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e5e7eb"
           strokeWidth={strokeWidth}
+          style={{ stroke: 'var(--color-border)' }}
         />
         {/* Progress circle */}
         <circle
@@ -38,17 +40,27 @@ const CircularProgressBar = ({ percentage, size = 120, strokeWidth = 8 }) => {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#3b82f6"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           className="transition-all duration-300 ease-in-out"
+          style={{
+            stroke: 'var(--accent-color)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
         />
       </svg>
       {/* Percentage text */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-2xl font-bold text-gray-800">
+        <span
+          className="text-2xl font-bold"
+          style={{
+            color: 'var(--color-text-primary)',
+            fontSize: 'var(--font-size-2xl)',
+            fontFamily: 'var(--font-family)'
+          }}
+        >
           {Math.round(percentage)}%
         </span>
       </div>
@@ -57,12 +69,14 @@ const CircularProgressBar = ({ percentage, size = 120, strokeWidth = 8 }) => {
 };
 
 const VideoUploadContainer = (props) => {
+  // const { appearanceSettings } = useAppearance();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     isPublished: false,
     videoFile: "",
-    thumbnail:''
+    thumbnail: ''
   });
 
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -75,8 +89,7 @@ const VideoUploadContainer = (props) => {
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null);
 
-  const { toggleVideoUploading, setToggleVideoUploading } =
-    props;
+  const { toggleVideoUploading, setToggleVideoUploading } = props;
 
   const videoInputRef = useRef(null);
   const thumbnailInputRef = useRef(null);
@@ -93,6 +106,7 @@ const VideoUploadContainer = (props) => {
   const maxVideoSize = 500 * 1024 * 1024; // 500MB
   const maxImageSize = 5 * 1024 * 1024; // 5MB
 
+  // All your existing handler functions remain the same...
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -100,7 +114,6 @@ const VideoUploadContainer = (props) => {
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -207,7 +220,7 @@ const VideoUploadContainer = (props) => {
 
   const handleVideoInputChange = (e) => {
     const file = e.target.files[0];
-    setFormData({...formData,videoFile:file})
+    setFormData({ ...formData, videoFile: file })
     if (file) handleVideoSelect(file);
   };
 
@@ -240,7 +253,6 @@ const VideoUploadContainer = (props) => {
     setUploadProgress(0);
 
     try {
-
       const data = new FormData();
       data.append("title", formData.title);
       data.append("description", formData.description);
@@ -249,7 +261,6 @@ const VideoUploadContainer = (props) => {
       if (formData.videoFile) data.append("videoFile", formData.videoFile);
       if (formData.thumbnail) data.append("thumbnail", formData.thumbnail);
 
-      // Make API call
       const apiPromise = await axiosInstance.post("videos/publish-video", data,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -258,16 +269,11 @@ const VideoUploadContainer = (props) => {
             setUploadProgress(percent)
           }
         });
-      
+
       setUploadProgress(90);
-
-      const response = await apiPromise;
-
-      console.log("Upload complete!", response);
-
+      await apiPromise;
       setUploadProgress(100);
 
-      // Reset after showing success
       setTimeout(() => {
         setIsUploading(false);
         setUploadProgress(0);
@@ -297,80 +303,156 @@ const VideoUploadContainer = (props) => {
 
   return (
     <div
-      className={`flex justify-center items-center absolute inset-0 z-10 ${
-        toggleVideoUploading === true ? "hidden" : ""
-      }`}
+      className={`flex justify-center items-center absolute inset-0 z-10 transition-all ${toggleVideoUploading === true ? "hidden" : ""
+        }`}
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(4px)',
+        transitionDuration: 'var(--animation-duration)'
+      }}
     >
       {isUploading === false ? (
         <form
           onSubmit={handleSubmitWithSimulation}
           ref={formRef}
-          className="mt-3 mb-3 max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg"
+          className="mt-3 mb-3 max-w-4xl mx-auto p-6 rounded-lg shadow-lg transition-all max-h-[90vh] overflow-y-auto scrollBar"
+          style={{
+            backgroundColor: 'var(--color-bg-primary)',
+            borderRadius: 'var(--spacing-unit)',
+            padding: 'var(--component-padding)',
+            transitionDuration: 'var(--animation-duration)'
+          }}
         >
-          <div className=" flex justify-between items-center">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4 ">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-4">
+            <h2
+              className="text-3xl font-bold mb-4"
+              style={{
+                color: 'var(--color-text-primary)',
+                fontSize: 'var(--font-size-3xl)',
+                fontFamily: 'var(--font-family)'
+              }}
+            >
               Upload Video Content
             </h2>
             <div>
               <button
                 onClick={() => setToggleVideoUploading(true)}
-                className="p-3 rounded-full bg-gray-300 hover:bg-gray-400"
+                className="p-3 rounded-full transition-all"
+                style={{
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                }}
               >
-                <X />
+                <X style={{ color: 'var(--color-text-primary)' }} />
               </button>
             </div>
           </div>
 
-          {/* Video Previews */}
+          {/* Video Preview */}
           {videoPreviewUrl && (
-            <div>
-              <h3 className="text-lg font-medium text-gray-700 mb-3">
+            <div
+              className="mb-6"
+              style={{ marginBottom: 'var(--section-gap)' }}
+            >
+              <h3
+                className="text-lg font-medium mb-3"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-lg)',
+                  marginBottom: 'var(--component-padding)'
+                }}
+              >
                 Video Preview
               </h3>
               <video
                 src={videoPreviewUrl}
                 controls
-                className="w-full max-h-64 rounded-lg border border-gray-300 mb-2"
+                className="w-full max-h-64 rounded-lg border mb-2"
+                style={{ borderColor: 'var(--color-border)' }}
               >
                 Your browser does not support the video tag.
               </video>
             </div>
           )}
 
-          <div className="">
-            {/* Title and Description */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-6" style={{ gap: 'var(--section-gap)' }}>
+            {/* Title and Published Status */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title <span className="text-red-500">*</span>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
+                  Title <span style={{ color: 'var(--color-error)' }}>*</span>
                 </label>
                 <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.title ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-all"
                   placeholder="Enter video title"
                   maxLength={100}
+                  style={{
+                    backgroundColor: 'var(--color-bg-primary)',
+                    borderColor: errors.title ? 'var(--color-error)' : 'var(--color-border)',
+                    color: 'var(--color-text-primary)',
+                    fontFamily: 'var(--font-family)',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--accent-color)';
+                    e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = errors.title ? 'var(--color-error)' : 'var(--color-border)';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
                 {errors.title && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p
+                    className="mt-1 text-sm flex items-center"
+                    style={{
+                      color: 'var(--color-error)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.title}
                   </p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">
+                <p
+                  className="mt-1 text-sm"
+                  style={{
+                    color: 'var(--color-text-secondary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
                   {formData.title.length}/100 characters
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
                   Published Status
                 </label>
-                <div className="flex items-center mt-3">
+                <div className="flex items-center mt-3 space-x-3">
                   <button
                     type="button"
                     onClick={() =>
@@ -379,17 +461,27 @@ const VideoUploadContainer = (props) => {
                         isPublished: !prev.isPublished,
                       }))
                     }
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      formData.isPublished ? "bg-blue-600" : "bg-gray-200"
-                    }`}
+                    className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                    style={{
+                      backgroundColor: formData.isPublished ? 'var(--accent-color)' : 'var(--color-border)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        formData.isPublished ? "translate-x-6" : "translate-x-1"
-                      }`}
+                      className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                      style={{
+                        transform: formData.isPublished ? 'translateX(1.5rem)' : 'translateX(0.25rem)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
                     />
                   </button>
-                  <span className="flex items-center text-sm text-gray-700">
+                  <span
+                    className="flex items-center text-sm"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     {formData.isPublished ? (
                       <Eye className="w-4 h-4 mr-1" />
                     ) : (
@@ -402,28 +494,52 @@ const VideoUploadContainer = (props) => {
             </div>
 
             {/* Video and Thumbnail Upload */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Video Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Video File <span className="text-red-500">*</span>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
+                  Video File <span style={{ color: 'var(--color-error)' }}>*</span>
                 </label>
                 <div
-                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 ${
-                    videoDragging
-                      ? "border-blue-500 bg-blue-50"
-                      : selectedVideo
-                      ? "border-green-500 bg-green-50"
-                      : errors.video
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 cursor-pointer ${videoDragging || selectedVideo || errors.video ? "" : ""
+                    }`}
                   onDragOver={(e) => handleDragOver(e, "video")}
                   onDragLeave={(e) => handleDragLeave(e, "video")}
                   onDrop={(e) => handleDrop(e, "video")}
-                  onClick={() =>
-                    !selectedVideo && videoInputRef.current?.click()
-                  }
+                  onClick={() => !selectedVideo && videoInputRef.current?.click()}
+                  style={{
+                    borderColor: videoDragging
+                      ? 'var(--accent-color)'
+                      : selectedVideo
+                        ? 'var(--color-success)'
+                        : errors.video
+                          ? 'var(--color-error)'
+                          : 'var(--color-border)',
+                    backgroundColor: videoDragging
+                      ? 'var(--color-accent-bg)'
+                      : selectedVideo
+                        ? 'rgba(16, 185, 129, 0.1)'
+                        : errors.video
+                          ? 'rgba(239, 68, 68, 0.1)'
+                          : 'transparent',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selectedVideo && !videoDragging) {
+                      e.target.style.borderColor = 'var(--color-text-secondary)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selectedVideo && !videoDragging) {
+                      e.target.style.borderColor = errors.video ? 'var(--color-error)' : 'var(--color-border)';
+                    }
+                  }}
                 >
                   <input
                     ref={videoInputRef}
@@ -435,29 +551,59 @@ const VideoUploadContainer = (props) => {
                   />
 
                   {!selectedVideo ? (
-                    <div className="">
+                    <div>
                       <div className="flex justify-center">
-                        <Upload className="w-10 h-10 text-gray-400" />
+                        <Upload
+                          className="w-10 h-10"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p
+                          className="text-sm font-medium"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
                           Drop video or click to browse
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p
+                          className="text-xs mt-1"
+                          style={{
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--font-size-xs)'
+                          }}
+                        >
                           MP4, MOV, AVI, WMV, WebM (Max 500MB)
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="">
+                    <div>
                       <div className="flex justify-center">
-                        <FileVideo className="w-10 h-10 text-green-500" />
+                        <FileVideo
+                          className="w-10 h-10"
+                          style={{ color: 'var(--color-success)' }}
+                        />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p
+                          className="text-sm font-medium"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
                           {selectedVideo.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p
+                          className="text-xs"
+                          style={{
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--font-size-xs)'
+                          }}
+                        >
                           {formatFileSize(selectedVideo.size)}
                         </p>
                       </div>
@@ -471,14 +617,33 @@ const VideoUploadContainer = (props) => {
                         e.stopPropagation();
                         handleRemoveVideo();
                       }}
-                      className="absolute top-2 right-2 p-1 rounded-full bg-red-100 hover:bg-red-200 transition-colors"
+                      className="absolute top-2 right-2 p-1 rounded-full transition-colors"
+                      style={{
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                      }}
                     >
-                      <X className="w-4 h-4 text-red-600" />
+                      <X
+                        className="w-4 h-4"
+                        style={{ color: 'var(--color-error)' }}
+                      />
                     </button>
                   )}
                 </div>
                 {errors.video && (
-                  <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <p
+                    className="mt-2 text-sm flex items-center"
+                    style={{
+                      color: 'var(--color-error)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.video}
                   </p>
@@ -487,25 +652,49 @@ const VideoUploadContainer = (props) => {
 
               {/* Thumbnail Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Thumbnail Image <span className="text-red-500">*</span>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
+                  Thumbnail Image <span style={{ color: 'var(--color-error)' }}>*</span>
                 </label>
                 <div
-                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 ${
-                    thumbnailDragging
-                      ? "border-blue-500 bg-blue-50"
-                      : selectedThumbnail
-                      ? "border-green-500 p-0"
-                      : errors.thumbnail
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 cursor-pointer ${selectedThumbnail ? "p-2" : ""
+                    }`}
                   onDragOver={(e) => handleDragOver(e, "thumbnail")}
                   onDragLeave={(e) => handleDragLeave(e, "thumbnail")}
                   onDrop={(e) => handleDrop(e, "thumbnail")}
-                  onClick={() =>
-                    !selectedThumbnail && thumbnailInputRef.current?.click()
-                  }
+                  onClick={() => !selectedThumbnail && thumbnailInputRef.current?.click()}
+                  style={{
+                    borderColor: thumbnailDragging
+                      ? 'var(--accent-color)'
+                      : selectedThumbnail
+                        ? 'var(--color-success)'
+                        : errors.thumbnail
+                          ? 'var(--color-error)'
+                          : 'var(--color-border)',
+                    backgroundColor: thumbnailDragging
+                      ? 'var(--color-accent-bg)'
+                      : selectedThumbnail
+                        ? 'rgba(16, 185, 129, 0.1)'
+                        : errors.thumbnail
+                          ? 'rgba(239, 68, 68, 0.1)'
+                          : 'transparent',
+                    transitionDuration: 'var(--animation-duration)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selectedThumbnail && !thumbnailDragging) {
+                      e.target.style.borderColor = 'var(--color-text-secondary)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selectedThumbnail && !thumbnailDragging) {
+                      e.target.style.borderColor = errors.thumbnail ? 'var(--color-error)' : 'var(--color-border)';
+                    }
+                  }}
                 >
                   <input
                     ref={thumbnailInputRef}
@@ -517,21 +706,36 @@ const VideoUploadContainer = (props) => {
                   />
 
                   {!selectedThumbnail ? (
-                    <div className="">
+                    <div>
                       <div className="flex justify-center">
-                        <Image className="w-10 h-10 text-gray-400" />
+                        <Image
+                          className="w-10 h-10"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p
+                          className="text-sm font-medium"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
                           Drop image or click to browse
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p
+                          className="text-xs mt-1"
+                          style={{
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--font-size-xs)'
+                          }}
+                        >
                           JPEG, PNG, WebP (Max 5MB)
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className={``}>
+                    <div>
                       <div className="flex justify-center">
                         <img
                           src={thumbnailPreviewUrl}
@@ -540,10 +744,22 @@ const VideoUploadContainer = (props) => {
                         />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p
+                          className="text-sm font-medium"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
                           {selectedThumbnail.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p
+                          className="text-xs"
+                          style={{
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--font-size-xs)'
+                          }}
+                        >
                           {formatFileSize(selectedThumbnail.size)}
                         </p>
                       </div>
@@ -557,14 +773,33 @@ const VideoUploadContainer = (props) => {
                         e.stopPropagation();
                         handleRemoveThumbnail();
                       }}
-                      className="absolute top-2 right-2 p-1 rounded-full bg-red-100 hover:bg-red-200 transition-colors z-11"
+                      className="absolute top-2 right-2 p-1 rounded-full transition-colors z-10"
+                      style={{
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                      }}
                     >
-                      <X className="w-4 h-4 text-red-600" />
+                      <X
+                        className="w-4 h-4"
+                        style={{ color: 'var(--color-error)' }}
+                      />
                     </button>
                   )}
                 </div>
                 {errors.thumbnail && (
-                  <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <p
+                    className="mt-2 text-sm flex items-center"
+                    style={{
+                      color: 'var(--color-error)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.thumbnail}
                   </p>
@@ -574,27 +809,58 @@ const VideoUploadContainer = (props) => {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description <span className="text-red-500">*</span>
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                Description <span style={{ color: 'var(--color-error)' }}>*</span>
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={4}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.description ? "border-red-500" : "border-gray-300"
-                }`}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-all"
                 placeholder="Enter video description"
                 maxLength={500}
+                style={{
+                  backgroundColor: 'var(--color-bg-primary)',
+                  borderColor: errors.description ? 'var(--color-error)' : 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-family)',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--accent-color)';
+                  e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = errors.description ? 'var(--color-error)' : 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
               {errors.description && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p
+                  className="mt-1 text-sm flex items-center"
+                  style={{
+                    color: 'var(--color-error)',
+                    fontSize: 'var(--font-size-sm)'
+                  }}
+                >
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.description}
                 </p>
               )}
-              <p className="mt-1 text-sm text-gray-500">
+              <p
+                className="mt-1 text-sm"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
                 {formData.description.length}/500 characters
               </p>
             </div>
@@ -603,18 +869,36 @@ const VideoUploadContainer = (props) => {
             {isUploading && (
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span
+                    className="text-sm font-medium"
+                    style={{
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     Uploading...
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span
+                    className="text-sm"
+                    style={{
+                      color: 'var(--color-text-secondary)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}
+                  >
                     {uploadProgress}%
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="w-full rounded-full h-2"
+                  style={{ backgroundColor: 'var(--color-border)' }}
+                >
                   <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${uploadProgress}%`,
+                      backgroundColor: 'var(--accent-color)'
+                    }}
+                  />
                 </div>
               </div>
             )}
@@ -624,50 +908,80 @@ const VideoUploadContainer = (props) => {
               <button
                 type="submit"
                 disabled={isUploading}
-                className={`px-8 py-3 rounded-md font-medium flex items-center space-x-2 transition-colors ${
-                  isUploading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
+                className={`px-8 py-3 rounded-md font-medium flex items-center space-x-2 transition-all ${isUploading ? "cursor-not-allowed" : ""
+                  }`}
+                style={{
+                  backgroundColor: isUploading ? 'var(--color-text-secondary)' : 'var(--accent-color)',
+                  color: 'white',
+                  fontSize: 'var(--font-size-base)',
+                  fontFamily: 'var(--font-family)',
+                  opacity: isUploading ? '0.6' : '1',
+                  transitionDuration: 'var(--animation-duration)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isUploading) {
+                    e.target.style.opacity = '0.9';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isUploading) {
+                    e.target.style.opacity = '1';
+                    e.target.style.transform = 'translateY(0)';
+                  }
+                }}
               >
                 <Save className="w-5 h-5" />
                 <span>{isUploading ? "Uploading..." : "Save Video"}</span>
               </button>
             </div>
-
-            {/* Success Message */}
-            {/* {uploadProgress === 100 && !isUploading && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-md">
-              <div className="flex items-center justify-center space-x-2 text-green-700">
-                <Play className="w-5 h-5" />
-                <span className="font-medium">
-                  Video uploaded successfully!
-                </span>
-              </div>
-            </div> */}
-            {/* )} */}
           </div>
         </form>
       ) : (
-        <div className="flex flex-col bg-white p-6 items-center justify-center space-y-6">
+        <div
+          className="flex flex-col p-6 items-center justify-center space-y-6 rounded-lg"
+          style={{
+            backgroundColor: 'var(--color-bg-primary)',
+            borderRadius: 'var(--spacing-unit)',
+            padding: 'var(--component-padding)'
+          }}
+        >
           <CircularProgressBar percentage={uploadProgress} />
 
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-              {uploadProgress < 100 ? "Sending..." : "Success!"}
+            <h3
+              className="text-xl font-semibold mb-2"
+              style={{
+                color: 'var(--color-text-primary)',
+                fontSize: 'var(--font-size-xl)',
+                fontFamily: 'var(--font-family)'
+              }}
+            >
+              {uploadProgress < 100 ? "Uploading..." : "Success!"}
             </h3>
-            <p className="text-gray-600">
+            <p
+              style={{
+                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--font-size-base)'
+              }}
+            >
               {uploadProgress < 100
-                ? "Please wait while we process your message"
-                : "Your message has been sent successfully!"}
+                ? "Please wait while we process your video"
+                : "Your video has been uploaded successfully!"}
             </p>
           </div>
 
           {uploadProgress < 100 && (
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="w-full rounded-full h-2"
+              style={{ backgroundColor: 'var(--color-border)' }}
+            >
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${uploadProgress}%` }}
+                className="h-2 rounded-full transition-all duration-300"
+                style={{
+                  width: `${uploadProgress}%`,
+                  backgroundColor: 'var(--accent-color)'
+                }}
               />
             </div>
           )}

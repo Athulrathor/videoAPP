@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Shield,
@@ -15,26 +14,25 @@ import {
   X,
   Save,
   Lock,
-  ArrowBigRight,
   ChevronRight
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { activeSessions, clearHistory, getWatchHistory, removingToWatchHistory, setWatchHistoryPaused, updatePassword, verifyPassword } from '../redux/features/user';
 import { toast } from 'react-toastify';
 import { Tooltip } from '@mui/material';
+// import { useAppearance } from '../hooks/appearances';
 
 const PrivacyAndSecurity = () => {
-
   const dispatch = useDispatch();
+  // const { appearanceSettings } = useAppearance();
 
-  const {user, watchHistory, activeSession } = useSelector((state) => state.user);
+  const { user, watchHistory, activeSession } = useSelector((state) => state.user);
 
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
     confirm: false
   });
-  // const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -42,13 +40,9 @@ const PrivacyAndSecurity = () => {
   });
 
   const [watchHistoryPause, setWatchHistoryPause] = useState(false);
-
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-
   const [step, SetStep] = useState(1);
-
-  // const [activeDevices] = useState();
 
   const activeDevices = activeSession;
 
@@ -58,8 +52,9 @@ const PrivacyAndSecurity = () => {
 
   useEffect(() => {
     dispatch(activeSessions())
-  },[dispatch])
+  }, [dispatch])
 
+  // All your existing validation, form handling, and other functions remain the same...
   const validatePassword = useCallback((password) => {
     const minLength = 8;
     const hasUpperCase = /[A-Z]/.test(password);
@@ -88,10 +83,6 @@ const PrivacyAndSecurity = () => {
   const handleNext = () => {
     SetStep(prev => prev + 1);
   }
-
-  // const handlePrev = () => {
-  //   SetStep(prev => prev - 1);
-  // }
 
   const handlePasswordChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -134,7 +125,6 @@ const PrivacyAndSecurity = () => {
     } else {
       toast.error('Invalid Password!');
     }
-    // setToggleNew(true);
   }
 
   const validateForm = useCallback(() => {
@@ -177,19 +167,15 @@ const PrivacyAndSecurity = () => {
 
     setIsLoading(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      const response = await dispatch(updatePassword({newPassword:passwordData.newPassword,UserId:user._id}));
+      const response = await dispatch(updatePassword({ newPassword: passwordData.newPassword, UserId: user._id }));
       if (response.payload !== true) return toast.error("Password update failed!");
-      console.log('Password updated successfully');
 
-      // Reset form
       setPasswordData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
-      // setIsEditing(false);
       SetStep(1);
       toast.success('Password updated successfully!');
     } catch (error) {
@@ -207,7 +193,6 @@ const PrivacyAndSecurity = () => {
       confirmPassword: ''
     });
     setErrors({});
-    // setIsEditing(false);
     SetStep(1);
     setShowPassword({
       currentPassword: false,
@@ -240,7 +225,6 @@ const PrivacyAndSecurity = () => {
 
   const handleDeviceLogout = (deviceId) => {
     console.log('Logging out device:', deviceId);
-    // Add device logout logic here
   };
 
   const handleDeleteWatchHistory = async (itemId) => {
@@ -252,7 +236,6 @@ const PrivacyAndSecurity = () => {
     console.log('Clearing all watch history...');
     await dispatch(clearHistory());
   };
-
 
   function timeAgo(createdAt) {
     const now = new Date();
@@ -280,14 +263,44 @@ const PrivacyAndSecurity = () => {
   }
 
   return (
-    <div className='flex w-full pl-4 pt-3 scrollBar max-md:p-0 bg-white overflow-y-auto h-[calc(100vh-57px)] max-md:h-[calc(100vh-41px)] max-md:max-w-full sm:px-3 sm:pt-2 max-[400px]:pl-2'>
-      <div className="flex-col max-w-3xl mx-auto">
+    <div
+      className='flex w-full pl-4 pt-3 scrollBar max-md:p-0 overflow-y-auto h-[calc(100vh-57px)] max-md:h-[calc(100vh-41px)] max-md:max-w-full sm:px-3 sm:pt-2 max-[400px]:pl-2 transition-all'
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        color: 'var(--color-text-primary)',
+        fontFamily: 'var(--font-family)',
+        transitionDuration: 'var(--animation-duration)'
+      }}
+    >
+      <div
+        className="flex-col max-w-3xl mx-auto"
+        style={{
+          color: 'var(--color-text-primary)',
+          fontFamily: 'var(--font-family)'
+        }}
+      >
         {/* Header */}
-        <div className="mb-8 md:hidden max-md:pt-4 max-md:pl-4 max-md:mb-4 max-sm:mb-2 max-[400px]:pl-2">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 max-md:text-[18px] max-sm:text-lg max-[400px]:text-base">
+        <div
+          className="mb-8 md:hidden max-md:pt-4 max-md:pl-4 max-md:mb-4 max-sm:mb-2 max-[400px]:pl-2"
+          style={{ marginBottom: 'var(--section-gap)' }}
+        >
+          <h1
+            className="text-3xl font-bold mb-2 max-md:text-[18px] max-sm:text-lg max-[400px]:text-base"
+            style={{
+              color: 'var(--color-text-primary)',
+              fontSize: 'var(--font-size-3xl)',
+              fontFamily: 'var(--font-family)'
+            }}
+          >
             Privacy & Security
           </h1>
-          <p className="text-gray-600 max-md:text-sm max-[400px]:text-xs">
+          <p
+            className="max-md:text-sm max-[400px]:text-xs"
+            style={{
+              color: 'var(--color-text-secondary)',
+              fontSize: 'var(--font-size-sm)'
+            }}
+          >
             Manage your account security and privacy settings
           </p>
         </div>
@@ -296,25 +309,34 @@ const PrivacyAndSecurity = () => {
           {/* Main Content */}
           <div className="flex-1 min-w-0">
             {/* Password Change Section */}
-
-
-            <div className=" mx-auto p-6 bg-gray-50 rounded-lg shadow-xs my-4 max-md:my-3 max-sm:my-2">
-              <div className="mb-6">
-                <h2 className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold text-gray-900 mb-6 flex items-center">
+            <div
+              className="mx-auto p-6 rounded-lg shadow-sm my-4 max-md:my-3 max-sm:my-2 transition-all"
+              style={{
+                backgroundColor: 'var(--color-bg-tertiary)',
+                padding: 'var(--component-padding)',
+                transitionDuration: 'var(--animation-duration)'
+              }}
+            >
+              <div
+                className="mb-6"
+                style={{ marginBottom: 'var(--component-padding)' }}
+              >
+                <h2
+                  className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold mb-6 flex items-center"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-xl)',
+                    marginBottom: 'var(--component-padding)'
+                  }}
+                >
                   <Lock className="mr-2 h-5 w-5 max-sm:w-4 max-[400px]:h-3 max-[400px]:w-3" />
                   Change Password
                 </h2>
-                {/* <p className="text-gray-600 text-sm">
-                Update your password to keep your account secure
-              </p> */}
               </div>
 
               {step === 1 && (
                 <div className="text-base">
-                  <div
-                    className=" text-white transition-colors flex items-center"
-                  >
-                    {/* <Key className="mr-2 h-4 w-4" /> */}
+                  <div className="text-white transition-colors flex items-center">
                     <div className="relative w-fit">
                       <input
                         type={'password'}
@@ -322,16 +344,34 @@ const PrivacyAndSecurity = () => {
                         value={"password!password!password"}
                         disabled
                         onChange={handlePasswordChange}
-                        className={`w-full px-3 py-2 pr-10 text-black border border-gray-300 rounded-lg ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                        className="w-full px-3 py-2 pr-10 text-black border rounded-lg"
                         placeholder="Enter current password"
+                        style={{
+                          backgroundColor: 'var(--color-bg-primary)',
+                          borderColor: 'var(--color-border)',
+                          color: 'var(--color-text-primary)',
+                          opacity: '0.7'
+                        }}
                       />
                     </div>
                     <button
                       type="button"
-                      // onClick={() => setIsEditing(true)}
                       onClick={handleNext}
-                      className=" ml-2 border px-3 py-2 border-gray-300 rounded-lg hover:bg-gray-400 text-black flex items-center hover:text-blue-600 transition-colors"
+                      className="ml-2 border px-3 py-2 rounded-lg flex items-center transition-all"
+                      style={{
+                        backgroundColor: 'transparent',
+                        borderColor: 'var(--color-border)',
+                        color: 'var(--color-text-primary)',
+                        transitionDuration: 'var(--animation-duration)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'var(--color-hover)';
+                        e.target.style.color = 'var(--accent-color)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                        e.target.style.color = 'var(--color-text-primary)';
+                      }}
                     >
                       Change
                     </button>
@@ -340,13 +380,111 @@ const PrivacyAndSecurity = () => {
               )}
 
               <form className="space-y-4">
-                {/* Current Password */}
+                {step === 2 && (
+                  <div>
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        style={{
+                          color: 'var(--color-text-primary)',
+                          fontSize: 'var(--font-size-sm)'
+                        }}
+                      >
+                        Current Password
+                      </label>
+                      <div className='flex'>
+                        <div
+                          className="w-fit relative flex justify-end items-center border rounded-lg focus:ring-2 transition-all"
+                          style={{
+                            borderColor: errors.currentPassword ? 'var(--color-error)' : 'var(--color-border)',
+                            focusRingColor: 'var(--accent-color)',
+                            transitionDuration: 'var(--animation-duration)'
+                          }}
+                        >
+                          <input
+                            type={showPassword.currentPassword ? 'text' : 'password'}
+                            name="currentPassword"
+                            value={passwordData.currentPassword}
+                            onChange={handlePasswordChange}
+                            className="w-full px-2 py-2 pr-1 outline-none focus:ring-0 focus:outline-none"
+                            placeholder="Enter current password"
+                            style={{
+                              backgroundColor: 'var(--color-bg-primary)',
+                              color: 'var(--color-text-primary)',
+                              fontFamily: 'var(--font-family)'
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility('currentPassword')}
+                            className="pr-2 flex items-center justify-center transition-colors"
+                            style={{
+                              color: 'var(--color-text-secondary)',
+                              transitionDuration: 'var(--animation-duration)'
+                            }}
+                            onMouseEnter={(e) => e.target.style.color = 'var(--accent-color)'}
+                            onMouseLeave={(e) => e.target.style.color = 'var(--color-text-secondary)'}
+                          >
+                            {!showPassword.currentPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                        <button
+                          onClick={(e) => handleValidatePassword(e)}
+                          className='flex justify-center items-center p-2 aspect-square transition-all'
+                          style={{
+                            backgroundColor: 'transparent',
+                            color: 'var(--color-text-primary)',
+                            transitionDuration: 'var(--animation-duration)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = 'var(--color-hover)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'transparent';
+                          }}
+                          onMouseDown={(e) => {
+                            e.target.style.backgroundColor = 'var(--color-active)';
+                            e.target.style.opacity = '0.6';
+                          }}
+                          onMouseUp={(e) => {
+                            e.target.style.backgroundColor = 'var(--color-hover)';
+                            e.target.style.opacity = '1';
+                          }}
+                        >
+                          <ChevronRight />
+                        </button>
+                      </div>
+                      {errors.currentPassword && (
+                        <p
+                          className="mt-1 text-sm"
+                          style={{
+                            color: 'var(--color-error)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
+                          {errors.currentPassword}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {step === 3 && (
                   <div>
-                    <div className=''>
+                    <div className="">
                       {/* New Password */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
                           New Password
                         </label>
                         <div className="relative">
@@ -355,14 +493,34 @@ const PrivacyAndSecurity = () => {
                             name="newPassword"
                             value={passwordData.newPassword}
                             onChange={handlePasswordChange}
-                            className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.newPassword ? 'border-red-500' : 'border-gray-300'
-                              }`}
+                            className="w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 transition-all"
                             placeholder="Enter new password"
+                            style={{
+                              backgroundColor: 'var(--color-bg-primary)',
+                              borderColor: errors.newPassword ? 'var(--color-error)' : 'var(--color-border)',
+                              color: 'var(--color-text-primary)',
+                              fontFamily: 'var(--font-family)',
+                              transitionDuration: 'var(--animation-duration)'
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = 'var(--accent-color)';
+                              e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = errors.newPassword ? 'var(--color-error)' : 'var(--color-border)';
+                              e.target.style.boxShadow = 'none';
+                            }}
                           />
                           <button
                             type="button"
                             onClick={() => togglePasswordVisibility('newPassword')}
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center transition-colors"
+                            style={{
+                              color: 'var(--color-text-secondary)',
+                              transitionDuration: 'var(--animation-duration)'
+                            }}
+                            onMouseEnter={(e) => e.target.style.color = 'var(--accent-color)'}
+                            onMouseLeave={(e) => e.target.style.color = 'var(--color-text-secondary)'}
                           >
                             {showPassword.newPassword ? (
                               <EyeOff className="h-4 w-4" />
@@ -383,23 +541,48 @@ const PrivacyAndSecurity = () => {
                                     ? passwordStrength.color
                                     : 'bg-gray-200'
                                     }`}
+                                  style={{
+                                    backgroundColor: level <= passwordStrength.strength
+                                      ? undefined
+                                      : 'var(--color-border)'
+                                  }}
                                 />
                               ))}
                             </div>
-                            <p className="text-xs text-gray-600">
+                            <p
+                              className="text-xs"
+                              style={{
+                                color: 'var(--color-text-secondary)',
+                                fontSize: 'var(--font-size-xs)'
+                              }}
+                            >
                               Password strength: <span className="font-medium">{passwordStrength.label}</span>
                             </p>
                           </div>
                         )}
 
                         {errors.newPassword && (
-                          <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>
+                          <p
+                            className="mt-1 text-sm"
+                            style={{
+                              color: 'var(--color-error)',
+                              fontSize: 'var(--font-size-sm)'
+                            }}
+                          >
+                            {errors.newPassword}
+                          </p>
                         )}
                       </div>
 
                       {/* Confirm Password */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
                           Confirm New Password
                         </label>
                         <div className="relative">
@@ -408,14 +591,34 @@ const PrivacyAndSecurity = () => {
                             name="confirmPassword"
                             value={passwordData.confirmPassword}
                             onChange={handlePasswordChange}
-                            className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                              }`}
+                            className="w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 transition-all"
                             placeholder="Confirm new password"
+                            style={{
+                              backgroundColor: 'var(--color-bg-primary)',
+                              borderColor: errors.confirmPassword ? 'var(--color-error)' : 'var(--color-border)',
+                              color: 'var(--color-text-primary)',
+                              fontFamily: 'var(--font-family)',
+                              transitionDuration: 'var(--animation-duration)'
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = 'var(--accent-color)';
+                              e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = errors.confirmPassword ? 'var(--color-error)' : 'var(--color-border)';
+                              e.target.style.boxShadow = 'none';
+                            }}
                           />
                           <button
                             type="button"
                             onClick={() => togglePasswordVisibility('confirmPassword')}
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-600 transition-colors"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center transition-colors"
+                            style={{
+                              color: 'var(--color-text-secondary)',
+                              transitionDuration: 'var(--animation-duration)'
+                            }}
+                            onMouseEnter={(e) => e.target.style.color = 'var(--accent-color)'}
+                            onMouseLeave={(e) => e.target.style.color = 'var(--color-text-secondary)'}
                           >
                             {showPassword.confirmPassword ? (
                               <EyeOff className="h-4 w-4" />
@@ -425,29 +628,75 @@ const PrivacyAndSecurity = () => {
                           </button>
                         </div>
                         {errors.confirmPassword && (
-                          <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                          <p
+                            className="mt-1 text-sm"
+                            style={{
+                              color: 'var(--color-error)',
+                              fontSize: 'var(--font-size-sm)'
+                            }}
+                          >
+                            {errors.confirmPassword}
+                          </p>
                         )}
                       </div>
 
-
-
                       {/* Password Requirements */}
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Password Requirements:</h4>
-                        <ul className="text-xs text-gray-600 space-y-1">
-                          <li className={passwordData.newPassword.length >= 8 ? 'text-green-600' : ''}>
+                      <div
+                        className="p-3 rounded-lg mb-4"
+                        style={{
+                          backgroundColor: 'var(--color-bg-secondary)',
+                          border: '1px solid var(--color-border)'
+                        }}
+                      >
+                        <h4
+                          className="text-sm font-medium mb-2"
+                          style={{
+                            color: 'var(--color-text-primary)',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
+                          Password Requirements:
+                        </h4>
+                        <ul
+                          className="text-xs space-y-1"
+                          style={{
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--font-size-xs)'
+                          }}
+                        >
+                          <li
+                            style={{
+                              color: passwordData.newPassword.length >= 8 ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                            }}
+                          >
                             • At least 8 characters long
                           </li>
-                          <li className={/[A-Z]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
+                          <li
+                            style={{
+                              color: /[A-Z]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                            }}
+                          >
                             • One uppercase letter
                           </li>
-                          <li className={/[a-z]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
+                          <li
+                            style={{
+                              color: /[a-z]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                            }}
+                          >
                             • One lowercase letter
                           </li>
-                          <li className={/\d/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
+                          <li
+                            style={{
+                              color: /\d/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                            }}
+                          >
                             • One number
                           </li>
-                          <li className={/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword) ? 'text-green-600' : ''}>
+                          <li
+                            style={{
+                              color: /[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                            }}
+                          >
                             • One special character
                           </li>
                         </ul>
@@ -455,18 +704,45 @@ const PrivacyAndSecurity = () => {
 
                       {/* Submit Error */}
                       {errors.submit && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                          <p className="text-sm text-red-600">{errors.submit}</p>
+                        <div
+                          className="border rounded-lg p-3 mb-4"
+                          style={{
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderColor: 'rgba(239, 68, 68, 0.3)'
+                          }}
+                        >
+                          <p
+                            className="text-sm"
+                            style={{
+                              color: 'var(--color-error)',
+                              fontSize: 'var(--font-size-sm)'
+                            }}
+                          >
+                            {errors.submit}
+                          </p>
                         </div>
                       )}
-
 
                       {/* Action Buttons */}
                       <div className="flex space-x-3 pt-4">
                         <button
                           type="button"
                           onClick={handleCancel}
-                          className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
+                          className="flex-1 px-4 py-2 border rounded-lg transition-all flex items-center justify-center"
+                          style={{
+                            backgroundColor: 'transparent',
+                            borderColor: 'var(--color-border)',
+                            color: 'var(--color-text-secondary)',
+                            transitionDuration: 'var(--animation-duration)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = 'var(--color-hover)';
+                            e.target.style.color = 'var(--color-text-primary)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'transparent';
+                            e.target.style.color = 'var(--color-text-secondary)';
+                          }}
                         >
                           <X className="mr-2 h-4 w-4" />
                           Cancel
@@ -474,7 +750,23 @@ const PrivacyAndSecurity = () => {
                         <button
                           disabled={isLoading}
                           onClick={handleSubmit}
-                          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                          className="flex-1 px-4 py-2 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                          style={{
+                            backgroundColor: 'var(--color-success)',
+                            transitionDuration: 'var(--animation-duration)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!e.target.disabled) {
+                              e.target.style.opacity = '0.9';
+                              e.target.style.transform = 'translateY(-1px)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!e.target.disabled) {
+                              e.target.style.opacity = '1';
+                              e.target.style.transform = 'translateY(0)';
+                            }
+                          }}
                         >
                           {isLoading ? (
                             <>
@@ -492,132 +784,113 @@ const PrivacyAndSecurity = () => {
                     </div>
                   </div>
                 )}
-                {step === 2 && (
-                  <div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Current Password
-                      </label>
-                      <div className='flex'>
-                        <div className={`w-fit relative flex justify-end items-center border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent  ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'
-                          }`}>
-                          <input
-                            type={showPassword.currentPassword ? 'text' : 'password'}
-                            name="currentPassword"
-                            value={passwordData.currentPassword}
-                            onChange={handlePasswordChange}
-                            className={`w-full px-2 py-2 pr-1 outline-none focus:ring-0 focus:outline-none`}
-                            placeholder="Enter current password"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => togglePasswordVisibility('currentPassword')}
-                            className="pr-2 flex items-center justify-center hover:text-blue-600 transition-colors"
-                          >
-                            {!showPassword.currentPassword ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
-                        <button onClick={(e) => handleValidatePassword(e)} className='flex justify-center hover:bg-gray-50 active:bg-gray-100 active:opacity-60 items-center p-2 aspect-square'>
-                          <ChevronRight />
-                        </button>
-                      </div>
-                      {errors.currentPassword && (
-                        <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
-                      )}
-
-                    </div>
-                  </div>
-                )}
-                  
-
-
               </form>
             </div>
 
-            {/* 2FA Section */}
-            {/* <div className="bg-gray-50 rounded-lg p-6 mb-4 max-sm:px-3 max-sm:py-3 max-sm:mb-2 max-[400px]:px-1.5">
-            <h2 className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold text-gray-900 mb-6 flex items-center">
-              <Shield className="mr-2 h-5 w-5 max-sm:w-4 max-[400px]:h-3 max-[400px]:w-3" />
-              Two-Factor Authentication
-            </h2>
-            <div className="space-y-6 max-sm:space-y-3">
-
-              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
-                <div>
-                  <h3 className="font-medium text-gray-900 text-base max-[400px]:text-xs">SMS Authentication</h3>
-                  <p className="text-sm text-gray-600 max-[400px]:text-xs">Receive codes via text message</p>
-                </div>
-                <button
-                  onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors text-xs ${twoFactorEnabled ? 'bg-blue-600' : 'bg-gray-200'
-                    }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                  />
-                </button>
-              </div>
-              <div className="p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
-                <h3 className="font-medium text-gray-900 mb-2 text-base max-[400px]:text-xs">Authenticator App</h3>
-                <p className="text-sm text-gray-600 mb-3 max-[400px]:text-xs">Use an authenticator app for more secure 2FA</p>
-                <button className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-base max-[400px]:px-2 max-[400px]:py-1 max-[400px]:text-xs">
-                  Set Up Authenticator
-                </button>
-              </div>
-            </div>
-            </div> */}
-
             {/* Active Devices */}
-            <div className="bg-gray-50 rounded-lg p-6 mb-4 max-md:rounded-none max-sm:px-3 max-sm:py-3 max-sm:mb-2">
-              <h2 className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold text-gray-900 mb-6 flex items-center">
+            <div
+              className="rounded-lg p-6 mb-4 max-md:rounded-none max-sm:px-3 max-sm:py-3 max-sm:mb-2 transition-all"
+              style={{
+                backgroundColor: 'var(--color-bg-tertiary)',
+                padding: 'var(--component-padding)',
+                marginBottom: 'var(--section-gap)',
+                transitionDuration: 'var(--animation-duration)'
+              }}
+            >
+              <h2
+                className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold mb-6 flex items-center"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontSize: 'var(--font-size-xl)',
+                  marginBottom: 'var(--component-padding)'
+                }}
+              >
                 <Monitor className="mr-2 h-5 w-5 max-sm:w-4 max-[400px]:h-3 max-[400px]:w-3" />
                 Active Devices
               </h2>
               <div className="space-y-4 max-sm:space-y-2">
                 <div>
                   {activeDevices.length === 0 && (
-                    <p>No active device found.</p>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>No active device found.</p>
                   )}
                 </div>
                 {activeDevices.map((device) => (
-                  <div key={device?._id} className="p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
+                  <div
+                    key={device?._id}
+                    className="p-4 border rounded-lg max-sm:p-2 max-[400px]:p-1.5 transition-all"
+                    style={{
+                      backgroundColor: 'var(--color-bg-primary)',
+                      borderColor: 'var(--color-border)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 max-sm:space-x-1">
-                        <div className="p-2 bg-gray-100 rounded-lg">
+                        <div
+                          className="p-2 rounded-lg"
+                          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+                        >
                           {device?.os === "android" || device?.os === 'iphone' ? (
-                            <Smartphone className="h-5 w-5 max-sm:w-4 text-gray-600" />
+                            <Smartphone
+                              className="h-5 w-5 max-sm:w-4"
+                              style={{ color: 'var(--color-text-secondary)' }}
+                            />
                           ) : (
-                            <Monitor className="h-5 w-5 max-sm:w-4 text-gray-600" />
+                            <Monitor
+                              className="h-5 w-5 max-sm:w-4"
+                              style={{ color: 'var(--color-text-secondary)' }}
+                            />
                           )}
                         </div>
                         <div>
                           <div className="flex items-center space-x-2 xa-msm:space-x-1">
-                            <h3 className="font-medium max-sm:text-sm text-gray-900">{device?.deviceName}</h3>
+                            <h3
+                              className="font-medium max-sm:text-sm"
+                              style={{ color: 'var(--color-text-primary)' }}
+                            >
+                              {device?.deviceName}
+                            </h3>
                             {device?.isActive && (
-                              <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                              <span
+                                className="px-2 py-1 text-xs rounded-full"
+                                style={{
+                                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                  color: 'var(--color-success)'
+                                }}
+                              >
                                 Current
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center text-sm max-sm:text-[10px] text-gray-600 space-x-4 max-sm:space-x-1.5">
+                          <div
+                            className="flex items-center text-sm max-sm:text-[10px] space-x-4 max-sm:space-x-1.5"
+                            style={{ color: 'var(--color-text-secondary)' }}
+                          >
                             <span className="flex items-center">
                               <MapPin className="h-3 w-3 mr-1 max-sm:w-2" />
                               {device?.location || 'New delhi INDIA'}
                             </span>
                             <span>Last active: {timeAgo(device?.lastActivity)}</span>
-                            <span >{device?.browser}</span>
+                            <span>{device?.browser}</span>
                           </div>
                         </div>
                       </div>
                       {!device?.isActive && (
                         <button
                           onClick={() => handleDeviceLogout(device?.id)}
-                          className="px-3 py-1 max-sm:px-1.5 max-sm:py-0.5 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors max-sm:text-xs"
+                          className="px-3 py-1 max-sm:px-1.5 max-sm:py-0.5 border rounded max-sm:text-xs transition-all"
+                          style={{
+                            color: 'var(--color-error)',
+                            borderColor: 'var(--color-error)',
+                            backgroundColor: 'transparent',
+                            transitionDuration: 'var(--animation-duration)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'transparent';
+                          }}
                         >
                           Sign Out
                         </button>
@@ -626,32 +899,71 @@ const PrivacyAndSecurity = () => {
                   </div>
                 ))}
               </div>
-              <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
+              <div
+                className="mt-6 p-4 border rounded-lg max-sm:p-2 max-[400px]:p-1.5"
+                style={{
+                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                  borderColor: 'rgba(245, 158, 11, 0.3)'
+                }}
+              >
                 <div className="flex items-start">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 mr-2 mt-0.5 max-sm:h-4 max-[400px]:h-3" />
+                  <AlertTriangle
+                    className="h-5 w-5 mr-2 mt-0.5 max-sm:h-4 max-[400px]:h-3"
+                    style={{ color: 'var(--color-warning)' }}
+                  />
                   <div>
-                    <h3 className="font-medium text-amber-800 text-base max-[400px]:text-xs">Security Tip</h3>
-                    <p className="text-amber-700 text-sm mt-1 max-[400px]:text-xs">
+                    <h3
+                      className="font-medium text-base max-[400px]:text-xs"
+                      style={{ color: 'var(--color-warning)' }}
+                    >
+                      Security Tip
+                    </h3>
+                    <p
+                      className="text-sm mt-1 max-[400px]:text-xs"
+                      style={{ color: 'var(--color-warning)', opacity: '0.8' }}
+                    >
                       If you see any unfamiliar devices, sign them out immediately and change your password.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
+
             {/* Watch History */}
-            <div className="bg-gray-50 rounded-lg p-6 mb-4 max-sm:px-3 max-sm:py-3 max-sm:mb-2">
+            <div
+              className="rounded-lg p-6 mb-4 max-sm:px-3 max-sm:py-3 max-sm:mb-2 transition-all"
+              style={{
+                backgroundColor: 'var(--color-bg-tertiary)',
+                padding: 'var(--component-padding)',
+                marginBottom: 'var(--section-gap)',
+                transitionDuration: 'var(--animation-duration)'
+              }}
+            >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 max-sm:mb-3">
-                <h2 className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold text-gray-900 flex items-center">
+                <h2
+                  className="text-xl max-sm:text-base max-[400px]:text-sm font-semibold flex items-center"
+                  style={{
+                    color: 'var(--color-text-primary)',
+                    fontSize: 'var(--font-size-xl)'
+                  }}
+                >
                   <Clock className="mr-2 h-5 w-5 max-sm:w-4 max-[400px]:h-3 max-[400px]:w-3" />
                   Watch History
                 </h2>
                 <div className="flex items-center space-x-3 max-sm:space-x-2 mt-2 sm:mt-0">
                   <button
                     onClick={handleWatchHistoryPauseBtn}
-                    className={`flex items-center max-sm:text-xs px-4 py-2 max-sm:px-2 max-sm:py-1 rounded-lg transition-colors ${watchHistoryPause
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-amber-600 text-white hover:bg-amber-700'
-                      }`}
+                    className="flex items-center max-sm:text-xs px-4 py-2 max-sm:px-2 max-sm:py-1 rounded-lg transition-all text-white"
+                    style={{
+                      backgroundColor: watchHistoryPause ? 'var(--color-success)' : 'var(--color-warning)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.opacity = '0.9';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.opacity = '1';
+                    }}
                   >
                     {watchHistoryPause ? (
                       <>
@@ -667,7 +979,19 @@ const PrivacyAndSecurity = () => {
                   </button>
                   <button
                     onClick={handleClearAllHistory}
-                    className="flex items-center px-4 py-2 max-sm:text-xs max-sm:px-2 max-sm:py-1 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                    className="flex items-center px-4 py-2 max-sm:text-xs max-sm:px-2 max-sm:py-1 border rounded-lg transition-all"
+                    style={{
+                      color: 'var(--color-error)',
+                      borderColor: 'var(--color-error)',
+                      backgroundColor: 'transparent',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                    }}
                   >
                     <Trash2 className="mr-2 h-4 w-4 max-sm:mr-1 max-sm:w-3 stroke-2" />
                     Clear All
@@ -676,25 +1000,53 @@ const PrivacyAndSecurity = () => {
               </div>
               <div className="space-y-4 max-sm:space-y-2">
                 {watchHistory?.map((item) => (
-                  <div key={item?._id} className="p-4 bg-white border border-gray-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
+                  <div
+                    key={item?._id}
+                    className="p-4 border rounded-lg max-sm:p-2 max-[400px]:p-1.5 transition-all"
+                    style={{
+                      backgroundColor: 'var(--color-bg-primary)',
+                      borderColor: 'var(--color-border)',
+                      transitionDuration: 'var(--animation-duration)'
+                    }}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900 max-sm:text-sm">{item?.title}</h3>
-                        <div className="flex items-center text-sm max-sm:text-xs text-gray-600 space-x-4 max-sm:space-x-2 mt-1">
+                        <h3
+                          className="font-medium max-sm:text-sm"
+                          style={{ color: 'var(--color-text-primary)' }}
+                        >
+                          {item?.title}
+                        </h3>
+                        <div
+                          className="flex items-center text-sm max-sm:text-xs space-x-4 max-sm:space-x-2 mt-1"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
                           <span>Duration: {item?.duration}</span>
                           <span>Watched: {item?.watchedAt}</span>
                           <span>Progress: {item?.progress}%</span>
                         </div>
-                        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="mt-2 w-full rounded-full h-2"
+                          style={{ backgroundColor: 'var(--color-border)' }}
+                        >
                           <div
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${item?.progress}%` }}
+                            className="h-2 rounded-full"
+                            style={{
+                              width: `${item?.progress}%`,
+                              backgroundColor: 'var(--accent-color)'
+                            }}
                           ></div>
                         </div>
                       </div>
                       <button
                         onClick={() => handleDeleteWatchHistory(item._id)}
-                        className="ml-4 max-sm:ml-0 p-2 text-gray-400 hover:text-red-600 transition-colors"
+                        className="ml-4 max-sm:ml-0 p-2 transition-colors"
+                        style={{
+                          color: 'var(--color-text-secondary)',
+                          transitionDuration: 'var(--animation-duration)'
+                        }}
+                        onMouseEnter={(e) => e.target.style.color = 'var(--color-error)'}
+                        onMouseLeave={(e) => e.target.style.color = 'var(--color-text-secondary)'}
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -703,22 +1055,45 @@ const PrivacyAndSecurity = () => {
                 ))}
               </div>
               <Tooltip title="Not available right now!">
-              <div className="opacity-50 mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-sm:p-2 max-[400px]:p-1.5">
-                <h3 className="font-medium text-blue-800 mb-2 text-base max-[400px]:text-xs">Privacy Controls</h3>
-                <p className="text-blue-700 text-sm mb-3 max-[400px]:text-xs">
-                  Control how your watch history is used for recommendations and personalization.
-                </p>
-                <div className="space-y-2">
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" defaultChecked />
-                    <span className="text-sm text-blue-800 max-[400px]:text-xs">Use watch history for recommendations</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" defaultChecked />
-                    <span className="text-sm text-blue-800 max-[400px]:text-xs">Include in search suggestions</span>
-                  </label>
+                <div
+                  className="opacity-50 mt-6 p-4 border rounded-lg max-sm:p-2 max-[400px]:p-1.5"
+                  style={{
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: 'rgba(59, 130, 246, 0.3)'
+                  }}
+                >
+                  <h3
+                    className="font-medium mb-2 text-base max-[400px]:text-xs"
+                    style={{ color: 'var(--accent-color)' }}
+                  >
+                    Privacy Controls
+                  </h3>
+                  <p
+                    className="text-sm mb-3 max-[400px]:text-xs"
+                    style={{ color: 'var(--accent-color)', opacity: '0.8' }}
+                  >
+                    Control how your watch history is used for recommendations and personalization.
+                  </p>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" defaultChecked />
+                      <span
+                        className="text-sm max-[400px]:text-xs"
+                        style={{ color: 'var(--accent-color)' }}
+                      >
+                        Use watch history for recommendations
+                      </span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" defaultChecked />
+                      <span
+                        className="text-sm max-[400px]:text-xs"
+                        style={{ color: 'var(--accent-color)' }}
+                      >
+                        Include in search suggestions
+                      </span>
+                    </label>
                   </div>
-              
                 </div>
               </Tooltip>
             </div>
