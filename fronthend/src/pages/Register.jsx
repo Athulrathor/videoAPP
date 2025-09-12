@@ -474,13 +474,13 @@ const Register = () => {
             onMouseEnter={(e) => {
               if (!appearanceSettings.reducedMotion) {
                 e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+                // e.target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
               }
             }}
             onMouseLeave={(e) => {
               if (!appearanceSettings.reducedMotion) {
                 e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+                // e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
               }
             }}
           >
@@ -528,15 +528,15 @@ const Register = () => {
                       value={formData.fullname}
                       onChange={(e) => handleInputChange('fullname', e.target.value)}
                       onBlur={(e) => handleBlur('fullname', e.target.value)}
-                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
+                      className={`w-full border-2 rounded-2xl focus:outline-none transition-all duration-200`}
                       style={{
-                        paddingLeft: '3rem',
+                        paddingLeft: '2.5rem',
                         padding: 'var(--spacing-unit)',
                         borderColor: errors.fullname
                           ? 'var(--color-error)'
                           : 'var(--color-border)',
                         backgroundColor: errors.fullname
-                          ? 'rgba(239, 68, 68, 0.05)'
+                          ? ''
                           : 'var(--color-bg-secondary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
@@ -545,13 +545,13 @@ const Register = () => {
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--accent-color)';
-                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
-                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                        // e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        // e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                       }}
                       onBlurCapture={(e) => {
                         if (!errors.fullname) {
                           e.target.style.borderColor = 'var(--color-border)';
-                          e.target.style.boxShadow = 'none';
+                          // e.target.style.boxShadow = 'none';
                         }
                       }}
                       placeholder="Enter your full name"
@@ -595,7 +595,7 @@ const Register = () => {
                   </label>
                   <div className="relative group">
                     <div
-                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      className="absolute inset-y-0 left-0 pl-4 h-full justify-center flex items-center pointer-events-none"
                       style={{ paddingLeft: 'var(--spacing-unit)' }}
                     >
                       <Mail
@@ -614,7 +614,7 @@ const Register = () => {
                       onBlur={(e) => handleBlur('email', e.target.value)}
                       className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
                       style={{
-                        paddingLeft: '3rem',
+                        paddingLeft: '2.5rem',
                         padding: 'var(--spacing-unit)',
                         borderColor: errors.email
                           ? 'var(--color-error)'
@@ -629,13 +629,13 @@ const Register = () => {
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--accent-color)';
-                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
-                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                        // e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        // e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                       }}
                       onBlurCapture={(e) => {
                         if (!errors.email) {
                           e.target.style.borderColor = 'var(--color-border)';
-                          e.target.style.boxShadow = 'none';
+                          // e.target.style.boxShadow = 'none';
                         }
                       }}
                       placeholder="Enter your email address"
@@ -709,13 +709,13 @@ const Register = () => {
                       onBlur={(e) => handleBlur('username', e.target.value)}
                       className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
                       style={{
-                        paddingLeft: '3rem',
+                        paddingLeft: '2.5rem',
                         padding: 'var(--spacing-unit)',
                         borderColor: errors.username
                           ? 'var(--color-error)'
                           : 'var(--color-border)',
                         backgroundColor: errors.username
-                          ? 'rgba(239, 68, 68, 0.05)'
+                          ? ''
                           : 'var(--color-bg-secondary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
@@ -724,13 +724,13 @@ const Register = () => {
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--accent-color)';
-                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
-                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                        // e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        // e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                       }}
                       onBlurCapture={(e) => {
                         if (!errors.username) {
                           e.target.style.borderColor = 'var(--color-border)';
-                          e.target.style.boxShadow = 'none';
+                          // e.target.style.boxShadow = 'none';
                         }
                       }}
                       placeholder="Choose a unique username"
@@ -793,14 +793,14 @@ const Register = () => {
                       onBlur={(e) => handleBlur('password', e.target.value)}
                       className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
                       style={{
-                        paddingLeft: '3rem',
-                        paddingRight: '3rem',
+                        paddingLeft: '2.5rem',
+                        paddingRight: '2.5rem',
                         padding: 'var(--spacing-unit)',
                         borderColor: errors.password
                           ? 'var(--color-error)'
                           : 'var(--color-border)',
                         backgroundColor: errors.password
-                          ? 'rgba(239, 68, 68, 0.05)'
+                          ? ''
                           : 'var(--color-bg-secondary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
@@ -946,14 +946,14 @@ const Register = () => {
                       onBlur={(e) => handleBlur('confirmPassword', e.target.value)}
                       className={`w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
                       style={{
-                        paddingLeft: '3rem',
-                        paddingRight: '3rem',
+                        paddingLeft: '2.5rem',
+                        paddingRight: '2.5rem',
                         padding: 'var(--spacing-unit)',
                         borderColor: errors.confirmPassword
                           ? 'var(--color-error)'
                           : 'var(--color-border)',
                         backgroundColor: errors.confirmPassword
-                          ? 'rgba(239, 68, 68, 0.05)'
+                          ? ''
                           : 'var(--color-bg-secondary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
@@ -962,13 +962,13 @@ const Register = () => {
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--accent-color)';
-                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
-                        e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                        // e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        // e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                       }}
                       onBlurCapture={(e) => {
                         if (!errors.confirmPassword) {
                           e.target.style.borderColor = 'var(--color-border)';
-                          e.target.style.boxShadow = 'none';
+                          // e.target.style.boxShadow = 'none';
                         }
                       }}
                       placeholder="Confirm your password"
@@ -1301,13 +1301,13 @@ const Register = () => {
                         }}
                         onFocus={(e) => {
                           e.target.style.borderColor = 'var(--accent-color)';
-                          e.target.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.2)';
+                          // e.target.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.2)';
                         }}
                         onBlur={(e) => {
                           if (!digit) {
                             e.target.style.borderColor = 'var(--color-border)';
                           }
-                          e.target.style.boxShadow = 'none';
+                          // e.target.style.boxShadow = 'none';
                         }}
                         aria-label={`Digit ${index + 1} of verification code`}
                         aria-describedby="otp-help"
@@ -1498,11 +1498,11 @@ const Register = () => {
                     transitionDuration: 'var(--animation-duration)'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-hover)';
+                    // e.target.style.backgroundColor = 'var(--color-hover)';
                     e.target.style.color = 'var(--color-text-primary)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
+                    // e.target.style.backgroundColor = 'transparent';
                     e.target.style.color = 'var(--color-text-secondary)';
                   }}
                   aria-label="Go to previous step"

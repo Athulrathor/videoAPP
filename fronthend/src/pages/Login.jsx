@@ -133,22 +133,22 @@ const Login = () => {
         style={{
           backgroundColor: loading ? 'rgba(0, 0, 0, 0.05)' : 'var(--color-bg-primary)',
           borderColor: 'var(--color-border)',
-          backdropFilter: 'blur(10px)',
+          backdropFilter: 'blur(0.1px)',
           transitionDuration: 'var(--animation-duration)',
           padding: 'var(--component-padding)'
         }}
-        onMouseEnter={(e) => {
-          if (!loading && !appearanceSettings.reducedMotion) {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!loading && !appearanceSettings.reducedMotion) {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
-          }
-        }}
+        // onMouseEnter={(e) => {
+        //   if (!loading && !appearanceSettings.reducedMotion) {
+        //     e.target.style.transform = 'translateY(-2px)';
+        //     e.target.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+        //   }
+        // }}
+        // onMouseLeave={(e) => {
+        //   if (!loading && !appearanceSettings.reducedMotion) {
+        //     e.target.style.transform = 'translateY(0)';
+        //     e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+        //   }
+        // }}
       >
         <div
           className="flex justify-between max-sm:block max-sm:flex-col max-sm:py-2.5 max-sm:items-center my-6 mx-4"
@@ -271,7 +271,7 @@ const Login = () => {
                       id="email-error"
                       className="flex items-center text-sm mt-1"
                       style={{
-                        color: 'var(--color-error)',
+                        color: 'red',
                         fontSize: 'var(--font-size-sm)',
                         marginTop: 'calc(var(--spacing-unit) * 0.5)'
                       }}
@@ -340,7 +340,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors"
+                    className={`${errors.password ? "top-[36%]" : ""} absolute right-3  top-1/2 transform -translate-y-1/2 transition-colors`}
                     style={{
                       color: 'var(--color-text-secondary)',
                       transitionDuration: 'var(--animation-duration)'
@@ -360,7 +360,7 @@ const Login = () => {
                       id="password-error"
                       className="flex items-center text-sm mt-1"
                       style={{
-                        color: 'var(--color-error)',
+                        color: 'red',
                         fontSize: 'var(--font-size-sm)',
                         marginTop: 'calc(var(--spacing-unit) * 0.5)'
                       }}
@@ -507,7 +507,7 @@ const Login = () => {
             <button
               onClick={googleLogin}
               disabled={loading}
-              className="w-14 h-14 text-white rounded-full transition-all duration-200 flex items-center justify-center"
+              className="w-14 h-14 rounded-full transition-all duration-200 flex items-center justify-center"
               style={{
                 backgroundColor: 'var(--color-bg-secondary)',
                 transitionDuration: 'var(--animation-duration)',
@@ -533,14 +533,13 @@ const Login = () => {
               <img
                 src={google}
                 alt="Google"
-                width={30}
-                height={30}
+                className="w-13 h-13 rounded-full"
               />
             </button>
 
             <button
               disabled={loading}
-              className="w-14 h-14 text-white rounded-full transition-all duration-200 flex items-center justify-center"
+              className="w-14 h-14 rounded-full transition-all duration-200 flex items-center justify-center"
               style={{
                 backgroundColor: 'var(--color-bg-secondary)',
                 transitionDuration: 'var(--animation-duration)',
@@ -566,8 +565,7 @@ const Login = () => {
               <img
                 src={facebook}
                 alt="Facebook"
-                width={30}
-                height={30}
+                className="w-14 h-14 rounded-full"
               />
             </button>
           </div>

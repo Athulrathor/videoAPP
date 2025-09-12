@@ -35,22 +35,26 @@ body{
   --font-size-2xl: 24px;
   --font-size-3xl: 30px;
   --accent-color: #3b82f6;
+  --accent-color-rgb: 59, 130, 246;
   --spacing-unit: 1rem;
   --component-padding: 1rem;
   --section-gap: 2rem;
   --animation-duration: 0.3s;
   --background-image: none;
+  --color-success:#03c447;
+  --color-error:#fa5a5a;
   
   /* Light theme colors */
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8fafc;
-  --color-bg-tertiary: #f1f5f9;
+  --color-bg-secondary: #d5d7d9;
+  --color-bg-tertiary: #aeb3b6;
   --color-text-primary: #1e293b;
   --color-text-secondary: #64748b;
   --color-border: #e2e8f0;
-  --color-hover: #f1f5f9;
-  --color-active: #e2e8f0;
-  --color-accent-bg: #eff6ff;
+  --color-hover: #c9c9ca;
+  --color-active: #868c92;
+  --color-accent-bg: #797e84;
+  --color-accent-hover: rgba(var(--accent-color-rgb),0.5);
 }
 
 /* Dark theme */
@@ -125,7 +129,7 @@ body {
   transition: all var(--animation-duration) ease;
   padding: var(--component-padding);
   width: 100%;
-  height: calc(100vh - 65px);
+  height: calc(100vh - 57px);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
