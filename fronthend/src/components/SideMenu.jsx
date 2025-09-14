@@ -69,7 +69,7 @@ function SideMenu(props) {
             }}
             style={{
               backgroundColor: sideActive === "home"
-                ? 'var(--color-accent-bg)'
+                ? 'var(--color-bg-secondary)'
                 : 'transparent',
               color: sideActive === "home"
                 ? 'var(--accent-color)'
@@ -126,7 +126,7 @@ function SideMenu(props) {
             }}
             style={{
               backgroundColor: sideActive === "shorts"
-                ? 'var(--color-accent-bg)'
+                ? 'var(--color-bg-secondary)'
                 : 'transparent',
               color: sideActive === "shorts"
                 ? 'var(--accent-color)'
@@ -191,7 +191,7 @@ function SideMenu(props) {
             }}
             style={{
               backgroundColor: sideActive === "subscription"
-                ? 'var(--color-accent-bg)'
+                ? 'var(--color-bg-secondary)'
                 : 'transparent',
               color: sideActive === "subscription"
                 ? 'var(--accent-color)'
@@ -289,7 +289,7 @@ function SideMenu(props) {
                 onClick={() => dispatch(setSideActive("history"))}
                 style={{
                   backgroundColor: sideActive === "history"
-                    ? 'var(--color-accent-bg)'
+                    ? 'var(--color-bg-secondary)'
                     : 'transparent',
                   color: sideActive === "history"
                     ? 'var(--accent-color)'
@@ -336,7 +336,7 @@ function SideMenu(props) {
                 }}
                 style={{
                   backgroundColor: sideActive === "Manage Videos"
-                    ? 'var(--color-accent-bg)'
+                    ? 'var(--color-bg-secondary)'
                     : 'transparent',
                   color: sideActive === "Manage Videos"
                     ? 'var(--accent-color)'
@@ -384,7 +384,7 @@ function SideMenu(props) {
                 }}
                 style={{
                   backgroundColor: sideActive === "playlists"
-                    ? 'var(--color-accent-bg)'
+                    ? 'var(--color-bg-secondary)'
                     : 'transparent',
                   color: sideActive === "playlists"
                     ? 'var(--accent-color)'
@@ -433,7 +433,7 @@ function SideMenu(props) {
                 }}
                 style={{
                   backgroundColor: sideActive === "your videos"
-                    ? 'var(--color-accent-bg)'
+                    ? 'var(--color-bg-secondary)'
                     : 'transparent',
                   color: sideActive === "your videos"
                     ? 'var(--accent-color)'
@@ -483,7 +483,7 @@ function SideMenu(props) {
                 }}
                 style={{
                   backgroundColor: sideActive === "likedVideos"
-                    ? 'var(--color-accent-bg)'
+                    ? 'var(--color-bg-secondary)'
                     : 'transparent',
                   color: sideActive === "likedVideos"
                     ? 'var(--accent-color)'
@@ -625,7 +625,7 @@ function SideMenu(props) {
             onClick={() => Navigate(`/settings`)}
             style={{
               backgroundColor: sideActive === "settings"
-                ? 'var(--color-accent-bg)'
+                ? 'var(--color-bg-secondary)'
                 : 'transparent',
               color: sideActive === "settings"
                 ? 'var(--accent-color)'
@@ -666,7 +666,7 @@ function SideMenu(props) {
             }}
             style={{
               backgroundColor: sideActive === "report history"
-                ? 'var(--color-accent-bg)'
+                ? 'var(--color-bg-secondary)'
                 : 'transparent',
               color: sideActive === "report history"
                 ? 'var(--accent-color)'
@@ -709,7 +709,7 @@ function SideMenu(props) {
             }}
             style={{
               backgroundColor: sideActive === "help"
-                ? 'var(--color-accent-bg)'
+                ? 'var(--color-bg-secondary)'
                 : 'transparent',
               color: sideActive === "help"
                 ? 'var(--accent-color)'
@@ -752,7 +752,7 @@ function SideMenu(props) {
             }}
             style={{
               backgroundColor: sideActive === "feedback"
-                ? 'var(--color-accent-bg)'
+                ? 'var(--color-bg-secondary)'
                 : 'transparent',
               color: sideActive === "feedback"
                 ? 'var(--accent-color)'

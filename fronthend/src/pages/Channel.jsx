@@ -268,7 +268,7 @@ const Channel = () => {
 
               {/* User Details */}
               <div
-                className="my-2"
+                className="my-1"
                 style={{ margin: 'var(--spacing-unit) 0' }}
               >
                 {/* Channel Name */}
@@ -305,7 +305,7 @@ const Channel = () => {
                   style={{
                     color: 'var(--color-text-secondary)',
                     fontSize: 'var(--font-size-sm)',
-                    marginTop: 'var(--spacing-unit)'
+                    // marginTop: 'var(--spacing-unit)'
                   }}
                 >
                   {/* Channel URL */}
@@ -355,15 +355,17 @@ const Channel = () => {
                 >
                   <button
                     onClick={() => {
-                      Navigate("/");
+                      Navigate("/setting");
                       dispatch(setSideActive("settings"));
                       dispatch(setSettingsActive("Accounts"));
                     }}
                     className="px-2 py-1 rounded-lg font-medium transition-all"
                     style={{
+                      borderColor: 'var(--color-border)',
                       backgroundColor: 'var(--color-bg-secondary)',
                       color: 'var(--color-text-primary)',
                       fontSize: 'var(--font-size-base)',
+                      fontFamily:'var(--font-family)',
                       transitionDuration: 'var(--animation-duration)'
                     }}
                     onMouseEnter={(e) => {
@@ -380,7 +382,7 @@ const Channel = () => {
                   <button
                     onClick={() => {
                       dispatch(setSideActive("settings"));
-                      Navigate("/");
+                      // Navigate("/");
                     }}
                     className="px-2 py-1 rounded-lg font-medium transition-all"
                     style={{
@@ -558,12 +560,12 @@ const Channel = () => {
                         style={{
                           transitionDuration: 'var(--animation-duration)'
                         }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = 'var(--color-hover)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = 'transparent';
-                        }}
+                        // onMouseEnter={(e) => {
+                        //   e.target.style.backgroundColor = 'var(--color-hover)';
+                        // }}
+                        // onMouseLeave={(e) => {
+                        //   e.target.style.backgroundColor = 'transparent';
+                        // }}
                         role="listitem"
                         aria-posinset={index + 1}
                         aria-setsize={videoByOwner.length}
@@ -606,7 +608,7 @@ const Channel = () => {
                                   transitionDuration: appearanceSettings.reducedMotion ? '0s' : '75ms'
                                 }}
                                 onMouseEnter={(e) => {
-                                  e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                                  e.target.style.backgroundColor = 'var(--color-accent-hover)';
                                 }}
                                 onMouseLeave={(e) => {
                                   e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
@@ -661,28 +663,28 @@ const Channel = () => {
 
                         {/* Video Info */}
                         <div
-                          className="max-w-96 max-md:w-[60%] flex-col flex py-1 pl-2"
+                          className="max-w-96 max-md:w-[60%] flex-col flex"
                           style={{
                             paddingLeft: 'var(--spacing-unit)',
-                            paddingTop: 'var(--spacing-unit)'
+                            // paddingTop: 'var(--spacing-unit)'
                           }}
                         >
                           {/* Title */}
                           <div
-                            className="line-clamp-2 w-full font-medium text-3xl pb-2 max-sm:pb-0 max-sm:text-lg max-md:text-2xl cursor-pointer transition-all"
+                            className="line-clamp-2 w-full font-medium text-3xl max-sm:pb-0 max-sm:text-lg max-md:text-2xl cursor-pointer transition-all"
                             style={{
                               color: 'var(--color-text-primary)',
-                              fontSize: 'var(--font-size-3xl)',
+                              fontSize: 'var(--font-size-xl)',
                               fontFamily: 'var(--font-family)',
-                              paddingBottom: 'var(--spacing-unit)',
+                              // paddingBottom: 'var(--spacing-unit)',
                               transitionDuration: 'var(--animation-duration)'
                             }}
-                            onMouseEnter={(e) => {
-                              e.target.style.color = 'var(--accent-color)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.color = 'var(--color-text-primary)';
-                            }}
+                            // onMouseEnter={(e) => {
+                            //   e.target.style.color = 'var(--accent-color)';
+                            // }}
+                            // onMouseLeave={(e) => {
+                            //   e.target.style.color = 'var(--color-text-primary)';
+                            // }}
                           >
                             <h2
                               onClick={handleOverAllEvent}
@@ -703,34 +705,34 @@ const Channel = () => {
                           </div>
 
                           <div className="flex">
-                            <div className="flex flex-col leading-tight">
+                            <div className="flex flex-col">
                               {/* Username */}
                               <div
-                                className="mb-1 text-xs font-normal max-md:text-xs"
+                                className="text-xs font-normal max-md:text-xs"
                                 style={{
                                   color: 'var(--color-text-secondary)',
                                   fontSize: 'var(--font-size-xs)',
-                                  marginBottom: 'var(--spacing-unit)'
+                                  // marginBottom: 'var(--spacing-unit)'
                                 }}
                               >
                                 <h3
                                   onClick={handleOverAllEvent}
-                                  data-username={video?.owner?.username}
+                                  data-username={video?.userInfo?.username}
                                   name="username"
                                   id={video._id}
                                   className="cursor-pointer transition-colors"
                                   style={{
                                     transitionDuration: 'var(--animation-duration)'
                                   }}
-                                  onMouseEnter={(e) => {
-                                    e.target.style.color = 'var(--accent-color)';
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.target.style.color = 'var(--color-text-secondary)';
-                                  }}
+                                  // onMouseEnter={(e) => {
+                                  //   e.target.style.color = 'var(--accent-color)';
+                                  // }}
+                                  // onMouseLeave={(e) => {
+                                  //   e.target.style.color = 'var(--color-text-secondary)';
+                                  // }}
                                   role="button"
                                   tabIndex={0}
-                                  aria-label={`Visit ${video?.owner?.username}'s channel`}
+                                  aria-label={`Visit ${video?.userInfo?.username}'s channel`}
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter' || e.key === ' ') {
                                       e.preventDefault();
@@ -738,7 +740,7 @@ const Channel = () => {
                                     }
                                   }}
                                 >
-                                  {video?.owner?.username}
+                                  {video?.userInfo?.username}
                                 </h3>
                               </div>
 

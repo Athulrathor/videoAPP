@@ -137,7 +137,7 @@ const VideoCard = ({ video, timeAgo, formatTime, muted, handleOverAllEvent }) =>
                     transitionDuration: 'var(--animation-duration)'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                    e.target.style.backgroundColor = 'var(--color-accent-hover)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
@@ -290,7 +290,7 @@ const VideoCard = ({ video, timeAgo, formatTime, muted, handleOverAllEvent }) =>
 
           <div
             className="mt-1"
-            style={{ marginTop: 'var(--spacing-unit)' }}
+            // style={{ marginTop: 'var(--spacing-unit)' }}
           >
             <div
               className="text-sm mt-0.5 transition-colors"

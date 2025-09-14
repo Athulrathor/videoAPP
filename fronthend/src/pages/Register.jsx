@@ -511,7 +511,7 @@ const Register = () => {
                   </label>
                   <div className="relative group">
                     <div
-                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      className="absolute hidden inset-y-0 left-0 items-center pointer-events-none"
                       style={{ paddingLeft: 'var(--spacing-unit)' }}
                     >
                       <User
@@ -537,7 +537,7 @@ const Register = () => {
                           : 'var(--color-border)',
                         backgroundColor: errors.fullname
                           ? ''
-                          : 'var(--color-bg-secondary)',
+                          : 'var(--color-bg-primary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
                         fontFamily: 'var(--font-family)',
@@ -545,7 +545,7 @@ const Register = () => {
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--accent-color)';
-                        // e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
                         // e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                       }}
                       onBlurCapture={(e) => {
@@ -568,8 +568,6 @@ const Register = () => {
                         fontSize: 'var(--font-size-sm)',
                         marginTop: 'var(--spacing-unit)'
                       }}
-                      role="alert"
-                      aria-live="polite"
                     >
                       <AlertCircle className="w-4 h-4 mr-2" />
                       {errors.fullname}
@@ -593,9 +591,9 @@ const Register = () => {
                   >
                     Email Address *
                   </label>
-                  <div className="relative group">
+                  <div className="relative">
                     <div
-                      className="absolute inset-y-0 left-0 pl-4 h-full justify-center flex items-center pointer-events-none"
+                      className="absolute hidden inset-y-0 left-0 pl-4 h-full justify-center items-center"
                       style={{ paddingLeft: 'var(--spacing-unit)' }}
                     >
                       <Mail
@@ -612,7 +610,7 @@ const Register = () => {
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       onBlur={(e) => handleBlur('email', e.target.value)}
-                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl focus:outline-none transition-all duration-200`}
+                      className={`w-full border-2 rounded-2xl focus:outline-none transition-all duration-200`}
                       style={{
                         paddingLeft: '2.5rem',
                         padding: 'var(--spacing-unit)',
@@ -620,8 +618,8 @@ const Register = () => {
                           ? 'var(--color-error)'
                           : 'var(--color-border)',
                         backgroundColor: errors.email
-                          ? 'rgba(239, 68, 68, 0.05)'
-                          : 'var(--color-bg-secondary)',
+                          ? ''
+                          : 'var(--color-bg-primary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
                         fontFamily: 'var(--font-family)',
@@ -629,7 +627,7 @@ const Register = () => {
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--accent-color)';
-                        // e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
                         // e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                       }}
                       onBlurCapture={(e) => {
@@ -690,7 +688,7 @@ const Register = () => {
                   </label>
                   <div className="relative group">
                     <div
-                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      className="absolute inset-y-0 left-0 pl-4 hidden items-center pointer-events-none"
                       style={{ paddingLeft: 'var(--spacing-unit)' }}
                     >
                       <UserCheck
@@ -716,7 +714,7 @@ const Register = () => {
                           : 'var(--color-border)',
                         backgroundColor: errors.username
                           ? ''
-                          : 'var(--color-bg-secondary)',
+                          : 'var(--color-bg-primary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
                         fontFamily: 'var(--font-family)',
@@ -724,7 +722,7 @@ const Register = () => {
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--accent-color)';
-                        // e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
                         // e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                       }}
                       onBlurCapture={(e) => {
@@ -774,7 +772,7 @@ const Register = () => {
                   </label>
                   <div className="relative group">
                     <div
-                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      className="absolute inset-y-0 left-0 pl-4 hidden items-center pointer-events-none"
                       style={{ paddingLeft: 'var(--spacing-unit)' }}
                     >
                       <Lock
@@ -801,7 +799,7 @@ const Register = () => {
                           : 'var(--color-border)',
                         backgroundColor: errors.password
                           ? ''
-                          : 'var(--color-bg-secondary)',
+                          : 'var(--color-bg-primary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
                         fontFamily: 'var(--font-family)',
@@ -927,7 +925,7 @@ const Register = () => {
                   </label>
                   <div className="relative group">
                     <div
-                      className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                      className="absolute inset-y-0 left-0 pl-4 hidden items-center pointer-events-none"
                       style={{ paddingLeft: 'var(--spacing-unit)' }}
                     >
                       <Lock
@@ -954,7 +952,7 @@ const Register = () => {
                           : 'var(--color-border)',
                         backgroundColor: errors.confirmPassword
                           ? ''
-                          : 'var(--color-bg-secondary)',
+                          : 'var(--color-bg-primary)',
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-base)',
                         fontFamily: 'var(--font-family)',
@@ -962,7 +960,7 @@ const Register = () => {
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--accent-color)';
-                        // e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                        e.target.style.backgroundColor = 'var(--color-bg-primary)';
                         // e.target.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                       }}
                       onBlurCapture={(e) => {
@@ -1293,7 +1291,7 @@ const Register = () => {
                         className="w-12 h-12 max-sm:w-10 max-sm:h-10 text-center text-xl font-bold border-2 rounded-xl focus:outline-none transition-colors"
                         style={{
                           borderColor: digit ? 'var(--accent-color)' : 'var(--color-border)',
-                          backgroundColor: digit ? 'var(--color-accent-bg)' : 'var(--color-bg-secondary)',
+                          backgroundColor: digit ? 'var(--color-bg-primary)' : 'var(--color-bg-primary)',
                           color: 'var(--color-text-primary)',
                           fontSize: 'var(--font-size-xl)',
                           fontFamily: 'var(--font-family)',
@@ -1406,8 +1404,8 @@ const Register = () => {
                         transitionDuration: 'var(--animation-duration)'
                       }}
                       onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = 'var(--color-accent-bg)';
-                        e.target.style.color = 'var(--color-accent-hover)';
+                        e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                        e.target.style.color = 'var(--color-text-secondary)';
                       }}
                       onMouseLeave={(e) => {
                         e.target.style.backgroundColor = 'transparent';
@@ -1498,11 +1496,11 @@ const Register = () => {
                     transitionDuration: 'var(--animation-duration)'
                   }}
                   onMouseEnter={(e) => {
-                    // e.target.style.backgroundColor = 'var(--color-hover)';
+                    e.target.style.backgroundColor = 'var(--color-hover)';
                     e.target.style.color = 'var(--color-text-primary)';
                   }}
                   onMouseLeave={(e) => {
-                    // e.target.style.backgroundColor = 'transparent';
+                    e.target.style.backgroundColor = 'transparent';
                     e.target.style.color = 'var(--color-text-secondary)';
                   }}
                   aria-label="Go to previous step"

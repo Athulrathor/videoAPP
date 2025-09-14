@@ -53,7 +53,7 @@ const Comments = ({
             });
             setLocalCommentData(initialData);
         }
-    }, [videosComments, shortComments]);
+    }, [videosComments, shortComments, commentLiked, dispatch]);
 
     useEffect(() => {
         if (contentId && whichContent === "videos") {
@@ -212,10 +212,10 @@ const Comments = ({
 
         return (
             <div
-                className={`flex gap-3 ${isReply ? 'ml-6 max-sm:ml-0 max-sm:mt-1 mt-3' : 'mb-4 max-sm:mb-2'} transition-all`}
+                className={`flex gap-2 ${isReply ? 'ml-6 max-sm:ml-0 max-sm:mt-1 mt-3' : 'mb-2 max-sm:mb-1'} transition-all`}
                 style={{
                     gap: 'var(--spacing-unit)',
-                    marginBottom: isReply ? 'var(--spacing-unit)' : 'var(--section-gap)',
+                    // marginBottom: isReply ? 'var(--spacing-unit)' : 'var(--section-gap)',
                     transitionDuration: 'var(--animation-duration)'
                 }}
                 role={isReply ? "listitem" : "article"}
@@ -223,9 +223,9 @@ const Comments = ({
             >
                 <div
                     className={`${isReply ? 'w-6 h-6' : 'w-10 h-10'} rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs overflow-hidden`}
-                    style={{
-                        background: 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))'
-                    }}
+                    // style={{
+                    //     background: 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))'
+                    // }}
                 >
                     <img
                         src={comment?.user_info?.avatar}
@@ -240,7 +240,7 @@ const Comments = ({
                         className="flex items-center gap-2 mb-1"
                         style={{
                             gap: 'var(--spacing-unit)',
-                            marginBottom: 'var(--spacing-unit)'
+                            // marginBottom: 'var(--spacing-unit)'
                         }}
                     >
                         <span
@@ -265,12 +265,12 @@ const Comments = ({
                     </div>
 
                     <div
-                        className="text-sm leading-relaxed mb-2"
+                        className="text-sm leading-relaxed "
                         style={{
                             color: 'var(--color-text-primary)',
                             fontSize: 'var(--font-size-sm)',
                             fontFamily: 'var(--font-family)',
-                            marginBottom: 'var(--spacing-unit)'
+                            // marginBottom: 'var(--spacing-unit)'
                         }}
                     >
                         {comment?.content}
@@ -488,7 +488,7 @@ const Comments = ({
                             onClick={() => handleCommentReplies(comment._id)}
                             className="my-1 px-4 py-1 rounded-2xl border transition-all"
                             style={{
-                                backgroundColor: showRepliesFor === comment._id ? 'var(--color-accent-bg)' : 'var(--color-bg-secondary)',
+                                backgroundColor: showRepliesFor === comment._id ? 'var(--color-bg-tertiary)' : 'var(--color-bg-secondary)',
                                 color: showRepliesFor === comment._id ? 'var(--accent-color)' : 'var(--color-text-primary)',
                                 borderColor: showRepliesFor === comment._id ? 'var(--accent-color)' : 'var(--color-border)',
                                 fontSize: 'var(--font-size-xs)',
@@ -564,7 +564,7 @@ const Comments = ({
                             className="flex items-center justify-between gap-6 mb-2 max-sm:mb-1"
                             style={{
                                 gap: 'var(--section-gap)',
-                                marginBottom: 'var(--spacing-unit)'
+                                // marginBottom: 'var(--spacing-unit)'
                             }}
                         >
                             <div

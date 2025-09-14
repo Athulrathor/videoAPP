@@ -450,8 +450,8 @@ const VideoPages = (props) => {
         <div
           className="w-[70%] max-lg:w-full pl-4 pt-2 max-lg:flex-shrink-0 px-2 max-md:px-0 h-auto transition-all"
           style={{
-            paddingLeft: 'var(--component-padding)',
-            paddingTop: 'var(--spacing-unit)',
+            // paddingLeft: 'var(--component-padding)',
+            // paddingTop: 'var(--spacing-unit)',
             transitionDuration: 'var(--animation-duration)'
           }}
         >
@@ -574,7 +574,7 @@ const VideoPages = (props) => {
                 {/* Bottom Control Bar */}
                 <div
                   className="w-full px-3 max-sm:p-1 flex justify-between"
-                  style={{ padding: 'var(--spacing-unit)' }}
+                  // style={{ padding: 'var(--spacing-unit)' }}
                 >
                   {/* Left Controls */}
                   <div className="flex space-x-1">
@@ -758,10 +758,16 @@ const VideoPages = (props) => {
                         transitionDuration: 'var(--animation-duration)'
                       }}
                       onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                        e.target.style.transform = 'rotate(45deg)';
+                        if (appearanceSettings.reducedMotion) {
+                          e.target.style.transition = 'transform 0.3s ease';
+                        }
                       }}
                       onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = 'transparent';
+                        e.target.style.transform = 'rotate(0deg)';
+                        if (appearanceSettings.reducedMotion) {
+                          e.target.style.transition = 'transform 0.3s ease';
+                        }
                       }}
                       aria-label="Video settings"
                     >
@@ -803,14 +809,16 @@ const VideoPages = (props) => {
             className="pb-2 transition-all"
             style={{
               paddingBottom: 'var(--spacing-unit)',
-              transitionDuration: 'var(--animation-duration)'
+              transitionDuration: 'var(--animation-duration)',
+              paddingLeft: 'var(--spacing-unit)',
+              paddingRight: 'var(--spacing-unit)'
             }}
           >
             {/* Video Title */}
             <div
               className="flex items-center justify-between max-sm:p-1 max-sm:text-sm p-2.5 text-lg font-bold"
               style={{
-                padding: 'var(--spacing-unit)',
+                paddingTop: 'var(--spacing-unit)',
                 fontSize: 'var(--font-size-lg)',
                 fontFamily: 'var(--font-family)',
                 color: 'var(--color-text-primary)'
@@ -821,19 +829,19 @@ const VideoPages = (props) => {
 
             {/* Channel Info and Actions */}
             <div
-              className="flex items-center justify-between p-2.5 max-sm:p-1"
+              className="flex sm:items-center justify-between max-sm:flex-col p-2.5 max-sm:p-1"
               style={{
-                padding: 'var(--spacing-unit)',
+                // paddingTop: 'var(--spacing-unit)',
                 gap: 'var(--spacing-unit)'
               }}
             >
               {/* Channel Info */}
-              <div className="h-full flex items-center">
+              <div className="h-full flex items-center  max-sm:w-full">
                 <div className="flex justify-center items-center">
                   <img
                     src={targetVideo?.owner?.avatar}
                     alt={`${targetVideo?.owner?.username} avatar`}
-                    className="w-12 max-lg:w-8 aspect-square rounded-full drop-shadow-lg"
+                    className="w-12 max-lg:w-10 aspect-square rounded-full drop-shadow-lg"
                     loading="lazy"
                   />
                 </div>
@@ -864,7 +872,7 @@ const VideoPages = (props) => {
                 <div className="h-full flex justify-center items-center">
                   <button
                     onClick={handleSubcribeUser}
-                    className="ml-3 px-3 max-sm:px-2 max-sm:py-1 max-lg:px-2 max-lg:text-sm py-2 max-lg:py-2 rounded-full flex justify-center items-center font-medium transition-all"
+                    className="px-3 max-sm:px-2  max-sm:py-1 max-lg:px-2 max-lg:text-sm py-2 max-lg:py-2 rounded-full flex justify-center items-center font-medium transition-all"
                     style={{
                       backgroundColor: currentStatus?.subcriberStatus
                         ? 'var(--color-bg-secondary)'
@@ -873,6 +881,8 @@ const VideoPages = (props) => {
                       fontSize: 'var(--font-size-base)',
                       fontFamily: 'var(--font-family)',
                       marginLeft: 'var(--spacing-unit)',
+                      paddingLeft: 'var(--spacing-unit)',
+                      paddingRight: 'var(--spacing-unit)',
                       transitionDuration: 'var(--animation-duration)'
                     }}
                     onMouseEnter={(e) => {
@@ -918,7 +928,7 @@ const VideoPages = (props) => {
                     >
                       {currentStatus?.likeStatus ? (
                         <ThumbsUp
-                          fill="var(--accent-color)"
+                          // fill="var(--accent-color)"
                           className="mr-2 max-lg:w-4"
                           style={{ color: 'var(--accent-color)' }}
                         />
@@ -993,7 +1003,7 @@ const VideoPages = (props) => {
                     aria-label="Add to playlist"
                   >
                     <Plus className="max-lg:w-4" />
-                    <span className="max-sm:hidden">Add to playlist</span>
+                    <span className="sm:max-lg:hidden">Add to playlist</span>
                   </button>
                 </div>
 
@@ -1024,27 +1034,27 @@ const VideoPages = (props) => {
             <div
               onClick={() => setshowDesc(true)}
               onBlur={() => setshowDesc(false)}
-              className={`${showDesc ? "h-fit" : "line-clamp-2"} w-full my-2.5 transition-all`}
+              className={`${showDesc ? "" : "line-clamp-2"} w-full transition-all`}
               style={{
                 margin: 'var(--spacing-unit) 0',
                 transitionDuration: 'var(--animation-duration)'
               }}
             >
               <div
-                className={`p-3 max-md:p-1.5 max-md:mx-2 flex-col border-2 rounded-lg ${showDesc ? "" : "line-clamp-2 max-md:line-clamp-1"
+                className={`p-3 flex-col border-2 rounded-2xl ${showDesc ? "" : "line-clamp-2 max-md:line-clamp-1"
                   } transition-all cursor-pointer`}
                 style={{
-                  backgroundColor: 'var(--color-bg-tertiary)',
+                  backgroundColor: 'var(--color-bg-primary)',
                   borderColor: 'var(--color-border)',
-                  padding: 'var(--component-padding)',
+                  // padding: 'var(--component-padding)',
                   transitionDuration: 'var(--animation-duration)'
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-bg-tertiary)';
-                }}
+                // onMouseEnter={(e) => {
+                //   e.target.style.backgroundColor = 'var(--color-hover)';
+                // }}
+                // onMouseLeave={(e) => {
+                //   e.target.style.backgroundColor = 'var(--color-hover)';
+                // }}
                 role="button"
                 tabIndex={0}
                 aria-expanded={showDesc}
@@ -1067,17 +1077,18 @@ const VideoPages = (props) => {
                 </div>
                 {/* Description Text */}
                 <p
-                  className="w-full"
+                  className={`${showDesc ? "" : "line-clamp-1"} w-full`}
                   style={{
                     color: 'var(--color-text-primary)',
                     fontSize: 'var(--font-size-base)',
-                    fontFamily: 'var(--font-family)'
+                    fontFamily: 'var(--font-family)',
+                    backgroundColor:'var(--color-bg-primary)'
                   }}
                 >
                   {targetVideo?.description}
                 </p>
                 <div
-                  className="text-xs cursor-pointer transition-colors"
+                  className={`${!showDesc ? "hidden" : ""} text-xs cursor-pointer transition-colors`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setshowDesc(false);
@@ -1101,11 +1112,11 @@ const VideoPages = (props) => {
             {/* Comments Section */}
             <div
               onClick={() => setMinimiseComment(true)}
-              className="border-2 my-3 rounded-2xl overflow-hidden transition-all"
+              className="border-2 rounded-2xl overflow-hidden transition-all"
               style={{
                 backgroundColor: 'var(--color-bg-tertiary)',
                 borderColor: 'var(--color-border)',
-                margin: 'var(--spacing-unit) 0',
+                // margin: 'var(--spacing-unit) 0',
                 transitionDuration: 'var(--animation-duration)'
               }}
             >
@@ -1125,7 +1136,7 @@ const VideoPages = (props) => {
           className="w-[30%] max-lg:mt-2 px-2 pt-2 max-md:px-0 max-lg:w-full max-lg:rounded-none rounded-lg flex flex-col space-y-3 transition-all"
           style={{
             gap: 'var(--spacing-unit)',
-            padding: 'var(--spacing-unit)',
+            // padding: 'var(--spacing-unit)',
             transitionDuration: 'var(--animation-duration)'
           }}
         >
@@ -1301,12 +1312,12 @@ const VideoPages = (props) => {
                 marginBottom: 'var(--spacing-unit)',
                 transitionDuration: 'var(--animation-duration)'
               }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--color-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-              }}
+              // onMouseEnter={(e) => {
+              //   e.target.style.backgroundColor = 'var(--color-hover)';
+              // }}
+              // onMouseLeave={(e) => {
+              //   e.target.style.backgroundColor = 'transparent';
+              // }}
             >
               {/* Video Thumbnail */}
               <div
@@ -1339,7 +1350,7 @@ const VideoPages = (props) => {
                         transitionDuration: 'var(--animation-duration)'
                       }}
                       onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                        e.target.style.backgroundColor = 'var(--color-accent-hover)';
                       }}
                       onMouseLeave={(e) => {
                         e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';

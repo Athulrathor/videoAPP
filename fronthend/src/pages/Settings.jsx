@@ -3,11 +3,11 @@ import SettingSideBar from "../components/SettingSideBar";
 import SettingMain from "../components/SettingMain";
 import Header from "../components/Header";
 import { useSelector } from 'react-redux';
-import { useAppearance } from '../hooks/appearances';
+// import { useAppearance } from '../hooks/appearances';
 
 const Settings = () => {
   const [showMenu, setShowMenu] = useState(true);
-  const { appearanceSettings } = useAppearance();
+  // const { appearanceSettings } = useAppearance();
 
   useEffect(() => {
     if (window.innerWidth <= 768) setShowMenu(false);

@@ -372,7 +372,7 @@ const OtpVerificationPage = () => {
                                 style={{
                                     backgroundColor: ['configure', 'verify', 'success', 'update'].indexOf(step) >= index
                                         ? 'var(--accent-color)'
-                                        : 'var(--color-bg-secondary)',
+                                        : 'var(--color-bg-primary)',
                                     color: ['configure', 'verify', 'success', 'update'].indexOf(step) >= index
                                         ? 'white'
                                         : 'var(--color-text-secondary)',
@@ -464,7 +464,7 @@ const OtpVerificationPage = () => {
                                         style={{
                                             padding: 'var(--spacing-unit)',
                                             borderColor: error ? 'var(--color-error)' : 'var(--color-border)',
-                                            backgroundColor: error ? 'rgba(239, 68, 68, 0.05)' : 'var(--color-bg-secondary)',
+                                            backgroundColor: error ? 'rgba(239, 68, 68, 0.05)' : 'var(--color-bg-primary)',
                                             color: 'var(--color-text-primary)',
                                             fontSize: 'var(--font-size-base)',
                                             fontFamily: 'var(--font-family)',
@@ -518,7 +518,7 @@ const OtpVerificationPage = () => {
                                 style={{
                                     background: (!isLoading && emailConfig.to)
                                         ? 'linear-gradient(135deg, var(--accent-color), var(--color-accent-hover))'
-                                        : 'var(--color-text-secondary)',
+                                        : 'var(--color-text-primary)',
                                     opacity: (!isLoading && emailConfig.to) ? 1 : 0.5,
                                     cursor: (!isLoading && emailConfig.to) ? 'pointer' : 'not-allowed',
                                     fontSize: 'var(--font-size-base)',
@@ -582,7 +582,7 @@ const OtpVerificationPage = () => {
                             <div
                                 className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-lg"
                                 style={{
-                                    background: 'linear-gradient(135deg, var(--color-success), var(--color-success-hover))',
+                                    background: 'linear-gradient(135deg, var(--accent-color), var(--color-success))',
                                     marginBottom: 'var(--spacing-unit)'
                                 }}
                             >
@@ -657,7 +657,7 @@ const OtpVerificationPage = () => {
                                             className="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-bold border-2 rounded-xl focus:outline-none transition-all"
                                             style={{
                                                 borderColor: digit ? 'var(--accent-color)' : 'var(--color-border)',
-                                                backgroundColor: digit ? 'var(--color-accent-bg)' : 'var(--color-bg-secondary)',
+                                                backgroundColor: digit ? 'var(--color-bg-secondary)' : 'var(--color-bg-primary)',
                                                 color: 'var(--color-text-primary)',
                                                 fontSize: 'var(--font-size-xl)',
                                                 fontFamily: 'var(--font-family)',
@@ -824,7 +824,7 @@ const OtpVerificationPage = () => {
                         <div
                             className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-lg"
                             style={{
-                                background: 'linear-gradient(135deg, var(--color-success), var(--color-success-hover))',
+                                background: 'linear-gradient(135deg, var(--color-bg-secondary), var(--color-success))',
                                 marginBottom: 'var(--spacing-unit)',
                                 animation: appearanceSettings.reducedMotion ? 'none' : 'pulse 2s infinite'
                             }}
@@ -853,7 +853,7 @@ const OtpVerificationPage = () => {
                             Your email address has been successfully verified.
                         </p>
                         <div
-                            className="text-sm"
+                            className="text-sm cursor-pointer underline"
                             style={{
                                 color: 'var(--accent-color)',
                                 fontSize: 'var(--font-size-sm)'
@@ -942,7 +942,7 @@ const OtpVerificationPage = () => {
                                             padding: 'var(--spacing-unit)',
                                             paddingRight: '3rem',
                                             borderColor: errors.newPassword ? 'var(--color-error)' : 'var(--color-border)',
-                                            backgroundColor: errors.newPassword ? 'rgba(239, 68, 68, 0.05)' : 'var(--color-bg-secondary)',
+                                            backgroundColor: errors.newPassword ? 'rgba(239, 68, 68, 0.05)' : 'var(--color-bg-primary)',
                                             color: 'var(--color-text-primary)',
                                             fontSize: 'var(--font-size-base)',
                                             fontFamily: 'var(--font-family)',
@@ -1074,7 +1074,7 @@ const OtpVerificationPage = () => {
                                             padding: 'var(--spacing-unit)',
                                             paddingRight: '3rem',
                                             borderColor: errors.confirmPassword ? 'var(--color-error)' : 'var(--color-border)',
-                                            backgroundColor: errors.confirmPassword ? 'rgba(239, 68, 68, 0.05)' : 'var(--color-bg-secondary)',
+                                            backgroundColor: errors.confirmPassword ? 'rgba(239, 68, 68, 0.05)' : 'var(--color-bg-primary)',
                                             color: 'var(--color-text-primary)',
                                             fontSize: 'var(--font-size-base)',
                                             fontFamily: 'var(--font-family)',
@@ -1139,7 +1139,7 @@ const OtpVerificationPage = () => {
                             <div
                                 className="p-4 rounded-xl"
                                 style={{
-                                    backgroundColor: 'var(--color-bg-secondary)',
+                                    backgroundColor: 'var(--color-border)',
                                     padding: 'var(--spacing-unit)'
                                 }}
                             >
@@ -1168,7 +1168,7 @@ const OtpVerificationPage = () => {
                                         <CheckCircle
                                             className={`w-3 h-3 mr-2`}
                                             style={{
-                                                color: passwordData.newPassword.length >= 8 ? 'var(--color-success)' : 'var(--color-border)'
+                                                color: passwordData.newPassword.length >= 8 ? 'var(--color-success)' : 'var(--color-text-secondary)'
                                             }}
                                         />
                                         8+ characters
@@ -1183,7 +1183,7 @@ const OtpVerificationPage = () => {
                                         <CheckCircle
                                             className={`w-3 h-3 mr-2`}
                                             style={{
-                                                color: /[A-Z]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-border)'
+                                                color: /[A-Z]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-text-secondary)'
                                             }}
                                         />
                                         Uppercase letter
@@ -1198,7 +1198,7 @@ const OtpVerificationPage = () => {
                                         <CheckCircle
                                             className={`w-3 h-3 mr-2`}
                                             style={{
-                                                color: /[a-z]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-border)'
+                                                color: /[a-z]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-text-secondary)'
                                             }}
                                         />
                                         Lowercase letter
@@ -1213,7 +1213,7 @@ const OtpVerificationPage = () => {
                                         <CheckCircle
                                             className={`w-3 h-3 mr-2`}
                                             style={{
-                                                color: /\d/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-border)'
+                                                color: /\d/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-text-secondary)'
                                             }}
                                         />
                                         Number
@@ -1228,7 +1228,7 @@ const OtpVerificationPage = () => {
                                         <CheckCircle
                                             className={`w-3 h-3 mr-2`}
                                             style={{
-                                                color: /[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-border)'
+                                                color: /[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword) ? 'var(--color-success)' : 'var(--color-text-secondary)'
                                             }}
                                         />
                                         Special character (!@#$%^&*)
@@ -1307,7 +1307,7 @@ const OtpVerificationPage = () => {
                                     style={{
                                         background: isLoading
                                             ? 'var(--color-text-secondary)'
-                                            : 'linear-gradient(135deg, var(--color-success), var(--color-success-hover))',
+                                            : ' var(--color-success)',
                                         opacity: isLoading ? 0.5 : 1,
                                         cursor: isLoading ? 'not-allowed' : 'pointer',
                                         fontSize: 'var(--font-size-base)',

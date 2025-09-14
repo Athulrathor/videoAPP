@@ -646,7 +646,7 @@ body {
 }
 
 .scrollBar::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  background: transparent;
 }
 
 .scrollBar::-webkit-scrollbar-thumb {

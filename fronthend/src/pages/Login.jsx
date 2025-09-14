@@ -243,7 +243,7 @@ const Login = () => {
                         : 'var(--color-border)',
                       backgroundColor: errors.email
                         ? 'rgba(239, 68, 68, 0.05)'
-                        : 'var(--color-bg-secondary)',
+                        : 'var(--color-bg-primary)',
                       color: 'var(--color-text-primary)',
                       fontSize: 'var(--font-size-base)',
                       fontFamily: 'var(--font-family)',
@@ -313,7 +313,7 @@ const Login = () => {
                         : 'var(--color-border)',
                       backgroundColor: errors.password
                         ? 'rgba(239, 68, 68, 0.05)'
-                        : 'var(--color-bg-secondary)',
+                        : 'var(--color-bg-primary)',
                       color: 'var(--color-text-primary)',
                       fontSize: 'var(--font-size-base)',
                       fontFamily: 'var(--font-family)',
@@ -407,7 +407,7 @@ const Login = () => {
                 className="w-2xs mt-6 py-3 text-xl font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
                 style={{
                   width: '300px',
-                  backgroundColor: loading ? 'var(--color-text-secondary)' : 'var(--accent-color)',
+                  backgroundColor: loading ? 'var(--color-text-primary)' : 'var(--accent-color)',
                   color: 'white',
                   fontSize: 'var(--font-size-xl)',
                   fontFamily: 'var(--font-family)',
@@ -509,7 +509,7 @@ const Login = () => {
               disabled={loading}
               className="w-14 h-14 rounded-full transition-all duration-200 flex items-center justify-center"
               style={{
-                backgroundColor: 'var(--color-bg-secondary)',
+                backgroundColor: 'var(--color-bg-primary)',
                 transitionDuration: 'var(--animation-duration)',
                 opacity: loading ? 0.5 : 1,
                 cursor: loading ? 'not-allowed' : 'pointer'
@@ -541,7 +541,7 @@ const Login = () => {
               disabled={loading}
               className="w-14 h-14 rounded-full transition-all duration-200 flex items-center justify-center"
               style={{
-                backgroundColor: 'var(--color-bg-secondary)',
+                backgroundColor: 'var(--color-bg-primary)',
                 transitionDuration: 'var(--animation-duration)',
                 opacity: loading ? 0.5 : 1,
                 cursor: loading ? 'not-allowed' : 'pointer'
