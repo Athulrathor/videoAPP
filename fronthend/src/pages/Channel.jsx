@@ -203,7 +203,7 @@ const Channel = () => {
       <div
         className="flex transition-all"
         style={{
-          backgroundColor: 'var(--color-bg-primary)',
+          backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
           transitionDuration: 'var(--animation-duration)'
         }}
       >
@@ -212,7 +212,7 @@ const Channel = () => {
         <div
           className="flex w-full flex-col h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] overflow-y-scroll scroll-smooth pb-2 scrollBar transition-all"
           style={{
-            backgroundColor: 'var(--color-bg-primary)',
+            backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
             transitionDuration: 'var(--animation-duration)'
           }}
           role="main"
@@ -238,7 +238,7 @@ const Channel = () => {
           <div
             className="channel flex-col w-full h-full transition-all"
             style={{
-              backgroundColor: 'var(--color-bg-primary)',
+              backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
               transitionDuration: 'var(--animation-duration)'
             }}
           >

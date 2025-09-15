@@ -8,6 +8,7 @@ import subscriberReducer from "./features/subcribers.js";
 import playlistReducer from "./features/playList.js";
 import uploadReducer from "./features/uploads.js";
 import channelReducer from "./features/channel.js";
+import settingReducer from "./features/settings.js"
 import { combineReducers } from '@reduxjs/toolkit';
 import sessionStorage from "redux-persist/lib/storage/session";
 import {
@@ -28,10 +29,6 @@ const persistConfig = {
   whitelist: ['user'],
 };
 
-// const rootReducer = combineReducers({
-//   user: userReducer,
-// });
-
 const rootReducer = combineReducers({
   user: userReducer,
   videos: videoReducer,
@@ -41,7 +38,8 @@ const rootReducer = combineReducers({
   subscriber: subscriberReducer,
   uploads: uploadReducer,
   Playlists: playlistReducer,
-  channels:channelReducer,
+  channels: channelReducer,
+  settings:settingReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

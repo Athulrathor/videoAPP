@@ -2,12 +2,12 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { setSettingsActive } from '../redux/features/user';
 import { BadgeInfo, BellDot, Cookie, EarthLock, Keyboard, PersonStanding, UserPen } from 'lucide-react';
-import { useAppearance } from '../hooks/appearances';
+// import { useAppearance } from '../hooks/appearances';
 
 const SettingSideBar = (props) => {
   const { showMenu } = props;
   const { settingsActive } = useSelector((state) => state.user);
-  const { appearanceSettings } = useAppearance();
+  // const { appearanceSettings } = useAppearance();
 
   const dispatch = useDispatch();
 
@@ -35,7 +35,7 @@ const SettingSideBar = (props) => {
         className="max-md:mr-2 py-1.5 rounded-lg max-md:py-1 pr-2 px-2.5 max-md:px-2 max-md:ml-2 flex items-center justify-baseline transition-all"
         style={{
           backgroundColor: settingsActive === 'Accounts'
-            ? 'var(--color-accent-bg)'
+            ? 'var(--color-accent-hover)'
             : 'transparent',
           color: settingsActive === 'Accounts'
             ? 'var(--accent-color)'
@@ -66,7 +66,7 @@ const SettingSideBar = (props) => {
         className="max-md:mr-2 rounded-lg py-1.5 max-md:py-1 pr-2 px-2.5 max-md:px-2 max-md:ml-2 flex items-center justify-baseline transition-all"
         style={{
           backgroundColor: settingsActive === 'Privacy & Security'
-            ? 'var(--color-accent-bg)'
+            ? 'var(--color-accent-hover)'
             : 'transparent',
           color: settingsActive === 'Privacy & Security'
             ? 'var(--accent-color)'
@@ -97,7 +97,7 @@ const SettingSideBar = (props) => {
         className="max-md:mr-2 rounded-lg py-1.5 max-md:py-1 pr-2 px-2.5 max-lg:p-1 max-md:px-2 max-md:ml-2 flex items-center justify-baseline transition-all"
         style={{
           backgroundColor: settingsActive === 'Notification Settings'
-            ? 'var(--color-accent-bg)'
+            ? 'var(--color-accent-hover)'
             : 'transparent',
           color: settingsActive === 'Notification Settings'
             ? 'var(--accent-color)'
@@ -128,7 +128,7 @@ const SettingSideBar = (props) => {
         className="max-md:mr-2 rounded-lg py-1.5 max-md:py-1 pr-2 px-2.5 max-md:px-2 max-md:ml-2 flex items-center justify-baseline transition-all"
         style={{
           backgroundColor: settingsActive === 'Appearance'
-            ? 'var(--color-accent-bg)'
+            ? 'var(--color-accent-hover)'
             : 'transparent',
           color: settingsActive === 'Appearance'
             ? 'var(--accent-color)'
@@ -159,7 +159,7 @@ const SettingSideBar = (props) => {
         className="max-md:mr-2 rounded-lg py-1.5 max-md:py-1 pr-2 px-2.5 max-md:px-2 max-md:ml-2 flex items-center justify-baseline transition-all"
         style={{
           backgroundColor: settingsActive === 'Accessibility'
-            ? 'var(--color-accent-bg)'
+            ? 'var(--color-accent-hover)'
             : 'transparent',
           color: settingsActive === 'Accessibility'
             ? 'var(--accent-color)'
@@ -190,7 +190,7 @@ const SettingSideBar = (props) => {
         className="max-md:mr-2 rounded-lg py-1.5 max-md:py-1 pr-2 px-2.5 max-md:px-2 max-md:ml-2 flex items-center justify-baseline transition-all"
         style={{
           backgroundColor: settingsActive === 'Help & Support'
-            ? 'var(--color-accent-bg)'
+            ? 'var(--color-accent-hover)'
             : 'transparent',
           color: settingsActive === 'Help & Support'
             ? 'var(--accent-color)'

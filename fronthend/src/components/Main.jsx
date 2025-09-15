@@ -114,7 +114,7 @@ const Main = ({
     <main
       className="flex flex-col w-full h-full transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         transitionDuration: 'var(--animation-duration)'

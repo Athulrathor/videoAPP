@@ -129,7 +129,7 @@ const Videos = (props) => {
     <div
       className="min-h-screen w-full transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         transitionDuration: 'var(--animation-duration)'
       }}
     >

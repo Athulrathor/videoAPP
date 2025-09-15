@@ -246,12 +246,12 @@ const History = (props) => {
                 backgroundColor: 'transparent',
                 transitionDuration: 'var(--animation-duration)'
             }}
-            onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--color-hover)';
-            }}
-            onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-            }}
+            // onMouseEnter={(e) => {
+            //     e.target.style.backgroundColor = 'var(--color-hover)';
+            // }}
+            // onMouseLeave={(e) => {
+            //     e.target.style.backgroundColor = 'transparent';
+            // }}
             role="listitem"
             aria-label={`Video: ${video.title}`}
             tabIndex={0}
@@ -334,12 +334,12 @@ const History = (props) => {
                         marginBottom: 'calc(var(--spacing-unit) * 0.5)',
                         transitionDuration: 'var(--animation-duration)'
                     }}
-                    onMouseEnter={(e) => {
-                        e.target.style.color = 'var(--accent-color)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.color = 'var(--color-text-primary)';
-                    }}
+                    // onMouseEnter={(e) => {
+                    //     e.target.style.color = 'var(--accent-color)';
+                    // }}
+                    // onMouseLeave={(e) => {
+                    //     e.target.style.color = 'var(--color-text-primary)';
+                    // }}
                     role="button"
                     tabIndex={0}
                     aria-label={`Play video: ${video.title}`}
@@ -375,12 +375,12 @@ const History = (props) => {
                             style={{
                                 transitionDuration: 'var(--animation-duration)'
                             }}
-                            onMouseEnter={(e) => {
-                                e.target.style.color = 'var(--accent-color)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.color = 'var(--color-text-secondary)';
-                            }}
+                            // onMouseEnter={(e) => {
+                            //     e.target.style.color = 'var(--accent-color)';
+                            // }}
+                            // onMouseLeave={(e) => {
+                            //     e.target.style.color = 'var(--color-text-secondary)';
+                            // }}
                             role="button"
                             tabIndex={0}
                             aria-label={`Visit ${video?.owner?.username}'s channel`}
@@ -498,7 +498,7 @@ const History = (props) => {
         <div
             className="min-h-screen"
             style={{
-                backgroundColor: 'var(--color-bg-primary)',
+                backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
                 fontFamily: 'var(--font-family)'
             }}
             role="main"
@@ -508,7 +508,7 @@ const History = (props) => {
             <div
                 className="shadow-sm border-b"
                 style={{
-                    backgroundColor: 'var(--color-bg-primary)',
+                    backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
                     borderColor: 'var(--color-border)'
                 }}
             >
@@ -589,7 +589,7 @@ const History = (props) => {
                             role="list"
                             aria-label="Your watch history"
                             style={{
-                                backgroundColor: 'var(--color-bg-primary)'
+                                backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
                             }}
                         >
                             {watchHistory.map((video, index) => (

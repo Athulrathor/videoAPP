@@ -14,10 +14,10 @@ import {
   Filter,
   Edit
 } from 'lucide-react';
-// import { useAppearance } from '../hooks/appearances';
+import { useAppearance } from '../hooks/appearances';
 
 const NotificationSettings = () => {
-  // const { appearanceSettings } = useAppearance();
+  const { appearanceSettings } = useAppearance();
 
   const [emailSettings, setEmailSettings] = useState({
     comments: true,
@@ -130,7 +130,7 @@ const NotificationSettings = () => {
     <div
       className="max-sm:w-full px-2 max-sm:p-0 sm:px-4 py-2 sm:py-4 overflow-y-scroll scrollBar max-md:h-[calc(100vh-41px)] h-[calc(100vh-57px)] transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         transitionDuration: 'var(--animation-duration)'

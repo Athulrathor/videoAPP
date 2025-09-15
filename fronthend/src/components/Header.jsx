@@ -98,18 +98,13 @@ const Header = (props) => {
     }
   }
 
-  // --color - border: #e2e8f0;
-  // --color - hover: #f1f5f9;
-  // --color - active: #e2e8f0;
-  // --color - accent - bg: #eff6ff;
-
   return (
     <>
       <div
-        className={`${appearanceSettings} flex justify-between items-center w-full p-2 max-md:p-1 max-[400px]:p-0.5 relative`}
+        className={`${appearanceSettings} flex justify-between items-center w-full p-2 max-md:p-1 max-[400px]:p-0.5 relative `}
         style={{
           borderBottom: '1px solid var(--color-border)',
-          backgroundColor: 'var(--color-bg-primary)',
+          backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
           fontFamily: 'var(--font-family)'
         }}
     // className="flex justify-between items-center p-2 w-full relative header-container"

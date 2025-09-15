@@ -30,6 +30,7 @@ import subcriberRouter from "./routes/subcription.routes.js";
 import dashboardRouter from "./routes/dashboard.routes.js";
 import healthcheckRouter from "./routes/healthcheck.routes.js";
 import commonRouter from "./routes/common.routes.js";
+import appearancesRouter from "./routes/appearances.routes.js";
 
 app.use("/api/v1/users", userRouter);
 
@@ -52,5 +53,7 @@ app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/health", healthcheckRouter);
 
 app.use("/api/v1/commons", commonRouter);
+
+app.use("/api/v1/appearance", appearancesRouter);
  
 export default app;

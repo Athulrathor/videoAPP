@@ -87,7 +87,7 @@ function Home() {
     <div
       className="relative transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         backgroundImage: 'var(--background-image)',
@@ -149,9 +149,7 @@ function Home() {
         <div
           className="w-full h-full transition-all"
           style={{
-            backgroundColor: appearanceSettings.backgroundType !== 'default'
-              ? 'rgba(var(--color-bg-primary-rgb), 0.98)'
-              : 'var(--color-bg-primary)',
+            backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
             transitionDuration: 'var(--animation-duration)'
           }}
         >
@@ -160,8 +158,9 @@ function Home() {
             <div
               className="absolute inset-0 z-0 transition-opacity"
               style={{
-                backgroundColor: 'var(--color-bg-primary)',
+                backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
                 opacity: '0.95',
+                pointerEvents:'none',
                 transitionDuration: 'var(--animation-duration)'
               }}
             />

@@ -2,11 +2,11 @@ import { Calendar, ImageUp, Mail, MapPin, Phone, Save, Trash2 } from 'lucide-rea
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { accountDeleted, currentUpdatedUser, updateAccountDetails, updateAvatar, updateCoverImage } from '../redux/features/user';
-// import { useAppearance } from '../hooks/appearances';
+import { useAppearance } from '../hooks/appearances';
 
 const AccountSettings = () => {
   const dispatch = useDispatch();
-  // const { appearanceSettings } = useAppearance();
+  const { appearanceSettings } = useAppearance();
 
   const { user, updateAvatarProgress, updateCoverImageProgress, updateAvatarStatus, updateCoverImageStatus, updateAccountLoading } = useSelector(state => state.user);
 
@@ -145,7 +145,7 @@ const AccountSettings = () => {
     <div
       className="w-4xl pl-4 pt-3 max-md:p-4 overflow-y-auto scrollBar h-[calc(100vh-65px)] max-md:h-[calc(100vh-53px)] max-xl:w-2xl max-md:w-screen max-[1040px]:w-2xl transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         transitionDuration: 'var(--animation-duration)'

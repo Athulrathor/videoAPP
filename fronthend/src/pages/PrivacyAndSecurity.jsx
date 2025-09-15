@@ -20,11 +20,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { activeSessions, clearHistory, getWatchHistory, removingToWatchHistory, setWatchHistoryPaused, updatePassword, verifyPassword } from '../redux/features/user';
 import { toast } from 'react-toastify';
 import { Tooltip } from '@mui/material';
-// import { useAppearance } from '../hooks/appearances';
+import { useAppearance } from '../hooks/appearances';
 
 const PrivacyAndSecurity = () => {
   const dispatch = useDispatch();
-  // const { appearanceSettings } = useAppearance();
+  const { appearanceSettings } = useAppearance();
 
   const { user, watchHistory, activeSession } = useSelector((state) => state.user);
 
@@ -266,7 +266,7 @@ const PrivacyAndSecurity = () => {
     <div
       className='flex w-full pl-4 pt-3 scrollBar max-md:p-0 overflow-y-auto h-[calc(100vh-57px)] max-md:h-[calc(100vh-41px)] max-md:max-w-full sm:px-3 sm:pt-2 max-[400px]:pl-2 transition-all'
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         transitionDuration: 'var(--animation-duration)'

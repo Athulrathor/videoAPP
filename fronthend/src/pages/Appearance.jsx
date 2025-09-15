@@ -19,9 +19,14 @@ import {
   Square
 } from 'lucide-react';
 import { useAppearance } from '../hooks/appearances';
+import { useDispatch, useSelector } from 'react-redux';
+import { setApperances } from '../redux/features/settings';
 
 const Appearance = () => {
+  const dispatch = useDispatch();
+
   const { appearanceSettings, setAppearanceSettings } = useAppearance();
+  const { appearances } = useSelector(state => state.settings);
 
   const themeOptions = [
     {
@@ -168,15 +173,18 @@ const Appearance = () => {
     return {};
   };
 
+  console.log(appearances)
+
   const handleApplySettings = () => {
     console.log('Settings applied:', appearanceSettings);
+    dispatch(setApperances(appearanceSettings));
   };
 
   return (
     <div
       className="max-sm:w-full sm:px-4 sm:py-4 overflow-y-scroll scrollBar max-md:h-[calc(100vh-41px)] h-[calc(100vh-57px)] transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         fontSize: 'var(--font-size-base)',

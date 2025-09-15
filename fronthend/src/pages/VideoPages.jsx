@@ -406,7 +406,7 @@ const VideoPages = (props) => {
     <div
       className="relative h-full transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         transitionDuration: 'var(--animation-duration)'

@@ -3,11 +3,11 @@ import SettingSideBar from "../components/SettingSideBar";
 import SettingMain from "../components/SettingMain";
 import Header from "../components/Header";
 import { useSelector } from 'react-redux';
-// import { useAppearance } from '../hooks/appearances';
+import { useAppearance } from '../hooks/appearances';
 
 const Settings = () => {
   const [showMenu, setShowMenu] = useState(true);
-  // const { appearanceSettings } = useAppearance();
+  const { appearanceSettings } = useAppearance();
 
   useEffect(() => {
     if (window.innerWidth <= 768) setShowMenu(false);
@@ -19,7 +19,7 @@ const Settings = () => {
     <div
       className="min-h-screen transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         backgroundImage: 'var(--background-image)',
@@ -37,7 +37,7 @@ const Settings = () => {
           <div
             className='flex h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] overflow-hidden'
             style={{
-              backgroundColor: 'var(--color-bg-primary)',
+              backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
               transitionDuration: 'var(--animation-duration)'
             }}
           >
@@ -48,7 +48,7 @@ const Settings = () => {
             <div
               className='w-full overflow-hidden transition-all'
               style={{
-                backgroundColor: 'var(--color-bg-primary)',
+                backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
                 transitionDuration: 'var(--animation-duration)'
               }}
             >
@@ -60,7 +60,7 @@ const Settings = () => {
         <div
           className="flex items-center justify-center h-screen transition-all"
           style={{
-            backgroundColor: 'var(--color-bg-primary)',
+            backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
             color: 'var(--color-text-primary)',
             fontSize: 'var(--font-size-lg)',
             fontFamily: 'var(--font-family)',

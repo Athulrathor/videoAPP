@@ -116,7 +116,7 @@ const Subscription = (props) => {
     <div
       className="h-[calc(100vh_-_57px)] max-md:h-screen max-md:w-screen scroll-smooth overflow-y-scroll scrollBar"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         fontFamily: 'var(--font-family)'
       }}
       role="main"

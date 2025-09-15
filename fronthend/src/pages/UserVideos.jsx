@@ -109,7 +109,7 @@ const UserVideos = ({ toggleVideoUploading, setToggleVideoUploading, timeAgo, fo
       <div
         className="h-full w-full overflow-y-scroll scrollBar"
         style={{
-          backgroundColor: 'var(--color-bg-primary)',
+          backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
           fontFamily: 'var(--font-family)'
         }}
         role="main"
@@ -350,16 +350,16 @@ const UserVideos = ({ toggleVideoUploading, setToggleVideoUploading, timeAgo, fo
                 name="container"
                 style={{
                   transitionDuration: 'var(--animation-duration)',
-                  padding: 'var(--spacing-unit)',
+                  // padding: 'var(--spacing-unit)',
                   borderRadius: '12px',
                   backgroundColor: 'transparent'
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'transparent';
-                }}
+                // onMouseEnter={(e) => {
+                //   e.target.style.backgroundColor = 'var(--color-hover)';
+                // }}
+                // onMouseLeave={(e) => {
+                //   e.target.style.backgroundColor = 'transparent';
+                // }}
                 role="listitem"
                 aria-label={`Video: ${video?.title}`}
                 tabIndex={0}
@@ -387,9 +387,9 @@ const UserVideos = ({ toggleVideoUploading, setToggleVideoUploading, timeAgo, fo
                     poster={video?.thumbnail}
                     onTimeUpdate={handleOverAllEvent}
                     preload="metadata"
-                    className="bg-black aspect-video rounded-lg"
+                    className="bg-black/90 aspect-video rounded-lg"
                     style={{
-                      backgroundColor: 'var(--color-bg-tertiary)',
+                      // backgroundColor: 'rgba(0,0,0,0.3)',
                       borderRadius: '12px'
                     }}
                     aria-label={`Video player for ${video?.title}`}
@@ -403,14 +403,14 @@ const UserVideos = ({ toggleVideoUploading, setToggleVideoUploading, timeAgo, fo
                         className={`${videoStatus[video._id]?.showControl ? "" : "hidden"
                           } z-13 p-2 rounded-full transition-all duration-75`}
                         style={{
-                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                          // backgroundColor: 'rgba(0, 0, 0, 0.3)',
                           transitionDuration: 'var(--animation-duration)'
                         }}
                         onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                          e.target.style.backgroundColor = 'var(--color-accent-hover)';
                         }}
                         onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+                          e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
                         }}
                         aria-label={videoStatus[video._id]?.isMuted ? "Unmute video" : "Mute video"}
                         aria-pressed={videoStatus[video._id]?.isMuted}
@@ -458,23 +458,23 @@ const UserVideos = ({ toggleVideoUploading, setToggleVideoUploading, timeAgo, fo
                 {/* Video Details */}
                 <div
                   className="max-w-96 max-md:w-[60%] flex-col flex py-1 pl-2"
-                  style={{ padding: 'var(--spacing-unit)' }}
+                  style={{ paddingLeft: 'var(--spacing-unit)' }}
                 >
                   <div
-                    className="line-clamp-2 w-full font-medium text-3xl pb-2 max-sm:pb-0 max-sm:text-lg max-md:text-2xl cursor-pointer transition-colors"
+                    className="line-clamp-2 w-full font-medium text-3xl pb-1 max-sm:pb-0 max-sm:text-lg max-md:text-2xl cursor-pointer transition-colors"
                     style={{
                       color: 'var(--color-text-primary)',
                       fontSize: 'var(--font-size-2xl)',
                       fontFamily: 'var(--font-family)',
-                      paddingBottom: 'var(--spacing-unit)',
+                      // paddingBottom: 'var(--spacing-unit)',
                       transitionDuration: 'var(--animation-duration)'
                     }}
-                    onMouseEnter={(e) => {
-                      e.target.style.color = 'var(--accent-color)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.color = 'var(--color-text-primary)';
-                    }}
+                    // onMouseEnter={(e) => {
+                    //   e.target.style.color = 'var(--accent-color)';
+                    // }}
+                    // onMouseLeave={(e) => {
+                    //   e.target.style.color = 'var(--color-text-primary)';
+                    // }}
                   >
                     <h2
                       onClick={handleOverAllEvent}
@@ -496,21 +496,21 @@ const UserVideos = ({ toggleVideoUploading, setToggleVideoUploading, timeAgo, fo
                   <div className="flex">
                     <div className="items-baseline hidden">
                       <img
-                        src={video?.owner?.avatar}
-                        alt={`${video?.owner?.username}'s avatar`}
+                        src={video?.userInfo?.avatar}
+                        alt={`${video?.userInfo?.username}'s avatar`}
                         name="avatar"
-                        data-username={video?.owner?.username}
+                        data-username={video?.userInfo?.username}
                         onClick={handleOverAllEvent}
                         id={video._id}
                         className="w-6 mr-3 max-sm:w-6 max-md:w-10 max-md:mr-2 aspect-square rounded-full drop-shadow-lg cursor-pointer"
                         style={{ marginRight: 'var(--spacing-unit)' }}
                         tabIndex={0}
                         role="button"
-                        aria-label={`Visit ${video?.owner?.username}'s channel`}
+                        aria-label={`Visit ${video?.userInfo?.username}'s channel`}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            Navigate(`/channel/${video?.owner?.username}`);
+                            Navigate(`/channel/${video?.userInfo?.username}`);
                           }
                         }}
                       />
@@ -522,32 +522,32 @@ const UserVideos = ({ toggleVideoUploading, setToggleVideoUploading, timeAgo, fo
                         style={{
                           color: 'var(--color-text-secondary)',
                           fontSize: 'var(--font-size-xs)',
-                          marginBottom: 'var(--spacing-unit)',
+                          // marginBottom: 'var(--spacing-unit)',
                           transitionDuration: 'var(--animation-duration)'
                         }}
-                        onMouseEnter={(e) => {
-                          e.target.style.color = 'var(--accent-color)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.color = 'var(--color-text-secondary)';
-                        }}
+                        // onMouseEnter={(e) => {
+                        //   e.target.style.color = 'var(--accent-color)';
+                        // }}
+                        // onMouseLeave={(e) => {
+                        //   e.target.style.color = 'var(--color-text-secondary)';
+                        // }}
                       >
                         <h3
                           onClick={handleOverAllEvent}
-                          data-username={video?.owner?.username}
+                          data-username={video?.userInfo?.username}
                           name="username"
                           id={video._id}
                           tabIndex={0}
                           role="button"
-                          aria-label={`Visit ${video?.owner?.username}'s channel`}
+                          aria-label={`Visit ${video?.userInfo?.username}'s channel`}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                               e.preventDefault();
-                              Navigate(`/channel/${video?.owner?.username}`);
+                              Navigate(`/channel/${video?.userInfo?.username}`);
                             }
                           }}
                         >
-                          {video?.owner?.username}
+                          {video?.userInfo?.username}
                         </h3>
                       </div>
                       {/* View and time ago */}

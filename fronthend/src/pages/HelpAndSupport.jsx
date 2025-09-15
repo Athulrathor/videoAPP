@@ -31,10 +31,10 @@ import {
   Eye,
   Upload
 } from 'lucide-react';
-// import { useAppearance } from '../hooks/appearances';
+import { useAppearance } from '../hooks/appearances';
 
 const HelpAndSupport = () => {
-  // const { appearanceSettings } = useAppearance();
+  const { appearanceSettings } = useAppearance();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -309,7 +309,7 @@ const HelpAndSupport = () => {
     <div
       className="w-4xl p-6 max-sm:p-0 max-md:p-4 overflow-y-auto h-[calc(100vh-65px)] max-md:h-[calc(100vh-53px)] max-xl:w-2xl max-md:w-screen max-[1040px]:w-2xl scrollBar transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         transitionDuration: 'var(--animation-duration)'

@@ -28,10 +28,10 @@ import {
     RotateCcw,
     Save
 } from 'lucide-react';
-// import { useAppearance } from '../hooks/appearances';
+import { useAppearance } from '../hooks/appearances';
 
 const Accessibility = () => {
-    // const { appearanceSettings } = useAppearance();
+    const { appearanceSettings } = useAppearance();
 
     const [videoQuality, setVideoQuality] = useState('auto');
     const [autoplay, setAutoplay] = useState(true);
@@ -139,7 +139,7 @@ const Accessibility = () => {
         <div
             className="max-sm:w-full sm:px-4 sm:py-4 overflow-y-scroll scrollBar max-md:h-[calc(100vh-53px)] h-[calc(100vh-65px)] transition-all"
             style={{
-                backgroundColor: 'var(--color-bg-primary)',
+                backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
                 color: 'var(--color-text-primary)',
                 fontFamily: 'var(--font-family)',
                 transitionDuration: 'var(--animation-duration)'

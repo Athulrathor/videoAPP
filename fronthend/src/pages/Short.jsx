@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchSubcribeToggle } from "../redux/features/subcribers";
 import { WifiOff, RefreshCw } from "lucide-react";
 import { useAppearance } from "../hooks/appearances";
+import { fetchViewCounter } from "../redux/features/videos";
 
 const Short = (props) => {
   const { appearanceSettings } = useAppearance();
@@ -32,10 +33,10 @@ const Short = (props) => {
 
   useEffect(() => {
     if (currentTime >= 3 && !functionCalled) {
-      props.fetchViewCounter(getShortId);
+      dispatch(fetchViewCounter(getShortId));
       setFunctionCalled(true);
     }
-  }, [getShortId, props.fetchViewCounter, functionCalled, currentTime]);
+  }, [dispatch,getShortId, functionCalled, currentTime]);
 
   const handleRetry = () => {
     setIsRetrying(true);
@@ -143,7 +144,7 @@ const Short = (props) => {
     <div
       className="w-full h-[calc(100vh_-_57px)] max-md:h-[calc(100vh_-_41px)] transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         transitionDuration: 'var(--animation-duration)'

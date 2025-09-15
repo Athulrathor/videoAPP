@@ -53,7 +53,7 @@ const Playlist = ({ timeAgo }) => {
     if (!playlist.video) {
       dispatch(fetchVideoByOwner(user._id));
     }
-  }, []);
+  }, [playlist,user,dispatch]);
 
   const handleAddRemoveVideos = (e, index, id) => {
     const { checked } = e.target;
@@ -100,11 +100,11 @@ const Playlist = ({ timeAgo }) => {
 
   return (
     <div
-      className='py-3 max-md:py-2 w-full h-full px-6 max-md:px-2 overflow-y-scroll'
+      className='py-3 max-md:py-2 sm:p-2 md:p-5 w-full h-full max-md:px-2 overflow-y-scroll scrollBar'
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         fontFamily: 'var(--font-family)',
-        padding: 'var(--component-padding)'
+        // padding: 'var(--component-padding)'
       }}
       role="main"
       aria-label="Playlist management"
@@ -412,21 +412,21 @@ const Playlist = ({ timeAgo }) => {
                           className="flex cursor-pointer items-center space-x-3 rounded-lg border max-sm:p-2 p-4 transition-colors"
                           style={{
                             borderColor: formData?.privacy === privacy ? 'var(--accent-color)' : 'var(--color-border)',
-                            backgroundColor: formData?.privacy === privacy ? 'var(--color-accent-bg)' : 'var(--color-bg-secondary)',
+                            backgroundColor: formData?.privacy === privacy ? 'var(--color-accent-hover)' : 'var(--color-bg-secondary)',
                             gap: 'var(--spacing-unit)',
                             padding: 'var(--spacing-unit)',
                             transitionDuration: 'var(--animation-duration)'
                           }}
-                          onMouseEnter={(e) => {
-                            if (formData?.privacy !== privacy) {
-                              e.target.style.backgroundColor = 'var(--color-hover)';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (formData?.privacy !== privacy) {
-                              e.target.style.backgroundColor = 'var(--color-bg-secondary)';
-                            }
-                          }}
+                          // onMouseEnter={(e) => {
+                          //   if (formData?.privacy !== privacy) {
+                          //     e.target.style.backgroundColor = 'var(--color-hover)';
+                          //   }
+                          // }}
+                          // onMouseLeave={(e) => {
+                          //   if (formData?.privacy !== privacy) {
+                          //     e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                          //   }
+                          // }}
                         >
                           <input
                             type="radio"
@@ -434,16 +434,20 @@ const Playlist = ({ timeAgo }) => {
                             value={privacy}
                             checked={formData?.privacy === privacy}
                             onChange={handleInputChange}
-                            className="h-4 w-4 focus:ring-2"
+                            className="h-4 w-4 focus:outline-2 rounded-full"
                             style={{
-                              accentColor: 'var(--accent-color)'
+                              accentColor: 'var(--accent-color)',
+                              outlineColor: 'var(--color-accent-hover)',
                             }}
                             aria-describedby={`${privacy}-description`}
                           />
                           <div>
                             <div
                               className="flex items-center space-x-2"
-                              style={{ gap: 'var(--spacing-unit)' }}
+                              style={{
+                                // gap: 'var(--spacing-unit)',
+                                // backgroundColor: 'var(--color-bg-secondary)'
+                               }}
                             >
                               <span className="text-lg">
                                 {privacy === 'public' ? '🌍' : privacy === 'unlisted' ? '🔗' : '🔒'}
@@ -451,6 +455,7 @@ const Playlist = ({ timeAgo }) => {
                               <span
                                 className="text-sm font-medium"
                                 style={{
+                                  // backgroundColor:'var(--color-bg-secondary)',
                                   color: 'var(--color-text-primary)',
                                   fontSize: 'var(--font-size-sm)'
                                 }}
@@ -640,7 +645,7 @@ const Playlist = ({ timeAgo }) => {
                     transitionDuration: 'var(--animation-duration)'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-success-hover)';
+                    e.target.style.backgroundColor = 'var(--color-success)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'var(--color-success)';
@@ -840,16 +845,16 @@ const Playlist = ({ timeAgo }) => {
                   className="flex h-fit transition-all"
                   style={{
                     transitionDuration: 'var(--animation-duration)',
-                    padding: 'var(--spacing-unit)',
+                    // padding: 'var(--spacing-unit)',
                     borderRadius: '12px',
                     backgroundColor: 'transparent'
                   }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-hover)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
-                  }}
+                  // onMouseEnter={(e) => {
+                  //   e.target.style.backgroundColor = 'var(--color-hover)';
+                  // }}
+                  // onMouseLeave={(e) => {
+                  //   e.target.style.backgroundColor = 'transparent';
+                  // }}
                   role="listitem"
                   aria-label={`Playlist: ${playlistItem?.title}`}
                   tabIndex={0}
@@ -864,7 +869,7 @@ const Playlist = ({ timeAgo }) => {
                   }}
                 >
                   {/* Playlist Thumbnail Stack */}
-                  <div className="relative max-md:w-[36%] max-sm:w-[42%] w-64 h-fit">
+                  <div className="relative max-md:w-[50%] w-64 h-fit">
                     <div className="relative aspect-video mt-4 ml-4">
                       {/* Stack Layers */}
                       <div
@@ -1002,8 +1007,8 @@ const Playlist = ({ timeAgo }) => {
 
                   {/* Playlist Details */}
                   <div
-                    className="max-md:w-[60%] max-w-96 flex-col flex py-1 pl-2"
-                    style={{ padding: 'var(--spacing-unit)' }}
+                    className="max-md:w-[50%] max-w-96 flex-col flex py-1 pl-2"
+                    // style={{ padding: 'var(--spacing-unit)' }}
                   >
                     {/* Title */}
                     <div
@@ -1016,15 +1021,15 @@ const Playlist = ({ timeAgo }) => {
                         color: 'var(--color-text-primary)',
                         fontSize: 'var(--font-size-xl)',
                         fontFamily: 'var(--font-family)',
-                        paddingBottom: 'var(--spacing-unit)',
+                        // paddingBottom: 'var(--spacing-unit)',
                         transitionDuration: 'var(--animation-duration)'
                       }}
-                      onMouseEnter={(e) => {
-                        e.target.style.color = 'var(--accent-color)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.color = 'var(--color-text-primary)';
-                      }}
+                      // onMouseEnter={(e) => {
+                      //   e.target.style.color = 'var(--accent-color)';
+                      // }}
+                      // onMouseLeave={(e) => {
+                      //   e.target.style.color = 'var(--color-text-primary)';
+                      // }}
                       role="button"
                       tabIndex={0}
                       aria-label={`Play playlist: ${playlistItem?.title}`}
@@ -1048,7 +1053,7 @@ const Playlist = ({ timeAgo }) => {
                         id={playlistItem._id}
                         onClick={handleAllOverOne}
                         data-username={playlistItem?.owner?.username}
-                        className="flex items-baseline cursor-pointer"
+                        className=" items-baseline cursor-pointer hidden"
                         role="button"
                         tabIndex={0}
                         aria-label={`Visit ${playlistItem?.owner?.username}'s channel`}
@@ -1067,7 +1072,7 @@ const Playlist = ({ timeAgo }) => {
                           data-username={playlistItem?.owner?.username}
                           onClick={handleAllOverOne}
                           className="w-8 mr-3 max-sm:w-5 max-md:w-7 max-md:mr-2 aspect-square rounded-full drop-shadow-lg"
-                          style={{ marginRight: 'var(--spacing-unit)' }}
+                          // style={{ marginRight: 'var(--spacing-unit)' }}
                         />
                       </div>
                       <div className="flex flex-col cursor-pointer">
@@ -1081,15 +1086,15 @@ const Playlist = ({ timeAgo }) => {
                           style={{
                             color: 'var(--color-text-secondary)',
                             fontSize: 'var(--font-size-xs)',
-                            marginBottom: 'calc(var(--spacing-unit) * 0.5)',
+                            // marginBottom: 'calc(var(--spacing-unit) * 0.5)',
                             transitionDuration: 'var(--animation-duration)'
                           }}
-                          onMouseEnter={(e) => {
-                            e.target.style.color = 'var(--accent-color)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.color = 'var(--color-text-secondary)';
-                          }}
+                          // onMouseEnter={(e) => {
+                          //   e.target.style.color = 'var(--accent-color)';
+                          // }}
+                          // onMouseLeave={(e) => {
+                          //   e.target.style.color = 'var(--color-text-secondary)';
+                          // }}
                           role="button"
                           tabIndex={0}
                           aria-label={`Visit ${playlistItem?.owner?.username}'s channel`}
@@ -1101,7 +1106,7 @@ const Playlist = ({ timeAgo }) => {
                           }}
                         >
                           <h3 name="username" id={playlistItem._id} data-username={playlistItem?.owner?.username} onClick={handleAllOverOne}>
-                            {playlistItem?.owner?.fullname}
+                            {playlistItem?.owner?.username}
                           </h3>
                         </div>
                         {/* View and time ago */}
@@ -1110,7 +1115,7 @@ const Playlist = ({ timeAgo }) => {
                           style={{
                             color: 'var(--color-text-secondary)',
                             fontSize: 'var(--font-size-xs)',
-                            gap: 'calc(var(--spacing-unit) * 0.75)'
+                            // gap: 'calc(var(--spacing-unit) * 0.75)'
                           }}
                         >
                           <span aria-label={`${playlistItem?.views || 0} views`}>{playlistItem?.views || 0} views</span>

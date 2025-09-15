@@ -7,10 +7,10 @@ import { uploadShort, uploadVideo, resetStatus } from '../redux/features/uploads
 import MobileContentManagerCardList from '../components/LoadingScreen/MobileContentManagerCardList';
 import DesktopCardList from '../components/LoadingScreen/DesktopCardList';
 import { useRef } from 'react';
-// import { useAppearance } from '../hooks/appearances';
+import { useAppearance } from '../hooks/appearances';
 
 const ContentManager = () => {
-    // const { appearanceSettings } = useAppearance();
+    const { appearanceSettings } = useAppearance();
 
     const [userSelected, setUserSelected] = useState("videos");
     const [editStatus, setEditStatus] = useState(false);
@@ -269,7 +269,7 @@ const ContentManager = () => {
         <div
             className="transition-all"
             style={{
-                backgroundColor: 'var(--color-bg-primary)',
+                backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
                 color: 'var(--color-text-primary)',
                 fontFamily: 'var(--font-family)',
                 transitionDuration: 'var(--animation-duration)'
@@ -426,14 +426,14 @@ const ContentManager = () => {
                                         borderColor: 'var(--color-border)',
                                         transitionDuration: 'var(--animation-duration)'
                                     }}
-                                    onFocus={(e) => {
-                                        e.target.style.borderColor = 'var(--accent-color)';
-                                        e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = 'var(--color-border)';
-                                        e.target.style.boxShadow = 'none';
-                                    }}
+                                    // onFocus={(e) => {
+                                    //     e.target.style.borderColor = 'var(--accent-color)';
+                                    //     e.target.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                                    // }}
+                                    // onBlur={(e) => {
+                                    //     e.target.style.borderColor = 'var(--color-border)';
+                                    //     e.target.style.boxShadow = 'none';
+                                    // }}
                                 >
                                     <label
                                         htmlFor="5"
@@ -859,7 +859,7 @@ const ContentManager = () => {
                                     className="flex flex-col rounded-lg shadow p-4 border mx-2 space-x-2 transition-all"
                                     style={{
                                         backgroundColor: editStatus[content._id]
-                                            ? 'var(--color-accent-bg)'
+                                            ? 'var(--color-bg-primary)'
                                             : 'var(--color-bg-primary)',
                                         borderColor: editStatus[content._id]
                                             ? 'var(--accent-color)'
@@ -1076,10 +1076,10 @@ const ContentManager = () => {
                                                         onClick={() => handleEdit(content?._id, content)}
                                                         className={`${editStatus[content?._id] ? "hidden" : ""} px-3 py-1 rounded text-white transition-all`}
                                                         style={{
-                                                            backgroundColor: 'var(--color-warning)',
+                                                            backgroundColor: 'var(--color-accent-bg)',
                                                             transitionDuration: 'var(--animation-duration)'
                                                         }}
-                                                        onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+                                                        onMouseEnter={(e) => e.target.style.opacity = '0.75'}
                                                         onMouseLeave={(e) => e.target.style.opacity = '1'}
                                                     >
                                                         <FilePenLine size={16} />
@@ -1172,7 +1172,7 @@ const ContentManager = () => {
                                     <tr
                                         className={`${addNewStatus ? "" : "hidden"} border-b transition-all`}
                                         style={{
-                                            backgroundColor: 'var(--color-accent-bg)',
+                                            backgroundColor: 'var(--color-bg-primary)',
                                             borderColor: 'var(--accent-color)',
                                             borderWidth: '2px',
                                             transitionDuration: 'var(--animation-duration)'
@@ -1603,7 +1603,7 @@ const ContentManager = () => {
                                             className="border-b transition-all"
                                             style={{
                                                 backgroundColor: editStatus[content._id]
-                                                    ? 'var(--color-accent-bg)'
+                                                    ? 'var(--color-bg-primary)'
                                                     : 'transparent',
                                                 borderColor: editStatus[content._id]
                                                     ? 'var(--accent-color)'
@@ -1611,16 +1611,16 @@ const ContentManager = () => {
                                                 borderWidth: editStatus[content._id] ? '2px' : '1px',
                                                 transitionDuration: 'var(--animation-duration)'
                                             }}
-                                            onMouseEnter={(e) => {
-                                                if (!editStatus[content._id]) {
-                                                    e.target.style.backgroundColor = 'var(--color-hover)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (!editStatus[content._id]) {
-                                                    e.target.style.backgroundColor = 'transparent';
-                                                }
-                                            }}
+                                            // onMouseEnter={(e) => {
+                                            //     if (!editStatus[content._id]) {
+                                            //         e.target.style.backgroundColor = 'var(--color-hover)';
+                                            //     }
+                                            // }}
+                                            // onMouseLeave={(e) => {
+                                            //     if (!editStatus[content._id]) {
+                                            //         e.target.style.backgroundColor = 'transparent';
+                                            //     }
+                                            // }}
                                         >
                                             {/* Video File Column */}
                                             <td className="p-2 w-28">

@@ -61,7 +61,7 @@ const VideoCard = ({ video, timeAgo, formatTime, muted, handleOverAllEvent }) =>
       name="video-container"
       className="flex flex-col cursor-pointer group max-sm:mt-2 max-md:mt-3 mt-4 overflow-hidden transition-all"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
+        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
         transitionDuration: 'var(--animation-duration)'
       }}
       role="listitem"
