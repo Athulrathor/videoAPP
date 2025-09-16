@@ -12,6 +12,7 @@ export const useAppearance = () => {
 };
 
 export const AppearanceProvider = ({ children }) => {
+
     const [appearanceSettings, setAppearanceSettings] = useState({
         theme: 'light',
         backgroundType: 'default',

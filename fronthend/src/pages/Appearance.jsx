@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Palette,
   Sun,
@@ -20,13 +20,44 @@ import {
 } from 'lucide-react';
 import { useAppearance } from '../hooks/appearances';
 import { useDispatch, useSelector } from 'react-redux';
-import { setApperances } from '../redux/features/settings';
+import { getApperances, setApperances } from '../redux/features/settings';
 
 const Appearance = () => {
   const dispatch = useDispatch();
 
-  const { appearanceSettings, setAppearanceSettings } = useAppearance();
+  const { setAppearanceSettings, appearanceSettings } = useAppearance();
   const { appearances } = useSelector(state => state.settings);
+
+  // const [appearanceSetting, setAppearanceSetting] = useState({
+  //         theme: 'light',
+  //         backgroundType: 'default',
+  //         customBackground: '',
+  //         fontSize: 'medium',
+  //         fontFamily: 'inter',
+  //         layoutDensity: 'comfortable',
+  //         accentColor: 'blue',
+  //         animationsEnabled: true,
+  //         highContrast: false,
+  //         reducedMotion: false,
+  //         sidebarStyle: 'default'
+  //     });
+
+  // useEffect(() => {
+  //   if (appearances === null) dispatch(getApperances());
+  // }, [dispatch, appearances]);
+
+  const themeSetting = useCallback( () => {
+    dispatch(getApperances());
+  }, [dispatch]);
+
+  useEffect(() => {
+    themeSetting();
+    console.log("function called")
+  }, [themeSetting])
+  
+  console.log(appearances)
+
+  const [appearanceSetting, setAppearanceSetting] = useState(appearances || appearanceSettings);
 
   const themeOptions = [
     {
@@ -140,7 +171,7 @@ const Appearance = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setAppearanceSettings(prev => ({
+        setAppearanceSetting(prev => ({
           ...prev,
           customBackground: e.target.result,
           backgroundType: 'custom'
@@ -151,7 +182,7 @@ const Appearance = () => {
   };
 
   const resetToDefaults = () => {
-    setAppearanceSettings({
+    setAppearanceSetting({
       theme: 'light',
       backgroundType: 'default',
       customBackground: '',
@@ -167,24 +198,23 @@ const Appearance = () => {
   };
 
   const getPreviewBackground = () => {
-    if (appearanceSettings.backgroundType === 'custom' && appearanceSettings.customBackground) {
-      return { backgroundImage: `url(${appearanceSettings.customBackground})`, backgroundSize: 'cover' };
+    if (appearanceSetting.backgroundType === 'custom' && appearanceSetting.customBackground) {
+      return { backgroundImage: `url(${appearanceSetting.customBackground})`, backgroundSize: 'cover' };
     }
     return {};
   };
 
-  console.log(appearances)
-
-  const handleApplySettings = () => {
-    console.log('Settings applied:', appearanceSettings);
-    dispatch(setApperances(appearanceSettings));
+  const handleApplySettings = async () => {
+    console.log('Settings applied:', appearanceSetting);
+    await dispatch(setApperances(appearanceSetting));
+    setAppearanceSettings(appearanceSetting);
   };
 
   return (
     <div
       className="max-sm:w-full sm:px-4 sm:py-4 overflow-y-scroll scrollBar max-md:h-[calc(100vh-41px)] h-[calc(100vh-57px)] transition-all"
       style={{
-        backgroundColor: appearanceSettings.customBackground ? 'transparent' : "var(--color-bg-primary)",
+        backgroundColor: appearanceSetting.customBackground ? 'transparent' : "var(--color-bg-primary)",
         color: 'var(--color-text-primary)',
         fontFamily: 'var(--font-family)',
         fontSize: 'var(--font-size-base)',
@@ -241,7 +271,7 @@ const Appearance = () => {
         </h2>
 
         <div
-          className={`w-full h-48 rounded-lg border-2 p-4 transition-all ${backgroundOptions.find(opt => opt.id === appearanceSettings.backgroundType)?.preview || 'bg-white'
+          className={`w-full h-48 rounded-lg border-2 p-4 transition-all ${backgroundOptions.find(opt => opt.id === appearanceSetting.backgroundType)?.preview || 'bg-white'
             }`}
           style={{
             ...getPreviewBackground(),
@@ -256,11 +286,11 @@ const Appearance = () => {
             }}
           >
             <div
-              className={`text-center ${fontFamilies.find(f => f.id === appearanceSettings.fontFamily)?.class}`}
+              className={`text-center ${fontFamilies.find(f => f.id === appearanceSetting.fontFamily)?.class}`}
               style={{ fontFamily: 'var(--font-family)' }}
             >
               <h3
-                className={`font-bold ${fontSizes.find(f => f.id === appearanceSettings.fontSize)?.sample} mb-2`}
+                className={`font-bold ${fontSizes.find(f => f.id === appearanceSetting.fontSize)?.sample} mb-2`}
                 style={{
                   color: 'var(--color-text-primary)',
                   fontSize: 'var(--font-size-base)'
@@ -275,7 +305,7 @@ const Appearance = () => {
                 This is how your interface will look with current settings
               </p>
               <button
-                className={`mt-3 px-4 py-2 text-white rounded-lg transition-all ${accentColors.find(c => c.id === appearanceSettings.accentColor)?.color
+                className={`mt-3 px-4 py-2 text-white rounded-lg transition-all ${accentColors.find(c => c.id === appearanceSetting.accentColor)?.color
                   }`}
                 style={{
                   backgroundColor: 'var(--accent-color)',
@@ -347,30 +377,30 @@ const Appearance = () => {
               return (
                 <div
                   key={theme.id}
-                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${appearanceSettings.theme === theme.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${appearanceSetting.theme === theme.id
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
                     }`}
                   style={{
-                    backgroundColor: appearanceSettings.theme === theme.id
+                    backgroundColor: appearanceSetting.theme === theme.id
                       ? 'var(--color-accent-bg)'
                       : 'var(--color-bg-primary)',
-                    borderColor: appearanceSettings.theme === theme.id
+                    borderColor: appearanceSetting.theme === theme.id
                       ? 'var(--accent-color)'
                       : 'var(--color-border)',
                     transitionDuration: 'var(--animation-duration)'
                   }}
-                  onClick={() => setAppearanceSettings(prev => ({
+                  onClick={() => setAppearanceSetting(prev => ({
                     ...prev,
                     theme: theme.id
                   }))}
                   onMouseEnter={(e) => {
-                    if (appearanceSettings.theme !== theme.id) {
+                    if (appearanceSetting.theme !== theme.id) {
                       e.target.style.borderColor = 'var(--color-text-secondary)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (appearanceSettings.theme !== theme.id) {
+                    if (appearanceSetting.theme !== theme.id) {
                       e.target.style.borderColor = 'var(--color-border)';
                     }
                   }}
@@ -399,7 +429,7 @@ const Appearance = () => {
                         {theme.description}
                       </p>
                     </div>
-                    {appearanceSettings.theme === theme.id && (
+                    {appearanceSetting.theme === theme.id && (
                       <Check
                         className="h-5 w-5"
                         style={{ color: 'var(--accent-color)' }}
@@ -440,22 +470,22 @@ const Appearance = () => {
                 className={`p-3 border-2 rounded-lg cursor-pointer transition-all`}
                 style={{
                   backgroundColor: 'var(--color-bg-primary)',
-                  borderColor: appearanceSettings.backgroundType === bg.id
+                  borderColor: appearanceSetting.backgroundType === bg.id
                     ? 'var(--accent-color)'
                     : 'var(--color-border)',
                   transitionDuration: 'var(--animation-duration)'
                 }}
-                onClick={() => setAppearanceSettings(prev => ({
+                onClick={() => setAppearanceSetting(prev => ({
                   ...prev,
                   backgroundType: bg.id
                 }))}
                 onMouseEnter={(e) => {
-                  if (appearanceSettings.backgroundType !== bg.id) {
+                  if (appearanceSetting.backgroundType !== bg.id) {
                     e.target.style.borderColor = 'var(--color-text-secondary)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (appearanceSettings.backgroundType !== bg.id) {
+                  if (appearanceSetting.backgroundType !== bg.id) {
                     e.target.style.borderColor = 'var(--color-border)';
                   }
                 }}
@@ -486,7 +516,7 @@ const Appearance = () => {
             ))}
           </div>
 
-          {appearanceSettings.backgroundType === 'custom' && (
+          {appearanceSetting.backgroundType === 'custom' && (
             <div className="mt-4">
               <label
                 className="block text-sm font-medium mb-2"
@@ -556,30 +586,30 @@ const Appearance = () => {
                 {fontSizes.map((size) => (
                   <button
                     key={size.id}
-                    onClick={() => setAppearanceSettings(prev => ({
+                    onClick={() => setAppearanceSetting(prev => ({
                       ...prev,
                       fontSize: size.id
                     }))}
                     className={`p-3 border rounded-lg text-left transition-colors`}
                     style={{
-                      backgroundColor: appearanceSettings.fontSize === size.id
+                      backgroundColor: appearanceSetting.fontSize === size.id
                         ? 'var(--color-accent-bg)'
                         : 'var(--color-bg-primary)',
-                      borderColor: appearanceSettings.fontSize === size.id
+                      borderColor: appearanceSetting.fontSize === size.id
                         ? 'var(--accent-color)'
                         : 'var(--color-border)',
-                      color: appearanceSettings.fontSize === size.id
+                      color: appearanceSetting.fontSize === size.id
                         ? 'var(--accent-color)'
                         : 'var(--color-text-primary)',
                       transitionDuration: 'var(--animation-duration)'
                     }}
                     onMouseEnter={(e) => {
-                      if (appearanceSettings.fontSize !== size.id) {
+                      if (appearanceSetting.fontSize !== size.id) {
                         e.target.style.borderColor = 'var(--color-text-secondary)';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (appearanceSettings.fontSize !== size.id) {
+                      if (appearanceSetting.fontSize !== size.id) {
                         e.target.style.borderColor = 'var(--color-border)';
                       }
                     }}
@@ -614,27 +644,27 @@ const Appearance = () => {
                 {fontFamilies.map((font) => (
                   <button
                     key={font.id}
-                    onClick={() => setAppearanceSettings(prev => ({
+                    onClick={() => setAppearanceSetting(prev => ({
                       ...prev,
                       fontFamily: font.id
                     }))}
                     className={`w-full p-3 border rounded-lg text-left transition-colors`}
                     style={{
-                      backgroundColor: appearanceSettings.fontFamily === font.id
+                      backgroundColor: appearanceSetting.fontFamily === font.id
                         ? 'var(--color-accent-bg)'
                         : 'var(--color-bg-primary)',
-                      borderColor: appearanceSettings.fontFamily === font.id
+                      borderColor: appearanceSetting.fontFamily === font.id
                         ? 'var(--accent-color)'
                         : 'var(--color-border)',
                       transitionDuration: 'var(--animation-duration)'
                     }}
                     onMouseEnter={(e) => {
-                      if (appearanceSettings.fontFamily !== font.id) {
+                      if (appearanceSetting.fontFamily !== font.id) {
                         e.target.style.borderColor = 'var(--color-text-secondary)';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (appearanceSettings.fontFamily !== font.id) {
+                      if (appearanceSetting.fontFamily !== font.id) {
                         e.target.style.borderColor = 'var(--color-border)';
                       }
                     }}
@@ -698,27 +728,27 @@ const Appearance = () => {
                 {layoutOptions.map((layout) => (
                   <button
                     key={layout.id}
-                    onClick={() => setAppearanceSettings(prev => ({
+                    onClick={() => setAppearanceSetting(prev => ({
                       ...prev,
                       layoutDensity: layout.id
                     }))}
                     className={`w-full p-3 border rounded-lg text-left transition-colors`}
                     style={{
-                      backgroundColor: appearanceSettings.layoutDensity === layout.id
+                      backgroundColor: appearanceSetting.layoutDensity === layout.id
                         ? 'var(--color-accent-bg)'
                         : 'var(--color-bg-primary)',
-                      borderColor: appearanceSettings.layoutDensity === layout.id
+                      borderColor: appearanceSetting.layoutDensity === layout.id
                         ? 'var(--accent-color)'
                         : 'var(--color-border)',
                       transitionDuration: 'var(--animation-duration)'
                     }}
                     onMouseEnter={(e) => {
-                      if (appearanceSettings.layoutDensity !== layout.id) {
+                      if (appearanceSetting.layoutDensity !== layout.id) {
                         e.target.style.borderColor = 'var(--color-text-secondary)';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (appearanceSettings.layoutDensity !== layout.id) {
+                      if (appearanceSetting.layoutDensity !== layout.id) {
                         e.target.style.borderColor = 'var(--color-border)';
                       }
                     }}
@@ -760,27 +790,27 @@ const Appearance = () => {
                   return (
                     <button
                       key={style.id}
-                      onClick={() => setAppearanceSettings(prev => ({
+                      onClick={() => setAppearanceSetting(prev => ({
                         ...prev,
                         sidebarStyle: style.id
                       }))}
                       className={`w-full p-3 border rounded-lg text-left transition-colors flex items-center space-x-3`}
                       style={{
-                        backgroundColor: appearanceSettings.sidebarStyle === style.id
+                        backgroundColor: appearanceSetting.sidebarStyle === style.id
                           ? 'var(--color-accent-bg)'
                           : 'var(--color-bg-primary)',
-                        borderColor: appearanceSettings.sidebarStyle === style.id
+                        borderColor: appearanceSetting.sidebarStyle === style.id
                           ? 'var(--accent-color)'
                           : 'var(--color-border)',
                         transitionDuration: 'var(--animation-duration)'
                       }}
                       onMouseEnter={(e) => {
-                        if (appearanceSettings.sidebarStyle !== style.id) {
+                        if (appearanceSetting.sidebarStyle !== style.id) {
                           e.target.style.borderColor = 'var(--color-text-secondary)';
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (appearanceSettings.sidebarStyle !== style.id) {
+                        if (appearanceSetting.sidebarStyle !== style.id) {
                           e.target.style.borderColor = 'var(--color-border)';
                         }
                       }}
@@ -839,27 +869,27 @@ const Appearance = () => {
             {accentColors.map((color) => (
               <button
                 key={color.id}
-                onClick={() => setAppearanceSettings(prev => ({
+                onClick={() => setAppearanceSetting(prev => ({
                   ...prev,
                   accentColor: color.id
                 }))}
                 className={`p-2 max-sm:p-1 border-2 rounded-lg transition-all text-center`}
                 style={{
-                  borderColor: appearanceSettings.accentColor === color.id
+                  borderColor: appearanceSetting.accentColor === color.id
                     ? 'var(--color-text-secondary)'
                     : 'var(--color-border)',
-                  boxShadow: appearanceSettings.accentColor === color.id
+                  boxShadow: appearanceSetting.accentColor === color.id
                     ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                     : 'none',
                   transitionDuration: 'var(--animation-duration)'
                 }}
                 onMouseEnter={(e) => {
-                  if (appearanceSettings.accentColor !== color.id) {
+                  if (appearanceSetting.accentColor !== color.id) {
                     e.target.style.borderColor = 'var(--color-text-secondary)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (appearanceSettings.accentColor !== color.id) {
+                  if (appearanceSetting.accentColor !== color.id) {
                     e.target.style.borderColor = 'var(--color-border)';
                   }
                 }}
@@ -927,18 +957,18 @@ const Appearance = () => {
                 </p>
               </div>
               <button
-                onClick={() => setAppearanceSettings(prev => ({
+                onClick={() => setAppearanceSetting(prev => ({
                   ...prev,
                   animationsEnabled: !prev.animationsEnabled
                 }))}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
                 style={{
-                  backgroundColor: appearanceSettings.animationsEnabled ? 'var(--accent-color)' : 'var(--color-border)',
+                  backgroundColor: appearanceSetting.animationsEnabled ? 'var(--accent-color)' : 'var(--color-border)',
                   transitionDuration: 'var(--animation-duration)'
                 }}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${appearanceSettings.animationsEnabled ? 'translate-x-6' : 'translate-x-1'
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${appearanceSetting.animationsEnabled ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   style={{ transitionDuration: 'var(--animation-duration)' }}
                 />
@@ -971,18 +1001,18 @@ const Appearance = () => {
                 </p>
               </div>
               <button
-                onClick={() => setAppearanceSettings(prev => ({
+                onClick={() => setAppearanceSetting(prev => ({
                   ...prev,
                   highContrast: !prev.highContrast
                 }))}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
                 style={{
-                  backgroundColor: appearanceSettings.highContrast ? 'var(--accent-color)' : 'var(--color-border)',
+                  backgroundColor: appearanceSetting.highContrast ? 'var(--accent-color)' : 'var(--color-border)',
                   transitionDuration: 'var(--animation-duration)'
                 }}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${appearanceSettings.highContrast ? 'translate-x-6' : 'translate-x-1'
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${appearanceSetting.highContrast ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   style={{ transitionDuration: 'var(--animation-duration)' }}
                 />
@@ -1015,18 +1045,18 @@ const Appearance = () => {
                 </p>
               </div>
               <button
-                onClick={() => setAppearanceSettings(prev => ({
+                onClick={() => setAppearanceSetting(prev => ({
                   ...prev,
                   reducedMotion: !prev.reducedMotion
                 }))}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
                 style={{
-                  backgroundColor: appearanceSettings.reducedMotion ? 'var(--accent-color)' : 'var(--color-border)',
+                  backgroundColor: appearanceSetting.reducedMotion ? 'var(--accent-color)' : 'var(--color-border)',
                   transitionDuration: 'var(--animation-duration)'
                 }}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${appearanceSettings.reducedMotion ? 'translate-x-6' : 'translate-x-1'
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${appearanceSetting.reducedMotion ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   style={{ transitionDuration: 'var(--animation-duration)' }}
                 />
