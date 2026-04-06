@@ -1,41 +1,57 @@
 import { Router } from "express";
-import { deleteVideo, getAllSuggestion, getAllVideos, getVideoById, getVideoByOwner, publishAVideo, togglePublishStatus, updateVideo, videoViewCounter } from "../controllers/video.controller.js";
+import {
+  deleteVideo,
+  getAllSuggestion,
+  getAllVideos,
+  getVideoById,
+  getVideoByOwner,
+  publishAVideo,
+  togglePublishStatus,
+  updateVideo,
+  videoViewCounter,
+  getFeed
+} from "../controllers/video.controller.js";
+
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/get-all-videos").get(verifyToken, getAllVideos);
+// 🔹 PUBLIC / FEED
+router.get("/feed", getFeed); // cursor-based (no auth needed)
 
-router.route("/get-all-suggestion").get(verifyToken, getAllSuggestion);
+// 🔹 GET VIDEOS
+router.get("/", getAllVideos); // query, pagination
+router.get("/suggestions", getAllSuggestion);
 
-router.route("/get-all-videos-of-owner/:userId").get(verifyToken, getVideoByOwner);
+// 🔹 USER VIDEOS
+router.get("/user/:userId", getVideoByOwner);
 
-router.route("/publish-video").post(
+// 🔹 SINGLE VIDEO
+router.get("/:videoId", getVideoById);
+
+// 🔹 CREATE VIDEO
+router.post(
+  "/video",
   verifyToken,
-  upload.fields([
-    {
-      name: "videoFile",
-      maxCount: 1,
-    },
-    {
-      name: "thumbnail",
-      maxCount: 1,
-    },
-  ]),
   publishAVideo
 );
 
-router.route("/get-video/:videoId").post(verifyToken, getVideoById);
+// 🔹 UPDATE VIDEO
+router.patch(
+  "/:videoId",
+  verifyToken,
+  upload.single("thumbnail"),
+  updateVideo
+);
 
-router
-  .route("/update-video/:videoId")
-    .post(verifyToken, upload.single("newThumbnail"), updateVideo);
-  
-router.route("/delete-video/:videoId").post(verifyToken, deleteVideo);
+// 🔹 DELETE VIDEO
+router.delete("/:videoId", verifyToken, deleteVideo);
 
-router.route("/toggle-published-status/:videoId").get(verifyToken, togglePublishStatus);
+// 🔹 TOGGLE PUBLISH
+router.patch("/:videoId/toggle-publish", verifyToken, togglePublishStatus);
 
-router.route("/view-counter/:videoId").get(verifyToken,videoViewCounter)
+// 🔹 VIEW COUNT (optional)
+router.post("/:videoId/view", videoViewCounter);
 
 export default router;

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
+
 import {
   deleteShort,
   getAllShorts,
@@ -10,28 +11,49 @@ import {
   updateShort,
   getShortByOwner,
   shortViewCounter,
+  getShortFeed
 } from "../controllers/short.controller.js";
 
 const router = Router();
 
-router.route("/get-all-short").get(verifyToken, getAllShorts);
 
-router.route("/get-all-short-of-owner/:userId").get(verifyToken, getShortByOwner);
+// 🔥 SHORT FEED (TikTok / Reels style)
+router.get("/feed", verifyToken, getShortFeed);
 
-router
-  .route("/publish-short")
-  .post(verifyToken, upload.single("shortFile"), publishAShort);
 
-router.route("/get-short/:shortId").post(verifyToken, getShortById);
+// 🔍 GET ALL SHORTS (search + pagination)
+router.get("/", verifyToken, getAllShorts);
 
-router.route("/update-short/:shortId").post(verifyToken, updateShort);
 
-router.route("/delete-short/:shortId").post(verifyToken, deleteShort);
+// 👤 GET SHORTS BY USER
+router.get("/user/:userId", verifyToken, getShortByOwner);
 
-router
-  .route("/toggle-published-status/:shortId")
-  .get(verifyToken, togglePublishStatus);
 
-router.route(`/view-counter/:shortId`).get(verifyToken, shortViewCounter);
+// 🎬 GET SINGLE SHORT
+router.get("/:shortId", verifyToken, getShortById);
+
+
+// 🚀 CREATE SHORT
+router.post(
+  "/short",
+  verifyToken,
+  publishAShort
+);
+
+// ✏️ UPDATE SHORT
+router.patch("/:shortId", verifyToken, updateShort);
+
+
+// 🗑 DELETE SHORT
+router.delete("/:shortId", verifyToken, deleteShort);
+
+
+// 🔄 TOGGLE PUBLISH
+router.patch("/:shortId/toggle-publish", verifyToken, togglePublishStatus);
+
+
+// 👁 VIEW COUNTER
+router.patch("/:shortId/view", verifyToken, shortViewCounter);
+
 
 export default router;

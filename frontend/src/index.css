@@ -1,0 +1,283 @@
+@import "tailwindcss";
+
+:root {
+  /* Surfaces */
+  --bg: #f8f8f7;
+  --surface: #ffffff;
+  --surface2: #f1f1ef;
+
+  /* Text */
+  --text: #111110;
+  --muted: #6f6e77;
+  --subtle: #d9d9d6;
+
+  /* Brand */
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+
+  --primary-glow: rgba(59, 130, 246, 0.10);
+
+  /* Status */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* Borders */
+
+  --border: #e4e4e2;
+  --border-hover: #c8c8c6;
+
+  /* Layout */
+  --radius: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --container: 900px;
+  --sidebar: 340px;
+
+  /* Transitions */
+  --t-fast: 100ms ease;
+  --t-base: 200ms ease;
+  --t-slow: 350ms ease;
+
+  /* Font */
+  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-size: 16px;
+}
+
+/* Light mode */
+.dark {
+  --bg: #0c0c0e;
+  --surface: #141416;
+  --surface2: #1c1c20;
+
+  --text: #f0f0ef;
+  --muted: #6e6e78;
+  --subtle: #3a3a40;
+
+  --border: #222226;
+  --border-hover: #2e2e36;
+
+  --primary-glow: rgba(59, 130, 246, 0.15);
+}
+
+/* ─────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: var(--font-size);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─────────────────────────────────────
+   TYPOGRAPHY
+───────────────────────────────────── */
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+p {
+  font-size: 0.9375rem;
+}
+
+/* ─────────────────────────────────────
+   LAYOUT CONTAINERS
+───────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-inline: 1.5rem;
+  }
+}
+
+/* ─────────────────────────────────────
+   SCROLLBAR
+───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* ─────────────────────────────────────
+   FOCUS
+───────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.no-focus :focus-visible {
+  outline: none;
+}
+
+/* ─────────────────────────────────────
+   VIDEO PLAYER
+───────────────────────────────────── */
+.video-player {
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  background: black;
+  width: 100%;
+  max-width: 100%;
+}
+
+.video-player video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.video-player::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE + Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* ─────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.4s ease both;
+}
+
+.animate-fade-up-1 {
+  animation: fade-up 0.4s 0.07s ease both;
+}
+
+.animate-fade-up-2 {
+  animation: fade-up 0.4s 0.14s ease both;
+}
+
+.animate-fade-up-3 {
+  animation: fade-up 0.4s 0.21s ease both;
+}
+
+.animate-fade-up-4 {
+  animation: fade-up 0.4s 0.28s ease both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease both;
+}
+
+/* ─────────────────────────────────────
+   GLOBAL TRANSITIONS
+───────────────────────────────────── */
+* {
+  transition:
+    background-color var(--t-base),
+    color var(--t-base),
+    border-color var(--t-base),
+    opacity var(--t-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.icon-liked {
+  color: var(--danger);
+  fill: var(--danger);
+}
+
+.icon-unliked {
+  color: var(--muted);
+  fill: transparent;
+}

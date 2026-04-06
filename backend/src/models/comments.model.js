@@ -7,30 +7,65 @@ const commentSchema = new Schema(
     content: {
       type: String,
       required: true,
+      trim: true,
     },
-    video: {
+
+    // 🔥 polymorphic reference (video OR short)
+    onModel: {
+      type: String,
+      required: true,
+      enum: ["Video", "Short"],
+    },
+
+    contentId: {
       type: Schema.Types.ObjectId,
-      ref: "Video",
+      required: true,
+      refPath: "onModel",
+      index: true,
     },
+
     owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+      index: true,
     },
-    short: {
+
+    // 🔥 parent comment (for replies)
+    parentComment: {
       type: Schema.Types.ObjectId,
-      ref:"short",
-    },
-    comment: {
-      type: mongoose.Types.ObjectId,
       ref: "Comment",
+      default: null,
+      index: true,
+    },
+
+    // 🔥 denormalized fields (performance)
+    likeCount: {
+      type: Number,
+      default: 0,
+    },
+
+    replyCount: {
+      type: Number,
+      default: 0,
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
+commentSchema.index({ owner: 1 });
+commentSchema.index({ contentId: 1, parentComment: 1, createdAt: -1, _id: -1 });
+commentSchema.index({ parentComment: 1, createdAt: -1, _id: -1 });
+
 commentSchema.pre("findOneAndDelete", async function (next) {
-  const commentId = this.getQuery()._id;
+  const comment = await this.model.findOne(this.getQuery());
+  if (!comment) return next();
+
+  const commentId = comment._id;
+
   await Like.deleteMany({ comment: commentId });
+  await mongoose.model("Comment").deleteMany({ parentComment: commentId });
+
   next();
 });
 

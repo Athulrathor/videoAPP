@@ -5,48 +5,57 @@ import {Like} from "./like.model.js";
 
 const videoSchema = new Schema(
   {
-    videoFile: {
+    videoUrl: { type: String, required: true },
+    videoPublicId: String,
+
+    thumbnail: { type: String, required: true },
+    thumbnailPublicId: String,
+
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+
+    duration: { type: Number, required: true },
+
+    views: { type: Number, default: 0 },
+
+    likeCount: { type: Number, default: 0 },
+    commentsCount: { type: Number, default: 0 },
+
+    visibility: {
       type: String,
-      required: true,
+      enum: ["public", "private", "unlisted"],
+      default: "public",
     },
-    thumbnail: {
+
+    category: {
       type: String,
-      required: true,
+      default: "other",
     },
-    title: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    duration: {
-      type: String,
-      required: true,
-    },
-    views: {
-      type: Number,
-      default: 0,
-    },
-    isPublished: {
-      type: Boolean,
-      default: true,
-    },
+
+    isPublished: { type: Boolean, default: true },
+
     owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-videoSchema.pre("findOneAndDelete", async function (next) {
-  const videoId = this.getQuery()._id;
-  await Comment.deleteMany({ video: videoId });
-  await Like.deleteMany({ video: videoId });
+videoSchema.index({
+  owner: 1,
+  createdAt: -1,
+  isPublished: 1,
+});
+videoSchema.index({ owner: 1 });
+videoSchema.index({ createdAt: -1 });
+videoSchema.index({ views: -1 });
+videoSchema.index({ title: "text" });
+
+videoSchema.pre("deleteOne", { document: true }, async function (next) {
+  await Comment.deleteMany({ onModel: "Video", contentId: this._id });
+  await Like.deleteMany({ video: this._id }); // only if Like model actually stores video
   next();
 });
 

@@ -1,33 +1,33 @@
 import { Router } from "express";
-import { addComment, deleteComment, getVideoComments, updateComment,getShortComments, addCommentShort, updateCommentShort, deleteCommentShort, getCommentToComments, addCommentToComment } from "../controllers/comment.controller.js";
+import { addComment, deleteComment, updateComment, addReplies, getComments, getReplies } from "../controllers/comment.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/add-comment-to-video/:videoId").post(verifyToken, addComment);
+router.route("/add-comment/:contentId").post(verifyToken, addComment);
 
-router.route("/add-comment-to-short/:shortId").post(verifyToken, addCommentShort);
-
-router
-  .route("/add-comment-to-comment/:commentId")
-  .post(verifyToken, addCommentToComment);
-
-router.route("/update-comment-to-video/:commentId").post(verifyToken, updateComment);
+// router.route("/add-comment-to-short/:contentId").post(verifyToken, addComment);
 
 router
-  .route("/update-comment-to-short/:commentId")
-  .post(verifyToken, updateCommentShort);
+  .route("/add-replies/:commentId")
+  .post(verifyToken, addReplies);
 
-router.route("/delete-comment-to-video/:commentId").get(verifyToken, deleteComment);
+router.route("/update-comment/:commentId").post(verifyToken, updateComment);
 
-router
-  .route("/delete-comment-to-short/:commentId")
-  .get(verifyToken, deleteCommentShort);
+// router
+//   .route("/update-comment-to-short/:commentId")
+//   .post(verifyToken, updateCommentShort);
 
-router.route("/get-video-comment/:videoId").get(verifyToken, getVideoComments);
+router.route("/delete-comment/:commentId").delete(verifyToken, deleteComment);
 
-router.route("/get-short-comment/:shortId").get(verifyToken, getShortComments);
+// router
+//   .route("/delete-comment-to-short/:commentId")
+//   .get(verifyToken, deleteCommentShort);
 
-router.route("/get-comment-to-comment/:commentId").get(verifyToken, getCommentToComments);
+router.route("/get-comment/:contentId").get(verifyToken, getComments);
+
+// router.route("/get-short-comment/:shortId").get(verifyToken, getShortComments);
+
+router.route("/get-replies/:commentId").get(verifyToken, getReplies);
 
 export default router;

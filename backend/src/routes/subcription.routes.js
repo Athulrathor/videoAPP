@@ -5,21 +5,30 @@ import {
   toggleSubscription,
   isSubcribed,
   getUserChannelSubscribersVideosAndShort,
-} from "../controllers/subcriber.controller.js";
+  subscriptionCount,
+} from "../controllers/subscriptions.controller.js";
+
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/toggle-subcriber/:userId").get(verifyToken, toggleSubscription);
 
-router.route("/get-subcriber").get(verifyToken, getUserChannelSubscribers);
+// 🔹 SUBSCRIBE / UNSUBSCRIBE (toggle)
+router.post("/:channelId", verifyToken, toggleSubscription);
 
-router.route("/get-subcribed/:userId").get(verifyToken, getSubscribedChannels);
+// 🔹 CHECK IF SUBSCRIBED
+router.get("/:channelId/status", verifyToken, isSubcribed);
 
-router
-  .route("/get-subcribers-videos-and-short")
-  .get(verifyToken,getUserChannelSubscribersVideosAndShort);
+// 🔹 GET SUBSCRIBER COUNT
+router.get("/:channelId/count", subscriptionCount);
 
-router.route("/is-subcribed/:userId").get(verifyToken, isSubcribed);
+// 🔹 GET MY SUBSCRIBERS (who subscribed to me)
+router.get("/me/subscribers", verifyToken, getUserChannelSubscribers);
+
+// 🔹 GET CHANNELS I SUBSCRIBED TO
+router.get("/me/subscriptions", verifyToken, getSubscribedChannels);
+
+// 🔹 GET FEED FROM SUBSCRIPTIONS
+router.get("/feed", verifyToken, getUserChannelSubscribersVideosAndShort);
 
 export default router;

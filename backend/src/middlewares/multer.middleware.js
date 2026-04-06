@@ -1,4 +1,4 @@
-import multer, { memoryStorage } from "multer";
+import multer from "multer";
 import path from 'path';
 
 const tempDir = path.join(process.cwd(), 'public', 'temp');

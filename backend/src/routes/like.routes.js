@@ -1,27 +1,41 @@
 import { Router } from "express";
-import { getLikedVideos, toggleCommentLike, toggleTweetLike, toggleVideoLike ,toggleShortLike, isLikedOrNotShort, isLikedOrNotComment, isLikedOrNotVideo} from "../controllers/like.controller.js";
+import {
+  getLikedVideos,
+  toggleCommentLike,
+  toggleTweetLike,
+  toggleVideoLike,
+  toggleShortLike,
+  isLikedOrNotShort,
+  isLikedOrNotComment,
+  isLikedOrNotVideo,
+} from "../controllers/like.controller.js";
+
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/toggle-like-to-video/:videoId").get(verifyToken, toggleVideoLike);
 
-router.route("/toggle-like-to-short/:shortId").get(verifyToken, toggleShortLike);
+// 🎬 VIDEO LIKES
+router.post("/videos/:videoId", verifyToken, toggleVideoLike);
+router.get("/videos/:videoId/status", verifyToken, isLikedOrNotVideo);
 
-router.route("/toggle-like-to-comment/:commentId").get(verifyToken, toggleCommentLike);
-  
-router.route("/toggle-like-to-tweet/:tweetId").get(verifyToken, toggleTweetLike);
 
-router.route("/get-liked-video").get(verifyToken, getLikedVideos);
+// 🎥 SHORT LIKES
+router.post("/shorts/:shortId", verifyToken, toggleShortLike);
+router.get("/shorts/:shortId/status", verifyToken, isLikedOrNotShort);
 
-router.route("/is-liked-or-not-short/:shortId").get(verifyToken, isLikedOrNotShort);
 
-router
-  .route("/is-liked-or-not-comment/:commentId")
-    .get(verifyToken, isLikedOrNotComment);
-  
-    router
-      .route("/is-liked-or-not-video/:videoId")
-      .get(verifyToken, isLikedOrNotVideo);
+// 💬 COMMENT LIKES
+router.post("/comments/:commentId", verifyToken, toggleCommentLike);
+router.get("/comments/:commentId/status", verifyToken, isLikedOrNotComment);
+
+
+// 🐦 TWEET LIKES (optional)
+router.post("/tweets/:tweetId", verifyToken, toggleTweetLike);
+
+
+// ❤️ USER LIKED VIDEOS
+router.get("/videos/me", verifyToken, getLikedVideos);
+
 
 export default router;

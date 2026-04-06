@@ -1,595 +1,404 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Comment } from "../models/comments.model.js";
+import { Video } from "../models/video.model.js";
+import { Short } from "../models/short.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import sendMail from "../utils/nodeMailer.js";
 
-const getVideoComments = asyncHandler(async (req, res) => {
-  //TODO: get all comments for a video
-
+export const getComments = asyncHandler(async (req, res) => {
   try {
-    const { videoId } = req.params;
-    const { page = 1, limit = 10, sortBy = "content", sortType=1 } = req.query;
+    const { contentId } = req.params;
+    const { limit = 10, cursor, cursorId } = req.query;
 
-    const sortTypes = parseInt(sortType);
-    const pages = parseInt(page);
-    const limits = parseInt(limit);
-
-    if (!videoId || !isValidObjectId(videoId)) {
-      throw new ApiError(401, "Video id not found!");
+    if (!isValidObjectId(contentId)) {
+      throw new ApiError(400, "Invalid contentId");
     }
 
-    const count = await Comment.countDocuments({video:videoId});
+    // if (!onModel || !["Video", "Short"].includes(onModel)) {
+    //   throw new ApiError(400, "Invalid onModel");
+    // }
 
-    const commentOfVideo = await Comment.aggregate([
-      {
-        $match: {
-          video: new mongoose.Types.ObjectId(videoId),
+    const parsedLimit = Math.min(Math.max(Number(limit) || 10, 1), 50);
+
+    const matchStage = {
+      contentId: new mongoose.Types.ObjectId(contentId),
+      parentComment: null,
+    };
+
+    if (cursor && cursorId) {
+      if (!isValidObjectId(cursorId)) {
+        throw new ApiError(400, "Invalid cursorId");
+      }
+
+      matchStage.$or = [
+        { createdAt: { $lt: new Date(cursor) } },
+        {
+          createdAt: new Date(cursor),
+          _id: { $lt: new mongoose.Types.ObjectId(cursorId) },
         },
-      },
+      ];
+    }
+
+    const comments = await Comment.aggregate([
+      { $match: matchStage },
+      { $sort: { createdAt: -1, _id: -1 } },
+      { $limit: parsedLimit + 1 },
+
       {
         $lookup: {
           from: "users",
           localField: "owner",
           foreignField: "_id",
-          as: "user_info",
+          as: "owner",
+          pipeline: [
+            {
+              $project: {
+                username: 1,
+                avatar: 1,
+              },
+            },
+          ],
         },
       },
       {
-        $unwind: "$user_info",
+        $unwind: {
+          path: "$owner",
+          preserveNullAndEmptyArrays: true,
+        },
       },
+
       {
         $lookup: {
           from: "likes",
-          localField: "_id",
-          foreignField: "comment",
-          as: "likes_info",
+          let: { commentId: "$_id", userId: new mongoose.Types.ObjectId(req.user._id) },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$comment", "$$commentId"] },
+                    { $eq: ["$owner", "$$userId"] },
+                  ],
+                },
+              },
+            },
+            { $limit: 1 },
+          ],
+          as: "userLike",
         },
       },
       {
         $addFields: {
-          totalLikes: {
-            $size: "$likes_info",
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "comment",
-          as: "replies_info",
-        },
-      },
-      {
-        $addFields: {
-          totalReplies: {
-            $size: "$replies_info",
-          },
+          isLiked: { $gt: [{ $size: "$userLike" }, 0] },
         },
       },
       {
         $project: {
-          owner: 1,
-          createdAt: 1,
-          content: 1,
-          video: 1,
-          "user_info.avatar": 1,
-          "user_info.username": 1,
-          "user_info.createdAt": 1,
-          totalLikes: 1,
-          totalReplies:1,
-        },
-      },
-    ]);
-      
-      const totalPage = Math.ceil(count / limits);
-      const startingIndex = 0;
-
-    if (!commentOfVideo) {
-      throw new ApiError(402, "There is no commented video!");
-    }
-
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          {totalCountInDocument:count,totalPages:totalPage,data:commentOfVideo},
-          "All commented video fetched successfully!"
-        )
-      );
-  } catch (error) {
-    console.log(error.message);
-    throw new ApiError(500, "Error in getting video comments!");
-  }
-});
-
-const getShortComments = asyncHandler(async (req, res) => {
-  //TODO: get all comments for a shorts
-
-  try {
-    const { shortId } = req.params;
-    const { page = 1, limit = 10, sortBy = "content", sortType=1 } = req.query;
-
-    const sortTypes = parseInt(sortType);
-    const pages = parseInt(page);
-    const limits = parseInt(limit);
-
-    if (!shortId || !isValidObjectId(shortId)) {
-      throw new ApiError(401, "Short id not found!");
-    }
-
-    const count = await Comment.countDocuments({ short: shortId });
-
-    const commentOfShort = await Comment.aggregate([
-      {
-        $match: {
-          short: new mongoose.Types.ObjectId(shortId),
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "owner",
-          foreignField: "_id",
-          as: "user_info",
-        },
-      },
-      {
-        $unwind: "$user_info",
-      },
-      {
-        $lookup: {
-          from: "likes",
-          localField: "_id",
-          foreignField: "comment",
-          as: "likes_info",
-        },
-      },
-      {
-        $addFields: {
-          totalLikes: {
-            $size: "$likes_info",
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "comment",
-          as: "comment_info",
-        },
-      },
-      {
-        $addFields: {
-          totalComment: {
-            $size: "$comment_info",
-          },
-        },
-      },
-      {
-        $project: {
-          owner: 1,
-          createdAt: 1,
-          content: 1,
-          "user_info.avatar": 1,
-          "user_info.username": 1,
-          "user_info.createdAt": 1,
-          totalLikes: 1,
-          totalComment:1,
+          userLike: 0,
+          __v: 0,
         },
       },
     ]);
 
-    const totalPage = Math.ceil(commentOfShort.length / limits);
-    const startingIndex = 0;
+    const hasNextPage = comments.length > parsedLimit;
+    const slicedComments = hasNextPage ? comments.slice(0, parsedLimit) : comments;
 
-    if (!commentOfShort) {
-      throw new ApiError(402, "There is no commented short!");
-    }
+    const lastItem = slicedComments[slicedComments.length - 1];
 
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          totalCountOfShort: commentOfShort.length,
-          totalPages: totalPage,
-          data: commentOfShort,
+          data: slicedComments,
+          nextCursor: hasNextPage
+            ? {
+              cursor: lastItem.createdAt,
+              cursorId: lastItem._id,
+            }
+            : null,
+          hasNextPage,
         },
-        "All commented short fetched successfully!"
+        "Comments fetched successfully"
       )
     );
   } catch (error) {
-    console.log(error.message);
-    throw new ApiError(500, "Error in getting shorts comments!");
+    console.error("[getComments] server error:", error.message);
+    throw new ApiError(500, "Error in getting comments");
   }
 });
 
-const getCommentToComments = asyncHandler(async (req, res) => {
-  //TODO: get all comments for a comments
-
+export const getReplies = asyncHandler(async (req, res) => {
   try {
     const { commentId } = req.params;
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = "content",
-      sortType = 1,
-    } = req.query;
-
-    const sortTypes = parseInt(sortType);
-    const pages = parseInt(page);
-    const limits = parseInt(limit);
-
-    if (!commentId || !isValidObjectId(commentId)) {
-      throw new ApiError(401, "Comment id not found!");
-    }
-
-    const count = await Comment.countDocuments({ comment: commentId });
-
-    const commentOfComments = await Comment.aggregate([
-      {
-        $match: {
-          comment: new mongoose.Types.ObjectId(commentId),
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "owner",
-          foreignField: "_id",
-          as: "user_info",
-        },
-      },
-      {
-        $unwind: "$user_info",
-      },
-      {
-        $lookup: {
-          from: "likes",
-          localField: "_id",
-          foreignField: "comment",
-          as: "likes_info",
-        },
-      },
-      {
-        $addFields: {
-          totalLikes: {
-            $size: "$likes_info",
-          },
-        },
-      },
-      {
-        $project: {
-          content: 1,
-          "user_info.avatar": 1,
-          "user_info.username": 1,
-          "user_info.createdAt": 1,
-          totalLikes:1,
-        },
-      },
-    ]);
-
-    if (!count || !commentOfComments) {
-      console.log("not found")
-    }
-
-    const totalPage = Math.ceil(count / limits);
-    const startingIndex = 0;
-
-    if (!commentOfComments) {
-      throw new ApiError(402, "There is no commented comment!");
-    }
-
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        {
-          totalCountOfComments: count,
-          totalPages: totalPage,
-          data: commentOfComments,
-        },
-        "All commented comments fetched successfully!"
-      )
-    );
-  } catch (error) {
-    console.log(error.message);
-    throw new ApiError(500, "Error in getting comments of comments!");
-  }
-});
-
-
-const addComment = asyncHandler(async (req, res) => {
-  // TODO: add a comment to a video
-
-  try {
-    const { videoId } = req.params;
-    const { comment } = req.body;
-
-    if (!isValidObjectId(videoId)) {
-      throw new ApiError(402, "Video id is not found!");
-    }
-
-    if (!comment || comment.trim() === "") {
-      throw new ApiError(402, "Comment is empty!");
-    }
-
-    const addCommentToVideo = await Comment.create({
-      content: comment,
-      video: videoId,
-      owner: req.user._id,
-    });
-
-    if (!addCommentToVideo) {
-      throw new ApiError(404, "Error in creating comment!");
-    }
-
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          addCommentToVideo,
-          "A comment is added to video successfully!"
-        )
-      );
-  } catch (error) {
-    console.log(error.message);
-    new ApiError(500, "Error in adding comment to video!");
-  }
-});
-
-const addCommentShort = asyncHandler(async (req, res) => {
-  // TODO: add a comment to a short
-
-  try {
-    const { shortId } = req.params;
-    const { comment } = req.body
-
-    if (!isValidObjectId(shortId)) {
-      throw new ApiError(402, "Short id is not found!");
-    }
-
-    if (!comment || comment.trim() === "") {
-      throw new ApiError(402, "Comment is empty!");
-    }
-
-    const addCommentToShort = await Comment.create({
-      content: comment,
-      short: shortId,
-      owner: req.user._id,
-    });
-
-    if (!addCommentToShort) {
-      throw new ApiError(404, "Error in creating comment!");
-    }
-
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          addCommentToShort,
-          "A comment is added to short successfully!"
-        )
-      );
-  } catch (error) {
-    console.log(error.message);
-    new ApiError(500, "Error in adding comment to short!");
-  }
-});
-
-const addCommentToComment = asyncHandler(async (req, res) => {
-  // TODO: add a comment to a comment
-
-  try {
-    const { commentId } = req.params;
-    const { comment } = req.body;
+    const { limit = 10, cursor, cursorId } = req.query;
 
     if (!isValidObjectId(commentId)) {
-      throw new ApiError(402, "Comment id is not found!");
+      throw new ApiError(400, "Invalid commentId");
     }
 
-    if (!comment) {
-      throw new ApiError(402, "Comment is empty!");
+    const parsedLimit = Math.min(Math.max(Number(limit) || 10, 1), 50);
+
+    const matchStage = {
+      parentComment: new mongoose.Types.ObjectId(commentId),
+    };
+
+    if (cursor && cursorId) {
+      if (!isValidObjectId(cursorId)) {
+        throw new ApiError(400, "Invalid cursorId");
+      }
+
+      matchStage.$or = [
+        { createdAt: { $lt: new Date(cursor) } },
+        {
+          createdAt: new Date(cursor),
+          _id: { $lt: new mongoose.Types.ObjectId(cursorId) },
+        },
+      ];
     }
 
-    const addCommentToComment = await Comment.create({
-      content: comment,
-      comment: commentId,
-      owner: req.user._id,
+    const replies = await Comment.aggregate([
+      { $match: matchStage },
+      { $sort: { createdAt: -1, _id: -1 } },
+      { $limit: parsedLimit + 1 },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+          pipeline: [
+            {
+              $project: {
+                username: 1,
+                avatar: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$owner",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "likes",
+          let: { commentId: "$_id", userId: new mongoose.Types.ObjectId(req.user._id) },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$comment", "$$commentId"] },
+                    { $eq: ["$owner", "$$userId"] },
+                  ],
+                },
+              },
+            },
+            { $limit: 1 },
+          ],
+          as: "userLike",
+        },
+      },
+      {
+        $addFields: {
+          isLiked: { $gt: [{ $size: "$userLike" }, 0] },
+        },
+      },
+      {
+        $project: {
+          userLike: 0,
+          __v: 0,
+        },
+      },
+    ]);
+
+    const hasNextPage = replies.length > parsedLimit;
+    const slicedReplies = hasNextPage ? replies.slice(0, parsedLimit) : replies;
+
+    const lastItem = slicedReplies[slicedReplies.length - 1];
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          data: slicedReplies,
+          nextCursor: hasNextPage
+            ? {
+              cursor: lastItem.createdAt,
+              cursorId: lastItem._id,
+            }
+            : null,
+          hasNextPage,
+        },
+        "Replies fetched successfully"
+      )
+    );
+  } catch (error) {
+    console.error("[getReplies] server error:", error.message);
+    throw new ApiError(500, "Error in getting replies");
+  }
+});
+
+export const addComment = asyncHandler(async (req, res) => {
+  try {
+    const { contentId } = req.params;
+    const { content, onModel } = req.body;
+
+    if (!isValidObjectId(contentId)) {
+      throw new ApiError(400, "Invalid contentId");
+    }
+
+    if (!["Video", "Short"].includes(onModel)) {
+      throw new ApiError(400, "Invalid model type");
+    }
+
+    if (!content?.trim()) {
+      throw new ApiError(400, "Comment cannot be empty");
+    }
+
+    const comment = await Comment.create({
+      content,
+      contentId,
+      onModel,
+      owner: req.user.id,
     });
 
-    if (!addCommentToComment) {
-      throw new ApiError(404, "Error in creating comment!");
+    if (onModel === "Video") {
+      await Video.findByIdAndUpdate(contentId, {
+        $inc: { commentsCount: 1 },
+      });
+    }
+
+    if (onModel === "Short") {
+      await Short.findByIdAndUpdate(contentId, {
+        $inc: { commentsCount: 1 },
+      });
     }
 
     return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          addCommentToComment,
-          "A comment is added to comment successfully!"
-        )
-      );
+      .status(201)
+      .json(new ApiResponse(201, comment, "Comment added"));
   } catch (error) {
     console.log(error.message);
-    new ApiError(500, "Error in adding comment to comment!");
+    throw new ApiError(500, "Error in adding comment to video!");
   }
 });
 
-const updateComment = asyncHandler(async (req, res) => {
-  // TODO: update a comment
-
-  try {
-    const {commentId } = req.params;
-    const { newComment } = req.body;
-
-    if (!newComment || newComment.trim() === " ") {
-      throw new ApiError(401, "New comment is empty!");
-    }
-
-    if (!commentId) {
-      throw new ApiError(401, "Comment id is empty!");
-    }
-
-    const updateVideoComment = await Comment.findByIdAndUpdate(
-      { _id: commentId },
-      {
-        content: newComment,
-      },
-      { new: true, upsert: true }
-    );
-
-    if (!updateVideoComment) {
-      throw new ApiError(401, "comment is not found!");
-    }
-
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          updateVideoComment,
-          "Comment on video is updated successfully!"
-        )
-      );
-  } catch (error) {
-    console.log(error.message);
-    throw new ApiError(500, "Error in updating a video comment!");
-  }
-});
-
-const updateCommentShort = asyncHandler(async (req, res) => {
-  // TODO: update a comment
-
+export const addReplies = asyncHandler(async (req, res) => {
   try {
     const { commentId } = req.params;
-    const { newComment } = req.body;
+    const { content } = req.body;
 
-    if (!newComment || newComment.trim() === " ") {
-      throw new ApiError(401, "New comment is empty!");
+    if (!isValidObjectId(commentId)) {
+      throw new ApiError(400, "Invalid commentId");
     }
 
-    if (!commentId) {
-      throw new ApiError(401, "Comment id is empty!");
+    const parent = await Comment.findById(commentId);
+
+    if (!parent) {
+      throw new ApiError(404, "Parent comment not found");
     }
 
-    const updateShortComment = await Comment.findByIdAndUpdate(
-      { _id: commentId },
-      {
-        content: newComment,
-      },
-      { new: true, upsert: true }
-    );
+    const reply = await Comment.create({
+      content,
+      contentId: parent.contentId,
+      onModel: parent.onModel,
+      parentComment: commentId,
+      owner: req.user.id,
+    });
 
-    if (!updateShortComment) {
-      throw new ApiError(401, "comment is not found!");
-    }
+    // 🔥 increment reply count
+    await Comment.findByIdAndUpdate(commentId, {
+      $inc: { replyCount: 1 },
+    });
 
     return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          updateShortComment,
-          "Comment on short is updated successfully!"
-        )
-      );
+      .status(201)
+      .json(new ApiResponse(201, reply, "Reply added"));
   } catch (error) {
-    console.log(error.message);
-    throw new ApiError(500, "Error in updating a short comment!");
+    console.error("[addReplies] server error: ", error.message);
+    throw new ApiError(500, "Internal server error");
   }
 });
 
-const deleteComment = asyncHandler(async (req, res) => {
-  // TODO: delete a comment
+export const updateComment = asyncHandler(async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { content } = req.body;
 
+    if (!content?.trim()) {
+      throw new ApiError(400, "Content cannot be empty");
+    }
+
+    const comment = await Comment.findById(commentId);
+
+    if (!comment) {
+      throw new ApiError(404, "Comment not found");
+    }
+
+    // 🔐 ownership check
+    if (comment.owner.toString() !== req.user.id.toString()) {
+      throw new ApiError(403, "Unauthorized");
+    }
+
+    comment.content = content;
+    await comment.save();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, comment, "Comment updated"));
+  } catch (error) {
+    console.error("[updateComment] server error: ", error.message);
+    throw new ApiError(500, "Internal server error!");
+  }
+});
+
+export const deleteComment = asyncHandler(async (req, res) => {
   try {
     const { commentId } = req.params;
 
-    if (!commentId) {
-      throw new ApiError(402, "Comment id is not found!");
+    const comment = await Comment.findById(commentId);
+
+    if (!comment) {
+      throw new ApiError(404, "Comment not found");
     }
 
-    const deletingcomment = await Comment.findByIdAndDelete({ _id: commentId });
-
-    if (!deletingcomment) {
-      throw new ApiError(404, "Error in deleting video comment!");
+    if (comment.owner.toString() !== req.user.id.toString()) {
+      throw new ApiError(403, "Unauthorized");
     }
+
+    // 🔥 decrement reply count if it's a reply
+    if (comment.parentComment) {
+      await Comment.findByIdAndUpdate(comment.parentComment, {
+        $inc: { replyCount: -1 },
+      });
+    } else {
+      if (comment.onModel === "Video") {
+        await Video.findByIdAndUpdate(comment.contentId, {
+          $inc: { commentsCount: -1 },
+        });
+      }
+
+      if (comment.onModel === "Short") {
+        await Short.findByIdAndUpdate(comment.contentId, {
+          $inc: { commentsCount: -1 },
+        });
+      }
+    }
+
+    await Comment.findByIdAndDelete(commentId);
 
     return res
       .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          deletingcomment,
-          "A comment is deleted successfully!"
-        )
-      );
+      .json(new ApiResponse(200, {}, "Comment deleted"));
   } catch (error) {
     console.log(error.message);
     throw new ApiError(500, "Error in deleting video comment!");
   }
 });
-
-const deleteCommentShort = asyncHandler(async (req, res) => {
-  // TODO: delete a comment
-
-  try {
-    const { commentId } = req.params;
-
-    if (!commentId) {
-      throw new ApiError(402, "Comment id is not found!");
-    }
-
-    const deletingcomment = await Comment.findByIdAndDelete({ _id: commentId });
-
-    if (!deletingcomment) {
-      throw new ApiError(404, "Error in deleting short comment!");
-    }
-
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          deletingcomment,
-          "A comment is deleted successfully!"
-        )
-      );
-  } catch (error) {
-    console.log(error.message);
-    throw new ApiError(500, "Error in deleting short comment!");
-  }
-})
-
-// const sendCommentMail = asyncHandler(async (res, req) => {
-//   // content,commentedBy,commentedOn,createdAt
-//   const { email } = req.body;
-  
-//   try {
-    
-//     if (!email) throw new ApiError(401, "Comment details missing!");
-
-//   } catch (error) {
-    
-//   }
-// })
-
-export {
-  getVideoComments,
-  addComment,
-  addCommentShort,
-  updateComment,
-  deleteComment,
-  getShortComments,
-  updateCommentShort,
-  deleteCommentShort,
-  getCommentToComments,
-  addCommentToComment
-};

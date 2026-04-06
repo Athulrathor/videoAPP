@@ -5,22 +5,27 @@ import {Like} from "./like.model.js";
 
 const shortSchema = new Schema(
   {
-    shortFile: {
+    shortUrl: {
       type: String,
       required: true,
     },
+    shortPublicId: String,
     title: {
       type: String,
       required: true,
     },
+    likeCount: { type: Number, default: 0 },
+    commentsCount: { type: Number, default: 0 },
     description: {
       type: String,
       required: true,
     },
-    duration: {
+    visibility: {
       type: String,
-      required: true,
+      enum: ["public", "private", "unlisted"],
+      default: "public",
     },
+    duration: { type: Number, required: true }, // seconds
     views: {
       type: Number,
       default: 0,
@@ -39,10 +44,14 @@ const shortSchema = new Schema(
   }
 );
 
-shortSchema.pre("findOneAndDelete", async function (next) {
-  const shortId = this.getQuery()._id;
-  await Comment.deleteMany({ short: shortId });
-  await Like.deleteMany({ short: shortId });
+shortSchema.index({ owner: 1 });
+shortSchema.index({ createdAt: -1 });
+shortSchema.index({ views: -1 });
+shortSchema.index({ isPublished: 1, visibility: 1 });
+
+shortSchema.pre("deleteOne", { document: true }, async function (next) {
+  await Comment.deleteMany({ onModel: "Short", contentId: this._id });
+  await Like.deleteMany({ short: this._id }); // only if Like model actually stores short
   next();
 });
 

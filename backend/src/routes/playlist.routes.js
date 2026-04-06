@@ -1,24 +1,45 @@
 import { Router } from "express";
-import { addVideoToPlaylist, createPlaylist, deletePlaylist, getPlaylistById, getUserPlaylists, removeVideoFromPlaylist, updatePlaylist } from "../controllers/playlist.controller.js";
-import { upload } from "../middlewares/multer.middleware.js";
+import {
+  addVideoToPlaylist,
+  createPlaylist,
+  deletePlaylist,
+  getPlaylistById,
+  getUserPlaylists,
+  removeVideoFromPlaylist,
+  updatePlaylist
+} from "../controllers/playlist.controller.js";
+
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/create-playlist").post(verifyToken, createPlaylist);
 
-router.route("/user-playlist/:userId").get(verifyToken, getUserPlaylists);
+// 🎬 CREATE PLAYLIST
+router.post("/", verifyToken, createPlaylist);
 
-router.route("/get-playlist/:playlistId").get(verifyToken, getPlaylistById);
 
-router.route("/add-video-to-playlist").post(verifyToken, addVideoToPlaylist);
+// 👤 GET USER PLAYLISTS
+router.get("/user/:userId", verifyToken, getUserPlaylists);
 
-router
-  .route("/remove-video-to-playlist/:videoId/:playlistId")
-  .patch(verifyToken, removeVideoFromPlaylist);
 
-router.route("/update-playlist/:playlistId").post(verifyToken, updatePlaylist);
+// 📂 GET SINGLE PLAYLIST (with videos)
+router.get("/:playlistId", verifyToken, getPlaylistById);
 
-router.route("/delete-playlist/:playlistId").delete(verifyToken, deletePlaylist);
+
+// ➕ ADD VIDEOS TO PLAYLIST
+router.post("/:playlistId/videos", verifyToken, addVideoToPlaylist);
+
+
+// ❌ REMOVE VIDEO FROM PLAYLIST
+router.delete("/:playlistId/videos/:videoId", verifyToken, removeVideoFromPlaylist);
+
+
+// ✏️ UPDATE PLAYLIST
+router.patch("/:playlistId", verifyToken, updatePlaylist);
+
+
+// 🗑 DELETE PLAYLIST
+router.delete("/:playlistId", verifyToken, deletePlaylist);
+
 
 export default router;
