@@ -2,6 +2,7 @@ const parseList = (value) =>
   String(value || "")
     .split(",")
     .map((item) => item.trim())
+    .map((item) => item.replace(/\/+$/, ""))
     .filter(Boolean);
 
 export const isProduction = process.env.NODE_ENV === "production";

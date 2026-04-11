@@ -46,6 +46,13 @@ app.use(express.urlencoded({
 app.use(express.static("public"));                                           // 4. Static files
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "VideoApp API is running",
+  });
+});
+
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/videos", videoRouter);
 app.use("/api/v1/shorts", shortRouter);
