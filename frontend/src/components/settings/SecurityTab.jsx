@@ -393,15 +393,19 @@ function SecurityTab() {
     const authState = useSelector((state) => state.auth || state.user || {});
     const user = authState?.user || authState?.currentUser || null;
 
-    const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+    const [twoFAOverride, setTwoFAOverride] = useState({
+        userId: null,
+        value: null,
+    });
     const [show2FASetup, setShow2FASetup] = useState(false);
     const [showDisable2FA, setShowDisable2FA] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [showDeletionModal, setShowDeletionModal] = useState(false);
 
-    useEffect(() => {
-        setTwoFAEnabled(!!user?.twoFactorEnabled);
-    }, [user?.twoFactorEnabled]);
+    const twoFAEnabled =
+        twoFAOverride.userId === user?._id && twoFAOverride.value !== null
+            ? twoFAOverride.value
+            : !!user?.twoFactorEnabled;
 
     const emailStatus = useMemo(() => {
         if (!user) return "Unavailable";
@@ -521,14 +525,14 @@ function SecurityTab() {
             {show2FASetup && (
                 <TwoFactorModal
                     onClose={() => setShow2FASetup(false)}
-                    onSuccess={() => setTwoFAEnabled(true)}
+                    onSuccess={() => setTwoFAOverride({ userId: user?._id, value: true })}
                 />
             )}
 
             {showDisable2FA && (
                 <DisableTwoFactorModal
                     onClose={() => setShowDisable2FA(false)}
-                    onSuccess={() => setTwoFAEnabled(false)}
+                    onSuccess={() => setTwoFAOverride({ userId: user?._id, value: false })}
                 />
             )}
 

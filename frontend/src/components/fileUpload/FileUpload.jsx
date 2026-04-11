@@ -19,6 +19,14 @@ const VIDEO_CATEGORIES = [
 
 const VISIBILITY_OPTIONS = ["public", "private", "unlisted"];
 
+function getSavedUploadDraft() {
+    try {
+        return JSON.parse(localStorage.getItem("upload-draft"));
+    } catch {
+        return null;
+    }
+}
+
 function Label({ htmlFor, children, required = false }) {
     return (
         <label
@@ -588,10 +596,11 @@ function UploadPublish({ type, form, fileData, onDone, onBack }) {
 }
 
 function FileUpload({ onClose }) {
-    const [step, setStep] = useState(1);
-    const [type, setType] = useState(null);
-    const [fileData, setFileData] = useState(null);
-    const [form, setForm] = useState({
+    const [savedDraft] = useState(getSavedUploadDraft);
+    const [step, setStep] = useState(() => (savedDraft?.fileData ? 3 : savedDraft ? 2 : 1));
+    const [type, setType] = useState(() => savedDraft?.type || null);
+    const [fileData, setFileData] = useState(() => savedDraft?.fileData || null);
+    const [form, setForm] = useState(() => ({
         title: "",
         description: "",
         category: "other",
@@ -599,18 +608,8 @@ function FileUpload({ onClose }) {
         isPublished: true,
         thumbnail: "",
         thumbnailPublicId: "",
-    });
-
-    useEffect(() => {
-        const saved = JSON.parse(localStorage.getItem("upload-draft"));
-
-        if (saved) {
-            setType(saved.type || null);
-            setForm((prev) => ({ ...prev, ...(saved.form || {}) }));
-            setFileData(saved.fileData || null);
-            setStep(saved.fileData ? 3 : 2);
-        }
-    }, []);
+        ...(savedDraft?.form || {}),
+    }));
 
     useEffect(() => {
         const handleEsc = (e) => {

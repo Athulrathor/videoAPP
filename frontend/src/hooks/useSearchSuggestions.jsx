@@ -21,11 +21,8 @@ export function useSearchSuggestions({
         const q = debouncedQuery.trim();
 
         if (q.length < minLength) {
+            requestIdRef.current += 1;
             controllerRef.current?.abort();
-            setSuggestions([]);
-            setLoading(false);
-            setError("");
-            setIsOpen(false);
             return;
         }
 
@@ -36,8 +33,13 @@ export function useSearchSuggestions({
         const controller = new AbortController();
         controllerRef.current = controller;
 
-        setLoading(true);
-        setError("");
+        queueMicrotask(() => {
+            if (currentRequestId !== requestIdRef.current || controller.signal.aborted) {
+                return;
+            }
+            setLoading(true);
+            setError("");
+        });
 
         fetchSuggestions(q, controller.signal)
             .then((data) => {
@@ -62,10 +64,10 @@ export function useSearchSuggestions({
     }, [debouncedQuery, fetchSuggestions, minLength]);
 
     return {
-        suggestions,
-        loading,
-        error,
-        isOpen,
+        suggestions: debouncedQuery.trim().length >= minLength ? suggestions : [],
+        loading: debouncedQuery.trim().length >= minLength && loading,
+        error: debouncedQuery.trim().length >= minLength ? error : "",
+        isOpen: debouncedQuery.trim().length >= minLength && isOpen,
         setIsOpen,
         clearSuggestions: () => {
             controllerRef.current?.abort();

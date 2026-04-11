@@ -14,12 +14,13 @@ function RecommendedList({ currentVideoId }) {
         { _id: "9", title: "Next Video 2", thumbnail: "/thumb.jpg" },
         { _id: "10", title: "Next Video 2", thumbnail: "/thumb.jpg" },
     ];
+    const visibleVideos = videos.filter((video) => video._id !== currentVideoId);
 
     return (
         <div className="space-y-3">
             <h3 className="font-semibold text-sm">Recommended</h3>
 
-            {videos.map((v) => (
+            {visibleVideos.map((v) => (
                 <Link
                     key={v._id}
                     to={`/watch/${v._id}`}

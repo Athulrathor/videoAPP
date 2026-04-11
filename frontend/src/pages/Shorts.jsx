@@ -18,7 +18,6 @@ function Shorts() {
     fetchNextPage,
   } = useFeed();
   const containerRef = useRef(null);
-  const [showTopState, setShowTopState] = useState(true);
   const [showBottomState, setShowBottomState] = useState(false);
   const [shortState, setShortState] = useState({});
   const [activeCommentShort, setActiveCommentShort] = useState(null);
@@ -40,10 +39,8 @@ function Shorts() {
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
-      const nearTop = scrollTop < 24;
       const nearBottom = scrollHeight - (scrollTop + clientHeight) < 120;
 
-      setShowTopState(nearTop);
       setShowBottomState(nearBottom);
 
       if (nearBottom && hasNextPage && !isFetchingNextPage) {

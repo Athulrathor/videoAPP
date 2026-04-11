@@ -35,9 +35,6 @@ function CommentItem({
     const {
         data: replies,
         isLoading: repliesLoading,
-        fetchNextPage: fetchNextReplies,
-        hasNextPage: hasMoreReplies,
-        isFetchingNextPage: isFetchingMoreReplies,
     } = useReplies(showReplies ? comment._id : null);
 
     const onLike = (commentId) => {
