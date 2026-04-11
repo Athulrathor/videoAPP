@@ -4,10 +4,13 @@ function VideoCard({ video }) {
     return (
         <Link to={`/watch/${video._id}`}>
             <div className="cursor-pointer">
-                <img
-                    src={video.thumbnail}
-                    className="rounded-lg w-full"
-                />
+                <div className="aspect-video w-full overflow-hidden rounded-lg bg-(--surface2)">
+                    <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="h-full w-full object-cover"
+                    />
+                </div>
 
                 <div className="mt-2">
                     <h3 className="font-semibold text-sm">

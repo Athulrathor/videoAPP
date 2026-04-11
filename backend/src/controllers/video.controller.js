@@ -4,16 +4,26 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { deleteOnCloudinary } from "../utils/cloudinary.js";
+import { emptyLookupPipeline, parsePositiveLimit, parsePositivePage } from "../utils/pagination.js";
 
 export const getFeed = asyncHandler(async (req, res) => {
   try {
-    const { cursor, limit = 10 } = req.query;
-    const limits = Math.min(Math.max(Number(limit) || 20, 1), 50);
+    const { cursor, limit = 10, query = "" } = req.query;
+    const limits = parsePositiveLimit(limit, 20);
+    const trimmedQuery = String(query).trim();
 
     const matchStage = {
       isPublished: true,
       visibility: "public",
     };
+
+    if (trimmedQuery) {
+      const safeQuery = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      matchStage.$or = [
+        { title: { $regex: safeQuery, $options: "i" } },
+        { description: { $regex: safeQuery, $options: "i" } },
+      ];
+    }
 
     if (cursor) {
       const parts = cursor.split("|");
@@ -22,13 +32,20 @@ export const getFeed = asyncHandler(async (req, res) => {
       }
 
       const [createdAt, id] = parts;
-      matchStage.$or = [
+      const cursorCondition = [
         { createdAt: { $lt: new Date(createdAt) } },
         {
           createdAt: new Date(createdAt),
           _id: { $lt: new mongoose.Types.ObjectId(id) },
         },
       ];
+
+      if (matchStage.$or) {
+        matchStage.$and = [{ $or: matchStage.$or }, { $or: cursorCondition }];
+        delete matchStage.$or;
+      } else {
+        matchStage.$or = cursorCondition;
+      }
     }
 
     const userId = req.user?.id ? new mongoose.Types.ObjectId(req.user.id) : null;
@@ -36,7 +53,7 @@ export const getFeed = asyncHandler(async (req, res) => {
     const videos = await Video.aggregate([
       { $match: matchStage },
       { $sort: { createdAt: -1, _id: -1 } },
-      { $limit: limits },
+      { $limit: limits + 1 },
 
       {
         $lookup: {
@@ -83,7 +100,7 @@ export const getFeed = asyncHandler(async (req, res) => {
               },
               { $limit: 1 },
             ]
-            : [{ $limit: 0 }],
+            : emptyLookupPipeline,
           as: "userLike",
         },
       },
@@ -144,7 +161,6 @@ export const getFeed = asyncHandler(async (req, res) => {
 });
 
 export const getAllVideos = asyncHandler(async (req, res) => {
-
   try {
     const {
       page = 1,
@@ -154,48 +170,67 @@ export const getAllVideos = asyncHandler(async (req, res) => {
       sortType = "desc",
     } = req.query;
 
-    const pages = parseInt(page);
-    // Clamp limits to be between 1 and 50
-    const limits = Math.min(Math.max(Number(limit) || 20, 1), 50);
+    const page_n = Number(value);
+    if (!Number.isFinite(page_n) || page_n <= 0) return fallback;
+
+    const limit_n = Number(value);
+    if (!Number.isFinite(limit_n) || limit_n <= 0) return fallback;
+
+    const pages = Math.floor(page_n);
+    const limits = Math.min(Math.floor(limit_n), max);
+    const trimmedQuery = String(query).trim();
+
+    const allowedVideoSortFields = new Set([
+      "createdAt",
+      "views",
+      "likeCount",
+      "title",
+      "duration",
+    ]);
 
     const matchStage = {
       isPublished: true,
       visibility: "public",
     };
 
-    const escapeRegex = (text) =>
-      text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-    // 🔍 search
-    if (query) {
+    if (trimmedQuery) {
       matchStage.title = {
-        $regex: escapeRegex(query),
+        $regex: String(trimmedQuery).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
         $options: "i",
       };
     }
 
-    const sortStage = {
-      [sortBy]: sortType === "asc" ? 1 : -1,
-    };
+    const safeSortBy = allowedVideoSortFields.has(sortBy)
+      ? sortBy
+      : "createdAt";
+
+    const safeSortType = sortType === "asc" ? 1 : -1;
 
     const pipeline = [
       { $match: matchStage },
-
-      // 🔥 sort FIRST
-      { $sort: sortStage },
-
-      // 👤 user info
+      { $sort: { [safeSortBy]: safeSortType, _id: -1 } },
       {
         $lookup: {
           from: "users",
           localField: "owner",
           foreignField: "_id",
           as: "owner",
+          pipeline: [
+            {
+              $project: {
+                username: 1,
+                avatar: 1,
+              },
+            },
+          ],
         },
       },
-      { $unwind: "$owner" },
-
-      // 🎯 clean projection
+      {
+        $unwind: {
+          path: "$owner",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $project: {
           title: 1,
@@ -203,14 +238,12 @@ export const getAllVideos = asyncHandler(async (req, res) => {
           duration: 1,
           views: 1,
           createdAt: 1,
-          likesCount: 1,
-
+          likeCount: 1,
           "owner._id": 1,
           "owner.username": 1,
           "owner.avatar": 1,
         },
       },
-
       { $skip: (pages - 1) * limits },
       { $limit: limits },
     ];
@@ -233,83 +266,78 @@ export const getAllVideos = asyncHandler(async (req, res) => {
       )
     );
   } catch (error) {
-    throw new ApiError(500, error.message, "Error in getting all video!");
+    throw new ApiError(500, error.message || "Error in getting all videos");
   }
 });
 
 export const getAllSuggestion = asyncHandler(async (req, res) => {
-
   try {
-      const { query = "" } = req.query;
+    const { query = "", limit = 10 } = req.query;
 
-      if (!query || !query.trim()) {
-        return res.status(200).json(
-          new ApiResponse(200, [], "Empty query")
-        );
-      }
+    const trimmedQuery = String(query).trim();
+    const safeLimit = parsePositiveLimit(limit, 10, 20);
 
-      const suggestions = await Video.aggregate([
-        {
-          $match: {
-            isPublished: true,
-            visibility: "public",
-            title: {
-              $regex: `^${query}`, // starts with
-              $options: "i"
-            },
+    if (!trimmedQuery) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, [], "Empty query"));
+    }
+
+    const safeQuery = String(trimmedQuery).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const suggestions = await Video.aggregate([
+      {
+        $match: {
+          isPublished: true,
+          visibility: "public",
+          title: {
+            $regex: `^${safeQuery}`,
+            $options: "i",
           },
         },
-
-        // 🔥 prioritize popular + recent
-        {
-          $addFields: {
-            score: {
-              $add: [
-                { $multiply: ["$views", 0.3] },
-                { $multiply: ["$likesCount", 0.3] },
-                {
-                  $divide: [
-                    1,
-                    {
-                      $add: [
-                        {
-                          $divide: [
-                            { $subtract: [new Date(), "$createdAt"] },
-                            1000 * 60 * 60 * 24,
-                          ],
-                        },
-                        1,
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
+      },
+      {
+        $addFields: {
+          ageInDays: {
+            $divide: [
+              { $subtract: [new Date(), "$createdAt"] },
+              1000 * 60 * 60 * 24,
+            ],
           },
         },
-
-        { $sort: { score: -1 } },
-
-        // 🎯 return only needed fields
-        {
-          $project: {
-            _id: 1,
-            title: 1,
+      },
+      {
+        $addFields: {
+          score: {
+            $add: [
+              { $multiply: [{ $ifNull: ["$views", 0] }, 0.3] },
+              { $multiply: [{ $ifNull: ["$likeCount", 0] }, 0.3] },
+              {
+                $divide: [1, { $add: ["$ageInDays", 1] }],
+              },
+            ],
           },
         },
+      },
+      { $sort: { score: -1, createdAt: -1 } },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          thumbnail: 1,
+        },
+      },
+      { $limit: safeLimit },
+    ]);
 
-        { $limit: 10 },
-      ]);
-
-      return res.status(200).json(
-        new ApiResponse(
-          200,
-          suggestions,
-          "Suggestions fetched successfully!"
-        )
-      );
+    return res.status(200).json(
+      new ApiResponse(200, suggestions, "Suggestions fetched successfully!")
+    );
   } catch (error) {
-    throw new ApiError(500, error.message, "Error in getting all suggestion!");
+    throw new ApiError(
+      500,
+      error.message || "Error in getting suggestions"
+    );
   }
 });
 
@@ -329,8 +357,8 @@ export const getVideoByOwner = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Invalid user id");
     }
 
-    const parsedPage = Math.max(parseInt(page) || 1, 1);
-    const parsedLimit = Math.min(Math.max(parseInt(limit) || 10, 1), 50);
+    const parsedPage = parsePositivePage(page);
+    const parsedLimit = parsePositiveLimit(limit, 10);
 
     const allowedSortFields = [
       "createdAt",
@@ -412,7 +440,7 @@ export const getVideoByOwner = asyncHandler(async (req, res) => {
               },
               { $limit: 1 },
             ]
-            : [{ $limit: 0 }],
+            : emptyLookupPipeline,
           as: "userLike",
         },
       },
@@ -668,7 +696,7 @@ export const updateVideo = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Video not found!");
     }
 
-    if (video.owner.toString() !== req.user._id.toString()) {
+    if (video.owner.toString() !== req.user.id.toString()) {
       throw new ApiError(403, "Unauthorized");
     }
 

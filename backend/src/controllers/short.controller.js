@@ -4,11 +4,12 @@ import {Short} from "../models/short.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { emptyLookupPipeline, parsePositiveLimit, parsePositivePage } from "../utils/pagination.js";
 
 export const getShortFeed = asyncHandler(async (req, res) => {
   try {
     const { cursor, limit = 5 } = req.query;
-    const parsedLimit = Math.min(Math.max(Number(limit) || 5, 1), 50);
+    const parsedLimit = parsePositiveLimit(limit, 5);
 
     const matchStage = {
       isPublished: true,
@@ -83,7 +84,7 @@ export const getShortFeed = asyncHandler(async (req, res) => {
               },
               { $limit: 1 },
             ]
-            : [{ $limit: 0 }],
+            : emptyLookupPipeline,
           as: "userLike",
         },
       },
@@ -96,7 +97,7 @@ export const getShortFeed = asyncHandler(async (req, res) => {
       {
         $project: {
           shortUrl: 1,
-          shortPublicId: 1,
+          thumbnail: 1,
           title: 1,
           description: 1,
           duration: 1,
@@ -153,8 +154,8 @@ export const getAllShorts = asyncHandler(async (req, res) => {
       sortType = "ascending",
     } = req.query;
 
-    const pages = parseInt(page);
-    const limits = parseInt(limit);
+    const pages = parsePositivePage(page);
+    const limits = parsePositiveLimit(limit, 2);
 
     const totalShort = await Short.countDocuments({});
     const totalPage = Math.ceil(totalShort / limits);
@@ -257,8 +258,8 @@ export const getShortByOwner = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Invalid user id");
     }
 
-    const parsedPage = Math.max(parseInt(page) || 1, 1);
-    const parsedLimit = Math.min(Math.max(parseInt(limit) || 10, 1), 50);
+    const parsedPage = parsePositivePage(page);
+    const parsedLimit = parsePositiveLimit(limit, 10);
 
     const allowedSortFields = [
       "createdAt",
@@ -340,7 +341,7 @@ export const getShortByOwner = asyncHandler(async (req, res) => {
               },
               { $limit: 1 },
             ]
-            : [{ $limit: 0 }],
+            : emptyLookupPipeline,
           as: "userLike",
         },
       },
@@ -353,7 +354,7 @@ export const getShortByOwner = asyncHandler(async (req, res) => {
       {
         $project: {
           shortUrl: 1,
-          shortPublicId: 1,
+          thumbnail: 1,
           title: 1,
           description: 1,
           duration: 1,
@@ -525,7 +526,7 @@ export const getShortById = asyncHandler(async (req, res) => {
               },
               { $limit: 1 },
             ]
-            : [{ $limit: 0 }],
+            : emptyLookupPipeline,
           as: "userLike",
         },
       },
@@ -538,7 +539,7 @@ export const getShortById = asyncHandler(async (req, res) => {
       {
         $project: {
           shortUrl: 1,
-          shortPublicId: 1,
+          thumbnail: 1,
           title: 1,
           description: 1,
           duration: 1,

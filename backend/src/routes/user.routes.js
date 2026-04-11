@@ -58,13 +58,13 @@ router.route("/cover-image").patch(verifyToken, uploadUserCoverImage);
 
 router.route("/channel/:username").get(verifyToken, getUserChannelProfile);
 
-router.route("/history").get(verifyToken, getWatchHistory);
+router.get("/watch-history", verifyToken, getWatchHistory);
 
-router.route("/add/history").post(verifyToken, addContentToHistory);
+router.post("/watch-history", verifyToken, addContentToHistory);
 
-router.route("/remove/history").post(verifyToken, removeContentToHistory);
+router.delete("/watch-history", verifyToken, removeContentToHistory);
 
-router.route("/clear/history").post(verifyToken, clearWatchHistory);
+router.delete("/watch-history/clear", verifyToken, clearWatchHistory);
 
 router.route("/delete-account/:userId").delete(verifyToken, deleteAccount);
 

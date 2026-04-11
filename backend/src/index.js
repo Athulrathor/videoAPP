@@ -6,12 +6,14 @@ import connectDb from "./db/mongoose.js";
 import app from "./app.js";
 import http from "http";
 import { Server } from "socket.io";
+import { port, socketCorsOrigin } from "./config/env.js";
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173" || process.env.FRONTH_END_URL,
+        origin: socketCorsOrigin,
+        credentials: true,
     },
 });
 
@@ -30,8 +32,8 @@ io.on("connection", (socket) => {
 });
 
 connectDb().then(() => {
-    server.listen(process.env.PORT || 8000, () => {
-        console.log(`Server is running on PORT: ${process.env.PORT}`);
+    server.listen(port, () => {
+        console.log(`Server is running on PORT: ${port}`);
     })
 }).catch((err) => {
     console.log("Error in connection failed db index.js",err)

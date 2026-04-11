@@ -5,28 +5,50 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Video } from "../models/video.model.js";
 import { Short } from "../models/short.model.js";
+import { parsePositiveLimit, parsePositivePage } from "../utils/pagination.js";
 
 export const toggleSubscription = asyncHandler(async (req, res) => {
   try {
     const { channelId } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
+
+    if (!channelId) {
+      throw new ApiError(400, "Channel id is required");
+    }
+
+    if (userId.toString() === channelId.toString()) {
+      throw new ApiError(400, "You cannot subscribe to your own channel");
+    }
 
     const existing = await Subscription.findOne({
       subscriber: userId,
       subscribedTo: channelId,
     });
 
+    let isSubscribed;
+
     if (existing) {
       await existing.deleteOne();
-      return res.json(new ApiResponse(200, "unsubcribed", false));
+      isSubscribed = false;
+    } else {
+      await Subscription.create({
+        subscriber: userId,
+        subscribedTo: channelId,
+      });
+      isSubscribed = true;
     }
 
-    await Subscription.create({
-      subscriber: userId,
+    const subscriberCount = await Subscription.countDocuments({
       subscribedTo: channelId,
     });
 
-    res.json(new ApiResponse(200, "subcribed", true));
+    return res.json(
+      new ApiResponse(200, "Subscription updated", {
+        isSubscribed,
+        subscriberCount,
+        channelId,
+      })
+    );
   } catch (error) {
     console.error('[toggleSubscription] server error: ', error.message);
     throw new ApiError(500, "Internal server error!");
@@ -95,6 +117,8 @@ export const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   try {
     const currentUserId = req.user._id;
     const { page = 1, limit = 10 } = req.query;
+    const parsedPage = parsePositivePage(page);
+    const parsedLimit = parsePositiveLimit(limit, 10);
 
     const subscribers = await Subscription.aggregate([
       {
@@ -119,8 +143,8 @@ export const getUserChannelSubscribers = asyncHandler(async (req, res) => {
           "subscriber.avatar": 1,
         },
       },
-      { $skip: (page - 1) * limit },
-      { $limit: Number(limit) },
+      { $skip: (parsedPage - 1) * parsedLimit },
+      { $limit: parsedLimit },
     ]);
 
     const total = await Subscription.countDocuments({
@@ -132,8 +156,8 @@ export const getUserChannelSubscribers = asyncHandler(async (req, res) => {
         200,
         {
           total,
-          page: Number(page),
-          limit: Number(limit),
+          page: parsedPage,
+          limit: parsedLimit,
           subscribers,
         },
         "Subscribers fetched successfully!"
@@ -148,6 +172,8 @@ export const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 export const getUserChannelSubscribersVideosAndShort = asyncHandler(async (req, res) => {
   const currentUserId = req.user._id;
   const { page = 1, limit = 10 } = req.query;
+  const parsedPage = parsePositivePage(page);
+  const parsedLimit = parsePositiveLimit(limit, 10);
 
   if (!currentUserId) {
     throw new ApiError(403, "Current user id is not found!");
@@ -181,8 +207,8 @@ export const getUserChannelSubscribersVideosAndShort = asyncHandler(async (req, 
   feed.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   // pagination AFTER merge
-  const start = (page - 1) * limit;
-  const paginatedFeed = feed.slice(start, start + Number(limit));
+  const start = (parsedPage - 1) * parsedLimit;
+  const paginatedFeed = feed.slice(start, start + parsedLimit);
 
   return res.status(200).json(
     new ApiResponse(

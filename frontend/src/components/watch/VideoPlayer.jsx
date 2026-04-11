@@ -1,7 +1,8 @@
 import { useVideoPlayer } from "../../hooks/useVideoPlayer";
+import { useWatchHistoryTracker } from "../../hooks/useWatchHistoryTracker";
 import VideoControls from "./VideoControls";
 
-function VideoPlayer({ src,thumbnail }) {
+function VideoPlayer({ src,thumbnail,videoId }) {
     const player = useVideoPlayer();
 
     const {
@@ -25,6 +26,14 @@ function VideoPlayer({ src,thumbnail }) {
         toggleFullscreen,
         togglePiP,
     };
+
+    useWatchHistoryTracker({
+        contentId: videoId,
+        onModel: "Video",
+        progressSeconds: state.currentTime,
+        thresholdSeconds: 10,
+        enabled: !!videoId,
+    });
 
     return (
         <div

@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Short } from "../models/short.model.js";
+import { parsePositiveLimit, parsePositivePage } from "../utils/pagination.js";
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
@@ -20,8 +21,8 @@ const getAllVideos = asyncHandler(async (req, res) => {
       // userId = req.user._id,
     } = req.query;
 
-    const pages = parseInt(page);
-    const limits = parseInt(limit);
+    const pages = parsePositivePage(page);
+    const limits = parsePositiveLimit(limit, 10);
 
     const totalVideo = await Video.countDocuments({});
     const totalPage = Math.ceil(totalVideo / limits);
@@ -102,8 +103,8 @@ const getAllShorts = asyncHandler(async (req, res) => {
       // userId = req.user._id,
     } = req.query;
 
-    const pages = parseInt(page);
-    const limits = parseInt(limit);
+    const pages = parsePositivePage(page);
+    const limits = parsePositiveLimit(limit, 10);
 
     const totalShort = await Short.countDocuments({});
     const totalPage = Math.ceil(totalShort / limits);

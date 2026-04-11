@@ -3,9 +3,12 @@ import VideoCard from "../components/video/VideoCard";
 import { Card, SkeletonCard } from "../components/ui/index";
 import { useFeed } from "../features/video/useFeed";
 import { useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 
 function Home() {
   // const { data, isLoading, isError } = useVideos();
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("query") || "";
 
   const {
     data,
@@ -14,9 +17,9 @@ function Home() {
     isFetchingNextPage,
     isLoading,
     isError
-  } = useFeed();
+  } = useFeed(query);
 
-  const videos = data?.pages.flatMap((p) => p.videos) || [];
+  const videos = data?.pages.flatMap((p) => p?.data?.videos) || [];
   const loadMoreRef = useRef(null);
 
   useEffect(() => {
@@ -42,7 +45,7 @@ function Home() {
   if (isLoading) {
     return (
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3"
         aria-busy="true"
         aria-live="polite"
       >
@@ -75,10 +78,10 @@ function Home() {
       >
         <Card className="p-6 text-center max-w-sm">
           <p className="text-lg font-medium mb-2">
-            No videos yet
+            {query ? "No videos found" : "No videos yet"}
           </p>
           <p className="text-sm text-(--muted)">
-            Start by uploading your first video 🎬
+            {query ? `No results for "${query}"` : "Start by uploading your first video"}
           </p>
         </Card>
       </div>
@@ -89,7 +92,7 @@ function Home() {
   return (
     <>
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3"
         aria-live="polite"
       >
         {videos.map((video) => (

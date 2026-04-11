@@ -1,339 +1,262 @@
-VideoApp
-A full-stack video streaming platform built with the MERN stack, featuring user authentication, video management, and social features like likes, subscriptions, playlists, and watch history.
+﻿# VideoApp
 
-🚀 Features
-User Authentication: Google OAuth integration with JWT token management
+VideoApp is a full-stack video sharing application with user accounts, video feeds, playlists, comments, likes, subscriptions, watch history, and account security controls. The frontend is built with React and Vite, while the backend uses Node.js, Express, MongoDB, JWT authentication, Cloudinary media storage, and Socket.IO.
 
-Video Management: Upload, stream, and manage videos
+## Features
 
-Social Features: Like/unlike videos, subscribe to channels
+- User registration, login, logout, email verification, and password reset
+- JWT access tokens with refresh token rotation
+- Session management with trusted devices and revoked-session handling
+- Optional two-factor authentication support
+- Password history checks and account security flows
+- Video upload, update, delete, and listing
+- Cloudinary-backed video and image storage
+- Search suggestions and search-targeted feed results
+- Cursor-based video feed pagination
+- Watch page, shorts page, and user video library
+- Playlist creation, update, delete, and video management
+- Reusable horizontal video list UI for playlist videos and selection flows
+- Multi-select add-to-playlist workflow from user videos
+- Comments, likes, subscriptions, and watch history
+- User profile, avatar, cover image, and appearance settings
+- CORS and cookie settings configured for development and production
 
-Playlist System: Create and manage custom playlists
+## Tech Stack
 
-Watch History: Track and view previously watched videos
+### Frontend
 
-Responsive Design: Mobile-friendly UI with Tailwind CSS
+- React
+- Vite
+- Redux Toolkit
+- React Router
+- Axios
+- Tailwind CSS
+- Socket.IO Client
 
-Cookie-based Sessions: Secure session management
+### Backend
 
-🛠️ Tech Stack
-Frontend:
+- Node.js
+- Express
+- MongoDB and Mongoose
+- JWT
+- bcrypt
+- Cloudinary
+- Multer
+- Nodemailer
+- Socket.IO
+- CORS and cookie-parser
 
-React.js
+## Project Structure
 
-Tailwind CSS
+```text
+videoAPP/
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── db/
+│   │   ├── middlewares/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── utils/
+│   │   ├── app.js
+│   │   └── index.js
+│   ├── .env.example
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── apis/
+│   │   ├── components/
+│   │   ├── config/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── store/
+│   │   └── utils/
+│   ├── .env.example
+│   └── package.json
+└── README.md
+```
 
-Axios for API calls
+## Environment Variables
 
-Backend:
+Never commit real `.env` files. Use the example files as templates:
 
-Node.js
+```powershell
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env
+```
 
-Express.js
+### Backend
 
-MongoDB with Mongoose
+Required production values usually include:
 
-JWT for authentication
+```env
+NODE_ENV=production
+PORT=8081
+BASE_URL=https://your-api-domain.com
+FRONTEND_URL=https://your-frontend-domain.com
+FRONTEND_URLS=https://your-frontend-domain.com,https://www.your-frontend-domain.com
+MONGODB_URI=mongodb+srv://user:password@cluster/dbname
+ACCESS_TOKEN_SECRET=replace-with-a-long-random-secret
+ACCESS_TOKEN_EXPIRY=15m
+REFRESH_TOKEN_SECRET=replace-with-a-different-long-random-secret
+REFRESH_TOKEN_EXPIRY=7d
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+GOOGLE_APP_EMAIL=your-email@example.com
+GOOGLE_APP_PASSWORD=your-google-app-password
+```
 
-Google OAuth 2.0
+The backend supports `MONGODB_URI`. For local development, it can also use a MongoDB URL plus database name if configured in the example file.
 
-Cookie-parser for session management
+### Frontend
 
-📋 Prerequisites
-Before running this application, make sure you have the following installed:
+Required production values usually include:
 
-Node.js (v14 or higher)
+```env
+VITE_API_BASE_URL=https://your-api-domain.com
+VITE_CLOUD_NAME=your-cloud-name
+VITE_UPLOAD_PRESET=your-upload-preset
+```
 
-MongoDB (local installation or MongoDB Atlas account)
+`VITE_API_BASE_URL` should point to the backend origin, not to a duplicated `/api/v1` path. The frontend config normalizes the API v1 base URL.
 
-Git
+## Installation
 
-🔧 Installation & Setup
-1. Clone the Repository
-bash
-git clone https://github.com/Athulrathor/videoAPP.git
-cd videoAPP
-2. Install Dependencies
-Backend Dependencies:
+Install dependencies in both apps:
 
-bash
-# Navigate to backend directory (if separate)
+```powershell
 cd backend
 npm install
 
-# Or if package.json is in root
+cd ../frontend
 npm install
-Frontend Dependencies:
+```
 
-bash
-# Navigate to frontend directory (if separate)
-cd frontend
-npm install
+## Development
 
-# Or install all dependencies from root
-npm install
-3. Environment Variables
-Create a .env file in the root directory and add the following variables:
+Start the backend:
 
-text
-# Database
-MONGODB_URI=mongodb://localhost:27017/videoapp
-# OR for MongoDB Atlas
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/videoapp
-
-# JWT Secret
-JWT_SECRET=your-super-secret-jwt-key
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-# Server Configuration
-PORT=5000
-NODE_ENV=development
-
-# Frontend URL (for CORS)
-CLIENT_URL=http://localhost:3000
-4. Google OAuth Setup
-Go to Google Cloud Console
-
-Create a new project or select an existing one
-
-Enable the Google+ API
-
-Create credentials (OAuth 2.0 Client IDs)
-
-Add authorized redirect URIs:
-
-http://localhost:3000 (for frontend)
-
-http://localhost:5000/auth/google/callback (for backend)
-
-Copy Client ID and Client Secret to your .env file
-
-5. Database Setup
-For Local MongoDB:
-
-bash
-# Start MongoDB service
-mongod
-For MongoDB Atlas:
-
-Create a cluster on MongoDB Atlas
-
-Whitelist your IP address
-
-Get the connection string and update MONGODB_URI in .env
-
-🚀 Running the Application
-Development Mode
-Start Backend Server:
-
-bash
+```powershell
+cd backend
 npm run dev
-Start Frontend (if separate):
+```
 
-bash
-# In a new terminal, navigate to frontend directory
+Start the frontend in another terminal:
+
+```powershell
 cd frontend
+npm run dev
+```
+
+By default, the frontend should run through Vite and the backend should expose API routes under:
+
+```text
+http://localhost:8081/api/v1
+```
+
+## Production Build
+
+Build the frontend:
+
+```powershell
+cd frontend
+npm run build
+```
+
+Start the backend with production environment variables set:
+
+```powershell
+cd backend
 npm start
-The application will be available at:
-
-Frontend: http://localhost:3000
-
-Backend API: http://localhost:5000
-
-Production Notes
-⚠️ Important: This application is currently configured for local development only. For production deployment, additional configuration is required including:
-
-Environment-specific configurations
-
-Production database setup
-
-Domain-specific OAuth settings
-
-SSL certificates
-
-Production build optimizations
-
-📁 Project Structure
-text
-videoApp/
-│
-├── backend/                 # Backend server files
-│   ├── controllers/         # Request handlers
-│   ├── models/             # MongoDB models
-│   ├── routes/             # API routes
-│   ├── middleware/         # Custom middleware
-│   └── server.js           # Main server file
-│
-├── frontend/               # React frontend
-│   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/          # Page components
-│   │   ├── hooks/          # Custom hooks
-│   │   ├── services/       # API services
-│   │   └── utils/          # Utility functions
-│   └── public/
-│
-├── uploads/                # Video file storage (local)
-├── .env                    # Environment variables
-├── .gitignore
-└── README.md
-🔐 API Endpoints
-Authentication
-POST /auth/google - Google OAuth login
-
-POST /auth/logout - User logout
-
-GET /auth/me - Get current user
-
-Videos
-GET /api/videos - Get all videos
-
-POST /api/videos - Upload new video
-
-GET /api/videos/:id - Get video by ID
-
-PUT /api/videos/:id - Update video
-
-DELETE /api/videos/:id - Delete video
-
-User Interactions
-POST /api/videos/:id/like - Like/unlike video
-
-POST /api/channels/:id/subscribe - Subscribe/unsubscribe
-
-Playlists
-GET /api/playlists - Get user playlists
-
-POST /api/playlists - Create new playlist
-
-PUT /api/playlists/:id - Update playlist
-
-DELETE /api/playlists/:id - Delete playlist
-
-History
-GET /api/history - Get watch history
-
-POST /api/history - Add to watch history
-
-🎨 Features Walkthrough
-User Authentication
-Seamless Google OAuth integration
-
-JWT token stored in HTTP-only cookies
-
-Automatic token refresh mechanism
-
-Video Management
-Video upload with metadata
-
-Thumbnail generation
-
-Video streaming optimization
-
-View count tracking
-
-Social Features
-One-click like/unlike functionality
-
-Channel subscription system
-
-Real-time subscriber count updates
-
-Playlist System
-Create custom playlists
-
-Add/remove videos from playlists
-
-Public/private playlist options
-
-Watch History
-Automatic history tracking
-
-Chronological viewing history
-
-Clear history functionality
-
-🚧 Development Status
-This project is currently in development phase with the following limitations:
-
-Local Development Only: Not configured for production deployment
-
-File Storage: Videos stored locally (not cloud storage)
-
-No CDN: Direct video serving without content delivery network
-
-Basic Security: Development-level security implementations
-
-🔮 Future Enhancements
- Cloud storage integration (AWS S3, Cloudinary)
-
- Video transcoding for multiple qualities
-
- Real-time notifications
-
- Advanced search functionality
-
- Video comments system
-
- Live streaming capabilities
-
- Mobile app development
-
- Production deployment configuration
-
-🐛 Troubleshooting
-Common Issues
-MongoDB Connection Error:
-
-bash
-# Ensure MongoDB is running
-sudo systemctl start mongod
-# Or for macOS with Homebrew
-brew services start mongodb-community
-Google OAuth Error:
-
-Verify Google Client ID and Secret in .env
-
-Check authorized redirect URIs in Google Console
-
-Ensure correct domain/port configuration
-
-Port Already in Use:
-
-bash
-# Find and kill process using port 5000
-sudo lsof -t -i tcp:5000 | xargs kill -9
-🤝 Contributing
-Fork the repository
-
-Create a feature branch (git checkout -b feature/AmazingFeature)
-
-Commit your changes (git commit -m 'Add some AmazingFeature')
-
-Push to the branch (git push origin feature/AmazingFeature)
-
-Open a Pull Request
-
-📝 License
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-👨‍💻 Developer
-Athul Rathor
-
-GitHub: @Athulrathor
-
-Project: VideoApp Repository
-
-🙏 Acknowledgments
-React.js community for excellent documentation
-
-MongoDB team for the robust database solution
-
-Google for OAuth integration
-
-Tailwind CSS for the utility-first CSS framework
-
-Express.js for the minimalist web framework
+```
+
+Before deploying, make sure `NODE_ENV=production`, `FRONTEND_URL`, `MONGODB_URI`, JWT secrets, Cloudinary credentials, and email credentials are set in the hosting provider's secret manager or environment settings.
+
+## API Overview
+
+The backend groups routes under `/api/v1`. Route names may include:
+
+```text
+/api/v1/users
+/api/v1/videos
+/api/v1/playlists
+/api/v1/comments
+/api/v1/likes
+/api/v1/subscriptions
+```
+
+Common flows include:
+
+- Login and refresh sessions through the user routes
+- Fetch videos and suggestions through the video routes
+- Create playlists and add or remove videos through the playlist routes
+- Update user profile, avatar, cover image, and appearance settings through account routes
+
+## Security
+
+This project includes several security-focused patterns:
+
+- Access tokens and refresh tokens are separated
+- Refresh tokens are rotated and tied to sessions
+- Revoked sessions are handled by the auth flow
+- Cookies are configured differently for production and development
+- Production cookies should use secure settings and appropriate `sameSite` behavior
+- CORS origins are controlled by frontend URL environment variables
+- Passwords are hashed before storage
+- Password reset and email verification flows avoid exposing raw credentials
+- Cloudinary, JWT, MongoDB, and SMTP secrets are read from environment variables
+- Frontend production builds require a valid API base URL instead of silently falling back to localhost
+
+Recommended production hardening:
+
+- Use long, random, unique values for `ACCESS_TOKEN_SECRET` and `REFRESH_TOKEN_SECRET`
+- Store secrets only in the deployment platform's secret manager
+- Do not expose backend secrets with a `VITE_` prefix
+- Use HTTPS for both frontend and backend
+- Restrict `FRONTEND_URLS` to real production domains only
+- Use a dedicated MongoDB database user with the minimum required permissions
+- Restrict Cloudinary upload presets and avoid unsigned uploads unless they are intentionally scoped
+- Enable rate limiting for login, password reset, refresh token, and upload routes
+- Add request size limits for JSON and file uploads
+- Keep dependencies updated and run audits regularly
+- Review server logs for repeated 401, session revoked, and failed login patterns
+- Rotate secrets immediately if a `.env` file is exposed
+
+## Useful Commands
+
+Run backend syntax checks on important files:
+
+```powershell
+cd backend
+node --check src/config/env.js src/app.js src/index.js src/db/mongoose.js
+```
+
+Run frontend lint checks on selected files:
+
+```powershell
+cd frontend
+npx eslint src/apis/axios.js src/config/env.js src/components/common/Navbar.jsx
+```
+
+Build the frontend:
+
+```powershell
+cd frontend
+npm run build
+```
+
+## Deployment Notes
+
+- Configure backend CORS with the exact frontend domain.
+- Configure frontend `VITE_API_BASE_URL` with the backend origin.
+- Do not use localhost values in production.
+- Make sure cookies work across the chosen frontend and backend domains.
+- If frontend and backend are on different domains, verify `sameSite=None` and secure HTTPS cookie behavior.
+- Confirm MongoDB network access allows the backend host.
+- Confirm Cloudinary upload and delivery settings before accepting production uploads.
+
+## Notes
+
+This README describes the current project structure and the main security expectations for running the app safely. Keep `.env.example` files updated whenever new environment variables are added.

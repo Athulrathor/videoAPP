@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Input, Button, Avatar, DropDown } from "../../components/ui/index";
-import { ArrowLeft, Bell, LogOut, Menu, Monitor, Moon, Search, Settings, Sun, Upload, User, X } from "lucide-react";
+import { Button, Avatar, DropDown } from "../../components/ui/index";
+import { ArrowLeft, Bell, LogOut, Menu, Monitor, Moon, Search, Settings, Sun, Upload, User } from "lucide-react";
 import { logout } from "../../features/auth/authSlice";
 import { logoutAllUser, logoutUser } from "../../apis/auth.api";
 import { useAppearance } from "./useAppearacePanel";
 import FileUpload from "../fileUpload/FileUpload";
+import { SearchAutocomplete } from "../search/SearchAutoComplete";
 
 function Navbar({ setCollapsed, setSidebarOpen }) {
   const navigate = useNavigate();
@@ -25,9 +26,15 @@ function Navbar({ setCollapsed, setSidebarOpen }) {
     { id: "system", label: "System", icon: <Monitor size={14} /> }
   ]
 
-  const handleSearch = () => {
-    if (!search.trim()) return;
-    navigate(`/?query=${search}`);
+  const handleSearch = (value = search) => {
+    const q = value.trim();
+    if (!q) {
+      navigate("/");
+      setShowSearch(false);
+      return;
+    }
+
+    navigate(`/?query=${encodeURIComponent(q)}`);
     setShowSearch(false);
   };
 
@@ -84,7 +91,7 @@ function Navbar({ setCollapsed, setSidebarOpen }) {
 
             {/* Input */}
             <div className="flex items-center flex-1 gap-2">
-              <Input
+              {/* <Input
                 type="text"
                 name="search_query_unique"
                 autoComplete="off"
@@ -96,11 +103,14 @@ function Navbar({ setCollapsed, setSidebarOpen }) {
                 className="bg-(--surface2)
                             border border-(--border)
                             focus:border-(--primary)"
+              /> */}
+
+              <SearchAutocomplete
+                value={search}
+                onChange={setSearch}
+                onSubmit={handleSearch}
+                placeholder="Search..."
               />
-              <Button className="
-  hover:bg-(--surface2)
-  transition
-" onClick={handleSearch}><Search size={16} /></Button>
             </div>
           </div>
         ) : (
@@ -142,7 +152,7 @@ function Navbar({ setCollapsed, setSidebarOpen }) {
 
             {/* 🔍 DESKTOP SEARCH (unchanged) */}
             <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-full max-w-150 max-lg:max-w-105">
-              <div className="flex items-center gap-2 w-full">
+              {/* <div className="flex items-center gap-2 w-full">
                 <Input
                   autoFocus
                   type="text"
@@ -160,7 +170,13 @@ function Navbar({ setCollapsed, setSidebarOpen }) {
   hover:bg-(--surface2)
   transition
 " onClick={handleSearch}><Search size={16} /></Button>
-              </div>
+              </div> */}
+                <SearchAutocomplete
+                  value={search}
+                  onChange={setSearch}
+                  onSubmit={handleSearch}
+                  placeholder="Search..."
+                />
             </div>
 
             {/* 🔹 RIGHT */}
@@ -306,31 +322,6 @@ function Navbar({ setCollapsed, setSidebarOpen }) {
       </header>
 
       {/* 🔍 MOBILE SEARCH OVERLAY */}
-      {showSearch && (
-        <div className="fixed inset-0 z-50 bg-(--bg) p-4 flex items-start gap-2">
-          <Input
-            autoFocus
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Search..."
-          />
-
-          <Button onClick={handleSearch}><Search size={16} /></Button>
-
-          <Button
-            variant="ghost"
-            onClick={() => setShowSearch(false)}
-            aria-label="Close search"
-            className="
-  hover:bg-(--surface2)
-  transition
-"
-          >
-            <X size={16} />
-          </Button>
-        </div>
-      )}
       {showUpload && (
         <FileUpload onClose={() => setShowUpload(false)} />
       )}

@@ -10,7 +10,7 @@ function WatchLayout() {
         <div className="h-screen flex flex-col overflow-hidden">
             <Navbar setSidebarOpen={setSidebarOpen} />
 
-            <div className="relative flex-1 min-h-0 overflow-hidden">
+            <div className="relative flex flex-1 min-h-0 overflow-hidden">
                 <Sidebar
                     collapsed={false}
                     sidebarOpen={sidebarOpen}

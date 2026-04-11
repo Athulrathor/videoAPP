@@ -69,8 +69,6 @@ function CommentsSection({
         );
     }
 
-    console.log("content comment : ",contentCommentCount)
-
     return (
         <Card className="space-y-4 border border-(--border) bg-(--surface) p-4 sm:rounded-(--radius-xl)">
             <div className="flex flex-wrap items-center justify-between gap-2">

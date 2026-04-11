@@ -5,6 +5,7 @@ import { Short } from "../models/short.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { emptyLookupPipeline, parsePositiveLimit } from "../utils/pagination.js";
 
 export const getComments = asyncHandler(async (req, res) => {
   try {
@@ -19,7 +20,10 @@ export const getComments = asyncHandler(async (req, res) => {
     //   throw new ApiError(400, "Invalid onModel");
     // }
 
-    const parsedLimit = Math.min(Math.max(Number(limit) || 10, 1), 50);
+    const parsedLimit = parsePositiveLimit(limit, 10);
+    const currentUserId = req.user?._id && isValidObjectId(req.user._id)
+      ? new mongoose.Types.ObjectId(req.user._id)
+      : null;
 
     const matchStage = {
       contentId: new mongoose.Types.ObjectId(contentId),
@@ -71,20 +75,22 @@ export const getComments = asyncHandler(async (req, res) => {
       {
         $lookup: {
           from: "likes",
-          let: { commentId: "$_id", userId: new mongoose.Types.ObjectId(req.user._id) },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$comment", "$$commentId"] },
-                    { $eq: ["$owner", "$$userId"] },
-                  ],
+          let: { commentId: "$_id", userId: currentUserId },
+          pipeline: currentUserId
+            ? [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$comment", "$$commentId"] },
+                      { $eq: ["$owner", "$$userId"] },
+                    ],
+                  },
                 },
               },
-            },
-            { $limit: 1 },
-          ],
+              { $limit: 1 },
+            ]
+            : emptyLookupPipeline,
           as: "userLike",
         },
       },
@@ -137,7 +143,10 @@ export const getReplies = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Invalid commentId");
     }
 
-    const parsedLimit = Math.min(Math.max(Number(limit) || 10, 1), 50);
+    const parsedLimit = parsePositiveLimit(limit, 10);
+    const currentUserId = req.user?._id && isValidObjectId(req.user._id)
+      ? new mongoose.Types.ObjectId(req.user._id)
+      : null;
 
     const matchStage = {
       parentComment: new mongoose.Types.ObjectId(commentId),
@@ -188,20 +197,22 @@ export const getReplies = asyncHandler(async (req, res) => {
       {
         $lookup: {
           from: "likes",
-          let: { commentId: "$_id", userId: new mongoose.Types.ObjectId(req.user._id) },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$comment", "$$commentId"] },
-                    { $eq: ["$owner", "$$userId"] },
-                  ],
+          let: { commentId: "$_id", userId: currentUserId },
+          pipeline: currentUserId
+            ? [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$comment", "$$commentId"] },
+                      { $eq: ["$owner", "$$userId"] },
+                    ],
+                  },
                 },
               },
-            },
-            { $limit: 1 },
-          ],
+              { $limit: 1 },
+            ]
+            : emptyLookupPipeline,
           as: "userLike",
         },
       },

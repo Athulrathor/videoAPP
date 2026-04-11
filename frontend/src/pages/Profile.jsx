@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +24,7 @@ import { Avatar, Button, Card, DropDown } from "../components/ui";
 import IconButton from "../components/ui/IconButton";
 import { useUpload } from "../hooks/useUpload";
 import { useNavigate } from "react-router-dom";
+import VideoCarousel from "../components/video/videosCaurosal";
 
 function Profile() {
   const { username } = useParams();
@@ -33,8 +34,6 @@ function Profile() {
 
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
-
-  const [isSubscribedLocal, setIsSubscribedLocal] = useState(null);
 
   const { mutate: toggleSubscribe, isPending: subscribePending } = useSubscribe();
 
@@ -62,9 +61,6 @@ function Profile() {
     return authUser._id === channel._id;
   }, [authUser, channel]);
 
-  const isSubscribed =
-    isSubscribedLocal !== null ? isSubscribedLocal : !!channel?.isSubscribed;
-
   const { data: videosRes, isLoading: videosLoading } = useQuery({
     queryKey: ["userVideos", channel?._id],
     queryFn: () => getUserVideos(channel._id),
@@ -77,19 +73,16 @@ function Profile() {
     enabled: !!channel?._id,
   });
 
-  const videos = videosRes?.data?.videos || videosRes?.data?.data || videosRes?.videos || [];
-  const shorts = shortsRes?.data?.shorts || shortsRes?.data?.data || shortsRes?.shorts || [];
+  const videos = videosRes?.data?.data?.videos || [];
+  const shorts = shortsRes?.data?.data?.shorts || [];
 
   const watchHistoryVideos = channel?.watchHistory?.videos || [];
   const watchHistoryShorts = channel?.watchHistory?.shorts || [];
 
+  const isSubscribed = !!channel?.isSubscribed;
+
   const handleToggleSubscribe = () => {
-    if (!channel?._id) return;
-
-    setIsSubscribedLocal((prev) =>
-      prev === null ? !channel.isSubscribed : !prev
-    );
-
+    if (!channel?._id || subscribePending) return;
     toggleSubscribe(channel._id);
   };
 
@@ -140,10 +133,6 @@ function Profile() {
     } finally {
       e.target.value = "";
     }
-  };
-
-  const handleEditProfile = () => {
-    console.log("Edit profile");
   };
 
   if (channelLoading) {
@@ -252,12 +241,17 @@ function Profile() {
               {isOwnProfile ? (
                 <>
                   <Button
-                    variant="secondary"
+                    onClick={handleToggleSubscribe}
+                    disabled={subscribePending}
+                    variant={isSubscribed ? "secondary" : "primary"}
                     className="inline-flex items-center gap-2"
-                    onClick={handleEditProfile}
                   >
-                    Subscribe
+                    {isSubscribed ? "Subscribed" : "Subscribe"}
                   </Button>
+
+                  {/* <button onClick={handleToggleSubscribe} disabled={subscribePending} className="ml-auto sm:ml-3 rounded-full bg-black px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white hover:bg-gray-800 shrink-0">
+                    {isSubscribed ? "Subscribed" : "Subscribe"}
+                  </button> */}
 
                   <DropDown
                     align="right"
@@ -270,12 +264,12 @@ function Profile() {
                     }
                   >
                     <DropDown.Label>Profile</DropDown.Label>
-                    <DropDown.Item
+                    {/* <DropDown.Item
                       icon={<UserRoundPen size={16} />}
                       onClick={handleEditProfile}
                     >
                       Edit profile
-                    </DropDown.Item>
+                    </DropDown.Item> */}
                     <DropDown.Item
                       icon={<Camera size={16} />}
                       onClick={handleAvatarPicker}
@@ -292,7 +286,7 @@ function Profile() {
                     <DropDown.Item
                       variant="danger"
                       icon={<ShieldAlert size={16} />}
-                      onClick={() => console.log("Privacy settings")}
+                      onClick={() => navigate('/settings/privacy')}
                     >
                       Privacy settings
                     </DropDown.Item>
@@ -372,7 +366,7 @@ function Profile() {
             <p className="text-(--muted)">No shorts found.</p>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[].map((short) => (
+              {shorts.map((short) => (
                 <div key={short._id} className="animate-fade-up">
                   <ShortCard short={short} />
                 </div>

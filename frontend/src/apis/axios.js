@@ -1,9 +1,10 @@
 import axios from "axios";
 import { store } from "../apps/store";
 import { setCredentials, logout } from "../features/auth/authSlice";
+import { API_V1_BASE_URL } from "../config/env";
 
 const api = axios.create({
-    baseURL: "http://localhost:8081/api/v1",
+    baseURL: API_V1_BASE_URL,
     withCredentials: true,
 });
 
@@ -44,7 +45,7 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        if (originalRequest.url?.includes("/users/refresh-token")) {
+        if (originalRequest.url?.includes("/users/refreshtoken")) {
             return Promise.reject(error);
         }
 
@@ -65,13 +66,18 @@ api.interceptors.response.use(
 
             try {
                 const response = await axios.post(
-                    "http://localhost:8081/api/v1/users/refreshtoken",
+                    `${API_V1_BASE_URL}/users/refreshtoken`,
                     {},
                     { withCredentials: true }
                 );
 
                 const accessToken = response.data?.data?.accessToken;
                 const currentUser = store.getState().auth.user;
+
+                if (!accessToken) {
+                    store.dispatch(logout());
+                    return Promise.reject(error);
+                }
 
                 store.dispatch(
                     setCredentials({

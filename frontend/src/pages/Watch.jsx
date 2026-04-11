@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useVideo } from "../features/video/useVideo";
 import { useToggleVideoLike } from "../features/like/useLike";
-import { useComments } from "../features/comment/useComment";
+// import { useComments } from "../features/comment/useComment";
 
 import VideoSection from "../components/watch/VideoSection";
 import VideoInfo from "../components/watch/VideoInfo";

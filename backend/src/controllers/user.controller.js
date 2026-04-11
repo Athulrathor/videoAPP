@@ -12,6 +12,7 @@ import { Session } from "../models/session.model.js";
 import { Video } from "../models/video.model.js";
 import { Short } from "../models/short.model.js";
 import { deleteOnCloudinary } from "../utils/cloudinary.js";
+import { cookieOptions } from "../config/env.js";
 
 const detector = new DeviceDetector({
   clientIndexes: true,
@@ -232,13 +233,10 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   return res
     .cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
     })
-    .json(new ApiResponse(200, { user: loggedUser, accessToken,sessionId: session._id }, "Login successful!"));
+    .json(new ApiResponse(200, { user: loggedUser, accessToken, sessionId: session._id }, "Login successful!"));
 });
 //  User Login Verifications
 export const verifyLoginUser = asyncHandler(async (req, res) => {
@@ -271,11 +269,8 @@ export const verifyLoginUser = asyncHandler(async (req, res) => {
     const token = await user.addTrustedDevice();
 
     res.cookie("deviceToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
     });
   }
 
@@ -325,13 +320,10 @@ export const verifyLoginUser = asyncHandler(async (req, res) => {
 
   return res
     .cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
     })
-    .json(new ApiResponse(200, { user: loggedUser, accessToken,sessionId:session._id }, "Login successful!"));
+    .json(new ApiResponse(200, { user: loggedUser, accessToken, sessionId: session._id }, "Login successful!"));
 });
 
 //  Logout current user session
@@ -350,13 +342,6 @@ export const logOutUser = asyncHandler(async (req, res) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-    path: "/",
-  };
-
   return res
     .clearCookie("refreshToken", cookieOptions)
     .json(new ApiResponse(200, {}, "User logged out successfully!"));
@@ -369,12 +354,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Unauthorized request!");
   }
 
-  const options = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-    path: '/',
-  };
+  const options = cookieOptions;
 
   try {
     const decodedToken = crypto
@@ -401,6 +381,11 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
       "+tokenVersion +refreshToken"
     );
 
+    if (!user) {
+      res.clearCookie('refreshToken', options);
+      throw new ApiError(401, "Session invalid. Please log in again.");
+    }
+
     if (decodedToken !== user.refreshToken) {
       // 🚨 token reuse attack detected
       await user.invalidateTokens();
@@ -408,11 +393,6 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
       res.clearCookie("refreshToken", options);
 
       throw new ApiError(401, "Token reuse detected. Please login again.");
-    }
-
-    if (!user) {
-      res.clearCookie('refreshToken', options);
-      throw new ApiError(401, "Session invalid. Please log in again.");
     }
 
     if (payload.tokenVersion !== user.tokenVersion) {
@@ -437,9 +417,9 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     // Touch lastActive for this session
     await Session.touch(sessionId);
 
-    const newAccessToken = generateAccessToken(user.id, user.role, user.tokenVersion, sessionId);
+    const newAccessToken = generateAccessToken(user.id, user.tokenVersion, user.role, sessionId);
     const newRefreshToken = generateRefreshToken(user.id, user.tokenVersion, sessionId);
-    console.log(newAccessToken)
+
     user.refreshToken = crypto
       .createHash("sha256")
       .update(newRefreshToken)
@@ -448,7 +428,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 
     return res
       .cookie("refreshToken", newRefreshToken, options)
-      .json(new ApiResponse(200, { accessToken: newAccessToken,sessionId }, "Access token is refreshed!"));
+      .json(new ApiResponse(200, { accessToken: newAccessToken, sessionId }, "Access token is refreshed!"));
   } catch (error) {
     console.error('[refreshAccessToken] server error: ', error.message);
     res.clearCookie("refreshToken", options);
@@ -501,7 +481,7 @@ export const changeCurrentPassword = asyncHandler(async (req, res) => {
       new ApiResponse(200, {}, "Password changed successfully! Please login again.")
     );
   } catch (error) {
-    console.error('[changePassword] server error!',error.message);
+    console.error('[changePassword] server error!', error.message);
     throw new ApiError(500, "Internal server error")
   }
 });
@@ -864,7 +844,7 @@ export const getUserChannelProfile = asyncHandler(async (req, res) => {
 
 export const getWatchHistory = asyncHandler(async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
+    const user = await User.findById(req.user.id)
       .populate({
         path: "watchHistory.videos",
         populate: {
@@ -888,8 +868,8 @@ export const getWatchHistory = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         {
-          videos: user.watchHistory.videos,
-          shorts: user.watchHistory.shorts,
+          videos: user.watchHistory?.videos || [],
+          shorts: user.watchHistory?.shorts || [],
         },
         "Watch history fetched successfully!"
       )
@@ -902,61 +882,39 @@ export const getWatchHistory = asyncHandler(async (req, res) => {
 
 export const addContentToHistory = asyncHandler(async (req, res) => {
   try {
-    const { videoId, shortId } = req.body;
+    const { contentId, onModel } = req.body;
 
-    if (!videoId && !shortId) {
-      throw new ApiError(400, "videoId or shortId is required!");
+    if (!contentId) {
+      throw new ApiError(400, "contentId is required!");
     }
 
-    let updateQuery = {};
-
-    // 🎬 VIDEO HISTORY
-    if (videoId) {
-      if (!isValidObjectId(videoId)) {
-        throw new ApiError(400, "Invalid videoId!");
-      }
-
-      updateQuery = {
-        $pull: { "watchHistory.videos": videoId }, // 🔥 remove duplicate
-      };
-
-      await User.findByIdAndUpdate(req.user._id, updateQuery);
-
-      updateQuery = {
-        $push: {
-          "watchHistory.videos": {
-            $each: [videoId],
-            $position: 0, // latest first
-          },
-        },
-      };
+    if (!isValidObjectId(contentId)) {
+      throw new ApiError(400, "Invalid contentId!");
     }
 
-    // 🎥 SHORT HISTORY
-    if (shortId) {
-      if (!isValidObjectId(shortId)) {
-        throw new ApiError(400, "Invalid shortId!");
-      }
+    if (!["Video", "Short"].includes(onModel)) {
+      throw new ApiError(400, "onModel must be either Video or Short");
+    }
 
-      updateQuery = {
-        $pull: { "watchHistory.shorts": shortId },
-      };
+    const historyPath =
+      onModel === "Video" ? "watchHistory.videos" : "watchHistory.shorts";
 
-      await User.findByIdAndUpdate(req.user._id, updateQuery);
+    await User.findByIdAndUpdate(req.user.id, {
+      $pull: {
+        [historyPath]: contentId,
+      },
+    });
 
-      updateQuery = {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
         $push: {
-          "watchHistory.shorts": {
-            $each: [shortId],
+          [historyPath]: {
+            $each: [contentId],
             $position: 0,
           },
         },
-      };
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      updateQuery,
+      },
       { new: true }
     ).select("watchHistory");
 
@@ -975,43 +933,30 @@ export const addContentToHistory = asyncHandler(async (req, res) => {
 
 export const removeContentToHistory = asyncHandler(async (req, res) => {
   try {
-    const { videoId, shortId } = req.body;
+    const { contentId, onModel } = req.body;
 
-    if (!videoId && !shortId) {
-      throw new ApiError(400, "videoId or shortId is required!");
+    if (!contentId) {
+      throw new ApiError(400, "contentId is required!");
     }
 
-    let updateQuery = {};
-
-    // 🎬 REMOVE VIDEO
-    if (videoId) {
-      if (!isValidObjectId(videoId)) {
-        throw new ApiError(400, "Invalid videoId!");
-      }
-
-      updateQuery = {
-        $pull: {
-          "watchHistory.videos": videoId,
-        },
-      };
+    if (!isValidObjectId(contentId)) {
+      throw new ApiError(400, "Invalid contentId!");
     }
 
-    // 🎥 REMOVE SHORT
-    if (shortId) {
-      if (!isValidObjectId(shortId)) {
-        throw new ApiError(400, "Invalid shortId!");
-      }
-
-      updateQuery = {
-        $pull: {
-          "watchHistory.shorts": shortId,
-        },
-      };
+    if (!["Video", "Short"].includes(onModel)) {
+      throw new ApiError(400, "onModel must be either Video or Short");
     }
+
+    const historyPath =
+      onModel === "Video" ? "watchHistory.videos" : "watchHistory.shorts";
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      updateQuery,
+      req.user.id,
+      {
+        $pull: {
+          [historyPath]: contentId,
+        },
+      },
       { new: true }
     ).select("watchHistory");
 
@@ -1031,7 +976,7 @@ export const removeContentToHistory = asyncHandler(async (req, res) => {
 export const clearWatchHistory = asyncHandler(async (req, res) => {
   try {
     const clearedWatchHistory = await User.findByIdAndUpdate(
-      req.user._id,
+      req.user.id,
       {
         $set: {
           "watchHistory.videos": [],
@@ -1193,11 +1138,8 @@ export const googleLogin = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
     })
     .json(new ApiResponse(200, { user: loggedUser, accessToken }, "Google login successful!"));
 });

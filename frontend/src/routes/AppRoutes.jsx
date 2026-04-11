@@ -12,6 +12,7 @@ import Profile from "../pages/Profile";
 import History from "../pages/History";
 // import Videos from "../pages/Videos";
 import Playlist from "../pages/Playlist";
+import UserPlaylists from "../pages/UserPlaylists"
 
 import FileUpload from "../components/fileUpload/FileUpload";
 
@@ -51,10 +52,10 @@ function AppRoutes() {
                             element={<ProtectedRoute><History /></ProtectedRoute>}
                         />
 
-                        <Route
+                        {/* <Route
                             path="/playlist/:id"
                             element={<ProtectedRoute><Playlist /></ProtectedRoute>}
-                        />
+                        /> */}
                     </Route>
 
                     {/* 🎥 WATCH + CHANNEL (NO SIDEBAR) */}
@@ -66,6 +67,9 @@ function AppRoutes() {
                             path="/channel/:username"
                             element={<ProtectedRoute><Profile /></ProtectedRoute>}
                         />
+
+                        <Route path="/playlists" element={<ProtectedRoute><UserPlaylists /></ProtectedRoute>} />
+                        <Route path="/playlist/:id" element={<ProtectedRoute><Playlist /></ProtectedRoute>} />
 
                     </Route>
 

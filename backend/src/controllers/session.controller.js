@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Session } from "../models/session.model.js";
 import mongoose, { isValidObjectId } from "mongoose";
+import { cookieOptions } from "../config/env.js";
 
 export const getSessions = asyncHandler(async (req, res) => {
     const userId = req.user?.id;
@@ -80,13 +81,6 @@ export const logoutAllSession = asyncHandler(async (req, res) => {
         await Session.deleteAll(user._id);
 
         await user.invalidateTokens();
-
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? 'strict' : "lax",
-            path: "/", // MUST match login
-        };
 
         return res
             .clearCookie("refreshToken", cookieOptions)

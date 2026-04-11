@@ -4,6 +4,7 @@ dotenv.config({ path: "./.env" });
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import { corsOrigins } from "./config/env.js";
 
 //  Routes
 import userRouter from "./routes/user.routes.js";
@@ -21,12 +22,7 @@ import appearancesRouter from "./routes/appearances.routes.js";
 
 const corsOption = {
   origin: function (origin, callback) {
-    const allowed = [
-      "http://localhost:5173",
-      process.env.FRONTH_END_URL,
-    ].filter(Boolean);
-
-    if (!origin || allowed.includes(origin)) {
+    if (!origin || corsOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -57,7 +53,7 @@ app.use("/api/v1/tweets", tweetRouter);
 app.use("/api/v1/playlists", playlistRouter);
 app.use("/api/v1/likes", likeRouter);
 app.use("/api/v1/comments", commentRouter);
-app.use("/api/v1/subcribers", subcriberRouter);
+app.use("/api/v1/subscribers", subcriberRouter);
 // app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/healths", healthcheckRouter);
 app.use("/api/v1/commons", commonRouter);

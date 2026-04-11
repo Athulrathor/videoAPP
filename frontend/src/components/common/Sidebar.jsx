@@ -24,7 +24,7 @@ function Sidebar({
             title: "Library",
             items: [
                 { name: "History", path: "/history", icon: <History size={16} /> },
-                { name: "Playlists", path: "/playlist/1", icon: <ListVideo size={16} /> },
+                { name: "Playlists", path: "/playlists", icon: <ListVideo size={16} /> },
             ],
         },
         user && {

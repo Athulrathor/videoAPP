@@ -2,13 +2,16 @@ import { useState } from "react";
 import { formatLastActive } from "../../utils/formatDate";
 import { Heart } from "lucide-react";
 import { useToggleVideoLike } from "../../features/like/useLike";
+import { useSubscribe } from "../../features/subscribe/useSubscribe";
+import { Button } from "../ui";
+import AddToPlaylistModal from "../playlist/AddToPlaylistModal";
 
 function VideoInfo({ video }) {
     const [expanded, setExpanded] = useState(false);
+    const [openAddModal, setOpenAddModal] = useState(false);
 
     const toggleVideoLikeMutation = useToggleVideoLike();
-
-    console.log(video)
+    const { mutate: toggleSubscribe, isPending } = useSubscribe();
 
     return (
         <div className="w-full max-sm:max-w-full space-y-4 border-b pb-6 px-2">
@@ -33,9 +36,19 @@ function VideoInfo({ video }) {
                         </p>
                     </div>
 
-                    <button className="ml-auto sm:ml-3 rounded-full bg-black px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white hover:bg-gray-800 shrink-0">
-                        Subscribe
-                    </button>
+                    {/* <Button variant={video?.owner?.subscribers ? "secondary" : "primary"} onClick={() => toggleSubscribe(video?.owner?._id)} disabled={!video?.owner?._id || isPending} className="ml-auto sm:ml-3 rounded-full bg-black px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white hover:bg-gray-800 shrink-0">
+                        {video?.owner?.isSubscribed ? "Subscribed" : "Subscribe"}
+                    </Button> */}
+
+                    <Button
+                        onClick={() => toggleSubscribe(video?.owner?._id)}
+                        disabled={!video?.owner?._id || isPending}
+                        variant={video?.owner?.isSubscribed ? "secondary" : "primary"}
+                        className="inline-flex items-center gap-2"
+                    >
+                        {video?.owner?.isSubscribed ? "Subscribed" : "Subscribe"}
+                    </Button>
+
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -48,7 +61,11 @@ function VideoInfo({ video }) {
                         Share
                     </button>
 
-                    <button className="rounded-full bg-gray-100 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium hover:bg-gray-200">
+                    <button
+                        type="button"
+                        onClick={() => setOpenAddModal(true)}
+                        className="rounded-full bg-gray-100 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium hover:bg-gray-200"
+                    >
                         Save
                     </button>
                 </div>
@@ -77,6 +94,12 @@ function VideoInfo({ video }) {
                     </span>
                 </div>
             </div>
+
+            <AddToPlaylistModal
+                open={openAddModal}
+                onClose={() => setOpenAddModal(false)}
+                videoId={video?._id}
+            />
         </div>
     );
 }

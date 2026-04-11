@@ -1,8 +1,10 @@
 import { Playlist } from "../models/playlist.model.js";
 import { PlaylistVideo } from "../models/playlistVideo.model.js";
+import { Video } from "../models/video.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { parsePositiveLimit, parsePositivePage } from "../utils/pagination.js";
 
 export const createPlaylist = asyncHandler(async (req, res) => {
   try {
@@ -16,7 +18,7 @@ export const createPlaylist = asyncHandler(async (req, res) => {
       title,
       description,
       privacy,
-      owner: req.user._id,
+      owner: req.user.id,
     });
 
     return res
@@ -31,11 +33,13 @@ export const getUserPlaylists = asyncHandler(async (req, res) => {
   try {
     const { userId } = req.params;
     const { page = 1, limit = 10 } = req.query;
+    const parsedPage = parsePositivePage(page);
+    const parsedLimit = parsePositiveLimit(limit, 10);
 
     const playlists = await Playlist.find({ owner: userId })
       .select("title description privacy videoCount createdAt thumbnail")
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
+      .skip((parsedPage - 1) * parsedLimit)
+      .limit(parsedLimit)
       .lean();
     
     return res
@@ -50,6 +54,8 @@ export const getPlaylistById = asyncHandler(async (req, res) => {
   try {
     const { playlistId } = req.params;
     const { page = 1, limit = 10 } = req.query;
+    const parsedPage = parsePositivePage(page);
+    const parsedLimit = parsePositiveLimit(limit, 10);
 
     const playlist = await Playlist.findById(playlistId)
       .populate("owner", "username avatar")
@@ -61,9 +67,9 @@ export const getPlaylistById = asyncHandler(async (req, res) => {
 
     const videos = await PlaylistVideo.find({ playlist: playlistId })
       .sort({ order: 1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .populate("video", "title thumbnail duration views")
+      .skip((parsedPage - 1) * parsedLimit)
+      .limit(parsedLimit)
+      .populate("video", "title description thumbnail duration views owner createdAt isPublished")
       .lean();
 
     return res.status(200).json(
@@ -79,7 +85,8 @@ export const getPlaylistById = asyncHandler(async (req, res) => {
 
 export const addVideoToPlaylist = asyncHandler(async (req, res) => {
   try {
-    const { playlistId, arrayVideoId } = req.body;
+    const { playlistId: bodyPlaylistId, arrayVideoId } = req.body;
+    const playlistId = req.params.playlistId || bodyPlaylistId;
 
     if (!playlistId || !arrayVideoId?.length) {
       throw new ApiError(400, "playlistId & videoIds required");
@@ -91,7 +98,7 @@ export const addVideoToPlaylist = asyncHandler(async (req, res) => {
     }
 
     // 🔐 Optional: ownership check
-    if (playlist.owner.toString() !== req.user._id.toString()) {
+    if (playlist.owner.toString() !== req.user.id.toString()) {
       throw new ApiError(403, "Unauthorized");
     }
 
@@ -147,7 +154,7 @@ export const addVideoToPlaylist = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, docs, "Videos added successfully"));
   } catch (error) {
     throw new ApiError(
-      500,
+      error.statusCode || 500,
       error.message,
       "Error in adding video to playlist!"
     );
