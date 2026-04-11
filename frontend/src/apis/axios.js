@@ -1,10 +1,9 @@
 import axios from "axios";
 import { store } from "../apps/store";
 import { setCredentials, logout } from "../features/auth/authSlice";
-import { API_V1_BASE_URL } from "../config/env";
 
 const api = axios.create({
-    baseURL: API_V1_BASE_URL,
+    baseURL: `${import.meta.VITE_API_BASE_URL}api/v1`,
     withCredentials: true,
 });
 
@@ -66,7 +65,7 @@ api.interceptors.response.use(
 
             try {
                 const response = await axios.post(
-                    `${API_V1_BASE_URL}/users/refreshtoken`,
+                    `${import.meta.VITE_API_BASE_URL}api/v1/users/refreshtoken`,
                     {},
                     { withCredentials: true }
                 );
