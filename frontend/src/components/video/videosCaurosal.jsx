@@ -88,7 +88,7 @@ function VideoCarousel({
         ) {
             fetchNextPage?.();
         }
-    }, [activeIndex, safeVideos.length]);
+    }, [activeIndex, fetchNextPage, hasNextPage, isFetchingNextPage, safeVideos.length]);
 
     if (!safeVideos.length) {
         return (

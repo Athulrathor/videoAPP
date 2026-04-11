@@ -12,8 +12,7 @@
   "scripts": {
     "dev": "nodemon -r dotenv/config src/index.js",
     "start": "node -r dotenv/config src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "echo \"No lint configured\""
+    "test": "echo \"No tests configured\""
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

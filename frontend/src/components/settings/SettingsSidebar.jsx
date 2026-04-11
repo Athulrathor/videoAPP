@@ -27,7 +27,7 @@ function SettingsSidebar({ collapsed, sidebarOpen, setSidebarOpen }) {
     // ✅ Close on route change (mobile UX)
     useEffect(() => {
         setSidebarOpen(false);
-    }, [location.pathname]);
+    }, [location.pathname, setSidebarOpen]);
 
     // ✅ ESC key support
     useEffect(() => {
@@ -40,7 +40,7 @@ function SettingsSidebar({ collapsed, sidebarOpen, setSidebarOpen }) {
         }
 
         return () => window.removeEventListener("keydown", handleEsc);
-    }, [sidebarOpen]);
+    }, [sidebarOpen, setSidebarOpen]);
 
     return (
         <>

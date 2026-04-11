@@ -34,5 +34,5 @@ export const useKeyboardShortcuts = ({
 
         window.addEventListener("keydown", handleKey);
         return () => window.removeEventListener("keydown", handleKey);
-    }, []);
+    }, [onBackward, onForward, onFullscreen, onMute, onPlayPause]);
 };

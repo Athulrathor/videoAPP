@@ -1,36 +1,40 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { checkUsername } from "../../apis/user.api";
+
+const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/;
 
 export const useUsernameCheck = (username) => {
     const [status, setStatus] = useState("idle");
     // idle | checking | available | taken
 
-    const isValidUsername = /^[a-z0-9_]{3,20}$/;
-
-    let currentRequest = 0;
+    const currentRequest = useRef(0);
+    const isValidUsername = USERNAME_PATTERN.test(username || "");
 
     useEffect(() => {
-        if (!username) return;
+        if (!isValidUsername) {
+            currentRequest.current += 1;
+            return;
+        }
 
-        const requestId = ++currentRequest;
+        const requestId = ++currentRequest.current;
 
         const delay = setTimeout(async () => {
             setStatus("checking");
 
-            const res = await checkUsername(username);
+            try {
+                const res = await checkUsername(username);
 
-            if (requestId !== currentRequest) return;
+                if (requestId !== currentRequest.current) return;
 
-            setStatus(res.data.available ? "available" : "taken");
+                setStatus(res.data.available ? "available" : "taken");
+            } catch {
+                if (requestId !== currentRequest.current) return;
+                setStatus("idle");
+            }
         }, 500);
 
-        if (!isValidUsername.test(username)) {
-            setStatus("idle");
-            return;
-        }
-
         return () => clearTimeout(delay);
-    }, [username]);
+    }, [isValidUsername, username]);
 
-    return status;
+    return isValidUsername ? status : "idle";
 };
