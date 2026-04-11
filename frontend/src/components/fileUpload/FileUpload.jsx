@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useUpload } from "../../hooks/useUpload";
-import { useDropzone } from "../../hooks/useDropzone";
+import { useDropzone } from "../../hooks/useDropZone";
 import { Button, Input } from "../ui/index";
 import { createShort } from "../../apis/short.api";
 import { createVideo } from "../../apis/video.api";
