@@ -16,7 +16,7 @@ export const frontendUrls = [
   ...parseList(process.env.FRONTEND_URLS),
   ...parseList(process.env.CLIENT_URL),
   ...parseList(process.env.CLIENT_URLS),
-  ...(isProduction ? productionFrontendUrls : []),
+  ...productionFrontendUrls,
   ...(!isProduction ? ["http://localhost:5173"] : []),
 ];
 
