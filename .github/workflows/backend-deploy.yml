@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -27,4 +32,17 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/video-platform-backend:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/video-platform-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/video-platform-backend:${{ github.sha }}
+
+      - name: Trigger Render backend deploy
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL secret is not set. Docker image was pushed, but Render deploy was not triggered."
+            exit 1
+          fi
+
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
