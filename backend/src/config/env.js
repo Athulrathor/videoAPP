@@ -9,7 +9,7 @@ export const isProduction = process.env.NODE_ENV === "production";
 
 export const port = process.env.PORT || 8000;
 
-const productionFrontendUrls = ["https://video-app-wheat-eight.vercel.app"];
+const productionFrontendUrls = [process.env.FRONTH_END_URL];
 
 export const frontendUrls = [
   ...parseList(process.env.FRONTEND_URL),
