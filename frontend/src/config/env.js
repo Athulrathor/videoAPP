@@ -9,12 +9,8 @@ const normalizeEnvUrl = (value) => {
 };
 
 const rawApiBaseUrl = normalizeEnvUrl(import.meta.env.VITE_API_BASE_URL) || (
-    import.meta.env.DEV ? "http://localhost:8081" : ""
+    import.meta.env.DEV ? "http://localhost:8081" : "/api"
 );
-
-if (!rawApiBaseUrl) {
-    throw new Error("VITE_API_BASE_URL is required in production");
-}
 
 export const API_BASE_URL = normalizeEnvUrl(rawApiBaseUrl);
 
