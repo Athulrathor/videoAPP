@@ -20,16 +20,19 @@ import healthcheckRouter from "./routes/healthcheck.routes.js";
 import commonRouter from "./routes/common.routes.js";
 import appearancesRouter from "./routes/appearances.routes.js";
 
+const normalizeOrigin = (value) => String(value || "").replace(/\/+$/, "");
+const allowedOrigins = new Set(corsOrigins.map(normalizeOrigin));
+
 const corsOption = {
   origin: function (origin, callback) {
-    if (!origin || corsOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.has(normalizeOrigin(origin))) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 };
 
 const app = express();
