@@ -9,15 +9,20 @@ export const isProduction = process.env.NODE_ENV === "production";
 
 export const port = process.env.PORT || 8000;
 
-const productionFrontendUrls = [process.env.FRONTH_END_URL];
+const defaultFrontendUrls = isProduction
+  ? ["https://video-app-wheat-eight.vercel.app"]
+  : ["http://localhost:5173"];
 
 export const frontendUrls = [
   ...parseList(process.env.FRONTEND_URL),
   ...parseList(process.env.FRONTEND_URLS),
+  ...parseList(process.env.FRONT_END_URL),
+  ...parseList(process.env.FRONT_END_URLS),
+  ...parseList(process.env.FRONTH_END_URL),
+  ...parseList(process.env.FRONTH_END_URLS),
   ...parseList(process.env.CLIENT_URL),
   ...parseList(process.env.CLIENT_URLS),
-  ...productionFrontendUrls,
-  ...(!isProduction ? ["http://localhost:5173"] : []),
+  ...defaultFrontendUrls,
 ];
 
 export const corsOrigins = Array.from(new Set(frontendUrls));
