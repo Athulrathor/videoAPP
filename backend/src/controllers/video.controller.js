@@ -160,55 +160,54 @@ export const getFeed = asyncHandler(async (req, res) => {
   }
 });
 
-export const getAllVideos = asyncHandler(async (req, res) => {
+export const getRecommendedVideos = asyncHandler(async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 20,
-      query = "",
-      sortBy = "createdAt",
-      sortType = "desc",
-    } = req.query;
+    const { videoId } = req.params;
+    const { limit = 10 } = req.query;
 
-    const page_n = Number(value);
-    if (!Number.isFinite(page_n) || page_n <= 0) return fallback;
-
-    const limit_n = Number(value);
-    if (!Number.isFinite(limit_n) || limit_n <= 0) return fallback;
-
-    const pages = Math.floor(page_n);
-    const limits = Math.min(Math.floor(limit_n), max);
-    const trimmedQuery = String(query).trim();
-
-    const allowedVideoSortFields = new Set([
-      "createdAt",
-      "views",
-      "likeCount",
-      "title",
-      "duration",
-    ]);
-
-    const matchStage = {
-      isPublished: true,
-      visibility: "public",
-    };
-
-    if (trimmedQuery) {
-      matchStage.title = {
-        $regex: String(trimmedQuery).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-        $options: "i",
-      };
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+      throw new ApiError(400, "Invalid video id");
     }
 
-    const safeSortBy = allowedVideoSortFields.has(sortBy)
-      ? sortBy
-      : "createdAt";
+    const parsedLimit = Number(limit);
+    const safeLimit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0
+        ? Math.min(Math.floor(parsedLimit), 20)
+        : 10;
 
-    const safeSortType = sortType === "asc" ? 1 : -1;
+    // Find current video to get its category
+    const currentVideo = await Video.findById(videoId).select("_id category");
+    if (!currentVideo) {
+      throw new ApiError(404, "Video not found");
+    }
 
-    const pipeline = [
-      { $match: matchStage },
-      { $sort: { [safeSortBy]: safeSortType, _id: -1 } },
+    const recommendedVideos = await Video.aggregate([
+      {
+        $match: {
+          _id: { $ne: new mongoose.Types.ObjectId(videoId) },
+          isPublished: true,
+          visibility: "public",
+        },
+      },
+
+      // Priority: same category first
+      {
+        $addFields: {
+          categoryPriority: {
+            $cond: [{ $eq: ["$category", currentVideo.category] }, 1, 0],
+          },
+        },
+      },
+
+      // same category first, then latest
+      {
+        $sort: {
+          categoryPriority: -1,
+          createdAt: -1,
+          _id: -1,
+        },
+      },
+
       {
         $lookup: {
           from: "users",
@@ -237,36 +236,37 @@ export const getAllVideos = asyncHandler(async (req, res) => {
           thumbnail: 1,
           duration: 1,
           views: 1,
-          createdAt: 1,
           likeCount: 1,
+          commentsCount: 1,
+          category: 1,
+          createdAt: 1,
           "owner._id": 1,
           "owner.username": 1,
           "owner.avatar": 1,
         },
       },
-      { $skip: (pages - 1) * limits },
-      { $limit: limits },
-    ];
-
-    const [videos, total] = await Promise.all([
-      Video.aggregate(pipeline),
-      Video.countDocuments(matchStage),
+      {
+        $limit: safeLimit,
+      },
     ]);
 
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          total,
-          page: pages,
-          totalPages: Math.ceil(total / limits),
-          videos,
+          currentVideo: currentVideo._id,
+          currentCategory: currentVideo.category,
+          total: recommendedVideos.length,
+          videos: recommendedVideos,
         },
-        "Videos fetched successfully!"
+        "Recommended videos fetched successfully"
       )
     );
   } catch (error) {
-    throw new ApiError(500, error.message || "Error in getting all videos");
+    throw new ApiError(
+      500,
+      error.message || "Error while fetching recommended videos"
+    );
   }
 });
 

@@ -2,14 +2,14 @@ import { Router } from "express";
 import {
   deleteVideo,
   getAllSuggestion,
-  getAllVideos,
   getVideoById,
   getVideoByOwner,
   publishAVideo,
   togglePublishStatus,
   updateVideo,
   videoViewCounter,
-  getFeed
+  getFeed,
+  getRecommendedVideos
 } from "../controllers/video.controller.js";
 
 import { upload } from "../middlewares/multer.middleware.js";
@@ -21,11 +21,12 @@ const router = Router();
 router.get("/feed", getFeed); // cursor-based (no auth needed)
 
 // 🔹 GET VIDEOS
-router.get("/", getAllVideos); // query, pagination
+router.get("/recommended/:videoId", getRecommendedVideos);
+
 router.get("/suggestions", getAllSuggestion);
 
 // 🔹 USER VIDEOS
-router.get("/user/:userId", getVideoByOwner);
+router.get("/user/:userId",verifyToken, getVideoByOwner);
 
 // 🔹 SINGLE VIDEO
 router.get("/:videoId", getVideoById);

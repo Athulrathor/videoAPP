@@ -37,3 +37,7 @@ export const createVideo = (data) =>
 
 export const updateVideo = (videoId, data) =>
     api.patch(`/videos/${videoId}`, data);
+
+export const recommendedVideo = async (videoId) => {
+    return await api.get(`/videos/recommended/${videoId}`);
+}
